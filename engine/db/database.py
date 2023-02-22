@@ -1,11 +1,13 @@
+import os
+import logging
+from functools import wraps
+from pathlib import Path
+
 from sqlalchemy import exc
 from sqlalchemy import create_engine
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-
-import logging
-from functools import wraps
 
 
 FORMAT = '%(asctime)s %(message)s'
@@ -14,12 +16,15 @@ logger = logging.getLogger('dbserver')
 
 
 # initialize db
-db_path: str = r'ratrace.db'
+db_path: str = os.path.join(Path.cwd(), 'db', r'ratrace.db')
 engine: Engine = create_engine(f'sqlite:///{db_path}', echo=False)
-session: scoped_session = scoped_session(sessionmaker(autocommit=False, bind=engine))
+Session = scoped_session(sessionmaker(
+                                    autocommit=False,
+                                    autoflush=False,
+                                    bind=engine))
 
 Base = declarative_base()
-Base.query = session.query_property()
+Base.query = Session.query_property()
 
 def init_db():
     # import all modules here that might define models so that
@@ -34,11 +39,12 @@ class DBSessionContext:
         self.engine = engine
 
     def __enter__(self):
-        self.session = scoped_session(sessionmaker(autocommit=False, bind=self.engine))
+        self.session = Session
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.session.remove()
+
 
 def commit_wrapper(obj_factory):
     """
@@ -56,6 +62,7 @@ def commit_wrapper(obj_factory):
                 logger.error(e)
                 db.session.rollback()
     return wrapper
+
 
 def query_wrapper(query):
     """
