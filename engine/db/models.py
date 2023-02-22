@@ -1,9 +1,8 @@
 import enum
 from collections import Counter
 
-from sqlalchemy import Column, Integer, Float, String, Enum, Index, ForeignKey
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import validates
+from sqlalchemy import Column, Integer, Float, String, Enum, Index, ForeignKey, text
+from sqlalchemy.orm import relationship, validates
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from . import database as db
@@ -45,12 +44,16 @@ class Vote(enum.Enum):
     UPVOTE = 'upvote'
 
 
+EPOCH_QUERY = "(select strftime('%s', 'now'))"
+
 class User(db.Base):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String(32), unique=True, nullable=False)
     password = Column(String(64), nullable=False)
+    created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
+    updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
     reviews = relationship('Review', backref='user', lazy=True)
     interviews = relationship('Interview', backref='user', lazy=True)
     interview_votes = relationship('InterviewVote', backref='user', lazy=True)
@@ -70,6 +73,8 @@ class Organisation(db.Base):
     url = Column(String, unique=True)
     size = Column(Integer, default=1, nullable=False)
     industry = Column(Enum(Industry), nullable=False)
+    created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
+    updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
     reviews = relationship('Review', backref='organisation', lazy=True)
     interviews = relationship('Interview', backref='organisation', lazy=True)
 
@@ -92,6 +97,8 @@ class Review(db.Base):
     review = Column(String, nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     org_id = Column(Integer, ForeignKey('organisation.id'), nullable=False)
+    created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
+    updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
     review_votes = relationship('ReviewVote', backref='review', lazy=True)
 
     def __repr__(self):
@@ -115,6 +122,8 @@ class Interview(db.Base):
     interview = Column(String, nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     org_id = Column(Integer, ForeignKey('organisation.id'), nullable=False)
+    created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
+    updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
     interview_votes = relationship('InterviewVote', backref='interview', lazy=True)
 
     def __repr__(self):
@@ -135,6 +144,8 @@ class InterviewVote(db.Base):
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     interview_id = Column(Integer, ForeignKey('interview.id'), nullable=False)
     vote = Column(Enum(Vote), nullable=False)
+    created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
+    updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
 
     def __repr__(self):
         return (f"<InterviewVote({self.id})>")
@@ -150,6 +161,8 @@ class ReviewVote(db.Base):
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     review_id = Column(Integer, ForeignKey('review.id'), nullable=False)
     vote = Column(Enum(Vote), nullable=False)
+    created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
+    updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
 
     def __repr__(self):
         return (f"<ReviewVote({self.id})>")
