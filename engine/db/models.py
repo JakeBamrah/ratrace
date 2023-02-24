@@ -46,23 +46,23 @@ class Vote(enum.Enum):
 
 EPOCH_QUERY = "(select strftime('%s', 'now'))"
 
-class User(db.Base):
-    __tablename__ = 'user'
+class Account(db.Base):
+    __tablename__ = 'account'
 
     id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String(32), unique=True, nullable=False)
     password = Column(String(64), nullable=False)
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
-    reviews = relationship('Review', backref='user', lazy=True)
-    interviews = relationship('Interview', backref='user', lazy=True)
-    interview_votes = relationship('InterviewVote', backref='user', lazy=True)
-    review_votes = relationship('ReviewVote', backref='user', lazy=True)
+    reviews = relationship('Review', backref='account', lazy=True)
+    interviews = relationship('Interview', backref='account', lazy=True)
+    interview_votes = relationship('InterviewVote', backref='account', lazy=True)
+    review_votes = relationship('ReviewVote', backref='account', lazy=True)
 
     def __repr__(self):
-        return (f"<User({self.id})>")
+        return (f"<Account({self.id})>")
 
-user_username_idx = Index('user_username_idx', User.username)
+account_username_idx = Index('account_username_idx', Account.username)
 
 
 class Organisation(db.Base):
@@ -95,7 +95,7 @@ class Review(db.Base):
     location = Column(String, nullable=False)
     duration_years = Column(Float, default=1, nullable=False)
     review = Column(String, nullable=False)
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    account_id = Column(Integer, ForeignKey('account.id'), nullable=False)
     org_id = Column(Integer, ForeignKey('organisation.id'), nullable=False)
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
@@ -108,7 +108,7 @@ class Review(db.Base):
     def vote_count(self):
         return Counter(i.vote.value for i in self.review_votes)
 
-review_user_idx = Index('review_user_idx', Review.user_id)
+review_account_idx = Index('review_account_idx', Review.account_id)
 review_org_idx = Index('review_org_idx', Review.org_id)
 review_salary_idx = Index('review_salary_idx', Review.salary)
 
@@ -120,7 +120,7 @@ class Interview(db.Base):
     position = Column(String(32), nullable=False)
     location = Column(String, nullable=False)
     interview = Column(String, nullable=False)
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    account_id = Column(Integer, ForeignKey('account.id'), nullable=False)
     org_id = Column(Integer, ForeignKey('organisation.id'), nullable=False)
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
@@ -133,7 +133,7 @@ class Interview(db.Base):
     def vote_count(self):
         return Counter(i.vote.value for i in self.interview_votes)
 
-interview_user_idx = Index('interview_user_idx', Interview.user_id)
+interview_account_idx = Index('interview_account_idx', Interview.account_id)
 interview_org_idx = Index('interview_org_idx', Interview.org_id)
 
 
@@ -141,7 +141,7 @@ class InterviewVote(db.Base):
     __tablename__ = 'interview_vote'
 
     id = Column(Integer, primary_key=True, nullable=False)
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    account_id = Column(Integer, ForeignKey('account.id'), nullable=False)
     interview_id = Column(Integer, ForeignKey('interview.id'), nullable=False)
     vote = Column(Enum(Vote), nullable=False)
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
@@ -150,7 +150,7 @@ class InterviewVote(db.Base):
     def __repr__(self):
         return (f"<InterviewVote({self.id})>")
 
-interview_vote_user_idx = Index('interview_vote_user_idx', InterviewVote.user_id)
+interview_vote_account_idx = Index('interview_vote_account_idx', InterviewVote.account_id)
 interview_vote_interview_idx = Index('interview_vote_interview_idx', InterviewVote.interview_id)
 
 
@@ -158,7 +158,7 @@ class ReviewVote(db.Base):
     __tablename__ = 'review_vote'
 
     id = Column(Integer, primary_key=True, nullable=False)
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    account_id = Column(Integer, ForeignKey('account.id'), nullable=False)
     review_id = Column(Integer, ForeignKey('review.id'), nullable=False)
     vote = Column(Enum(Vote), nullable=False)
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
@@ -167,5 +167,5 @@ class ReviewVote(db.Base):
     def __repr__(self):
         return (f"<ReviewVote({self.id})>")
 
-review_vote_user_idx = Index('review_vote_user_idx', ReviewVote.user_id)
+review_vote_account_idx = Index('review_vote_account_idx', ReviewVote.account_id)
 review_vote_review_idx = Index('review_vote_review_idx', ReviewVote.review_id)
