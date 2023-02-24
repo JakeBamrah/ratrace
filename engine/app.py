@@ -3,7 +3,7 @@ import os
 import flask
 
 from db.database import Session
-from db.models import User
+import blueprints
 
 
 def create_app(config='dev'):
@@ -27,5 +27,8 @@ def create_app(config='dev'):
     @app.teardown_appcontext
     def shutdown_session(response_or_exc):
         flask.g.session.remove()
+
+    app.register_blueprint(blueprints.orgs)
+    app.register_blueprint(blueprints.account)
 
     return app
