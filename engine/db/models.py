@@ -51,7 +51,6 @@ class Account(db.Base):
 
     id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String(32), unique=True, nullable=False)
-    password = Column(String(64), nullable=False)
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
     reviews = relationship('Review', backref='account', lazy=True)
@@ -105,8 +104,12 @@ class Review(db.Base):
         return (f"<Review({self.id})>")
 
     @hybrid_property
-    def vote_count(self):
-        return Counter(i.vote.value for i in self.review_votes)
+    def upvotes(self):
+        return [i.account_id for i in self.review_votes if i.vote == Vote.UPVOTE]
+
+    @hybrid_property
+    def downvotes(self):
+        return [i.account_id for i in self.review_votes if i.vote == Vote.DOWNVOTE]
 
 review_account_idx = Index('review_account_idx', Review.account_id)
 review_org_idx = Index('review_org_idx', Review.org_id)
@@ -130,8 +133,12 @@ class Interview(db.Base):
         return (f"<Interview({self.id})>")
 
     @hybrid_property
-    def vote_count(self):
-        return Counter(i.vote.value for i in self.interview_votes)
+    def upvotes(self):
+        return [i.account_id for i in self.interview_votes if i.vote == Vote.UPVOTE]
+
+    @hybrid_property
+    def downvotes(self):
+        return [i.account_id for i in self.interview_votes if i.vote == Vote.DOWNVOTE]
 
 interview_account_idx = Index('interview_account_idx', Interview.account_id)
 interview_org_idx = Index('interview_org_idx', Interview.org_id)
