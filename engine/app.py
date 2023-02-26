@@ -1,6 +1,7 @@
 import os
 
 import flask
+from flask_cors import CORS
 
 from db.database import Session
 import blueprints
@@ -8,6 +9,8 @@ import blueprints
 
 def create_app(config='dev'):
     app = flask.Flask(__name__, instance_relative_config=True)
+
+    CORS(app)
 
     if config == 'dev':
         app.config.from_object('config.DevConfig')
