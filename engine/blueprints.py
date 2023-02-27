@@ -10,7 +10,15 @@ orgs = Blueprint('orgs', __name__, url_prefix='/orgs')
 
 @orgs.route('/get_names', methods=['GET'])
 def get_names():
-    org_names = [{'id': o.id, 'name': o.name} for o in g.session.query(Organisation).all()]
+    limit = request.args.get('limit', type=int, default=50)
+    offset = request.args.get('offset', type=int, default=50)
+    industry = request.args.get('industry', type=str, default='')
+    queries = []
+    if industry and industry != 'ALL':
+        queries.append(Organisation.industry == industry)
+
+    find_orgs_q = (g.session.query(Organisation).filter(*queries).limit(limit))
+    org_names = [{'id': o.id, 'value': o.name} for o in find_orgs_q.all()]
     return jsonify(response=200, org_names=org_names)
 
 
@@ -20,11 +28,11 @@ def search_orgs():
     limit = request.args.get('limit', type=int, default=50)
     offset = request.args.get('offset', type=int, default=50)
     org_name = request.args.get('org_name', type=str, default='')
-    find_orgs_q = (g.session
-             .query(Organisation)
-             .filter(Organisation.name.contains(org_name))
-             .limit(limit)
-    )
+    industry = request.args.get('industry', type=str, default='')
+    queries = [Organisation.name.contains(org_name)]
+    if industry and industry != 'ALL':
+        queries.append(Organisation.industry == industry)
+    find_orgs_q = (g.session.query(Organisation).filter(*queries).limit(limit))
 
     schema = schemas.OrganisationSchema(exclude=('interviews', 'reviews'), many=True)
     orgs = schema.dump(find_orgs_q)

@@ -30,31 +30,37 @@
 
   export let id: string
   export let value: string
-  export let empty: boolean = false
   export let placeholder: string
   export let canClear: boolean = false
   export let onClear: () => void = () => null
+  export let onFocus: (e: Event) => void = () => null
+  export let onBlur: (e: Event) => void = () => null
+  export let onKeyDown: (e: Event) => void = () => null
   export let shortcut: string = ""
   export let use_window_shortcut: boolean = false
   export let ref: HTMLInputElement
 
   let original_value = ""
+  $: empty = value?.length === 0
 
   const events = getEventsAction(current_component);
 
-  const onInput =(e: Event) => {
+  const onHandleInput =(e: Event) => {
     const target = e.target as HTMLInputElement
     value = target.value
   }
 
-  const onBlur = () => {
+  const onHandleBlur = (e: Event) => {
     // store original value on clickaways too
     // the new_value has been handled by either the onChange or keyHandler
     // by this point so we can be sure of value correctness
     original_value = value.trim()
+    onBlur(e)
   }
 
-  const onKeyDown = (e: KeyboardEvent) => {
+  const onHandleKeyDown = (e: KeyboardEvent) => {
+    onKeyDown(e)
+
     const target = e.target as HTMLInputElement
     if (e.key === 'Escape') {
       // restore the original value on escape, unless the input was left empty
@@ -82,9 +88,10 @@
   <input
     id={id}
     placeholder={placeholder}
-    on:input={onInput}
-    on:blur={onBlur}
-    on:keydown={onKeyDown}
+    on:input={onHandleInput}
+    on:blur={onHandleBlur}
+    on:keydown={onHandleKeyDown}
+    on:focus={onFocus}
     bind:this={ref}
 
     use:events
