@@ -28,8 +28,6 @@
   import { getEventsAction } from "../utils/events"
 
 
-  let original_value = ""
-
   export let id: string
   export let value: string
   export let empty: boolean = false
@@ -39,6 +37,8 @@
   export let shortcut: string = ""
   export let use_window_shortcut: boolean = false
   export let ref: HTMLInputElement
+
+  let original_value = ""
 
   const events = getEventsAction(current_component);
 

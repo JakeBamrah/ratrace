@@ -8,31 +8,36 @@ import db.schemas as schemas
 
 orgs = Blueprint('orgs', __name__, url_prefix='/orgs')
 
-@orgs.route('/', methods=['GET'])
-def get_orgs():
+@orgs.route('/get_names', methods=['GET'])
+def get_names():
     org_names = [{'id': o.id, 'name': o.name} for o in g.session.query(Organisation).all()]
-    return jsonify(response=200, data=org_names)
+    return jsonify(response=200, org_names=org_names)
 
 
 @orgs.route('/search', methods=['GET'])
 def search_orgs():
-    org_name = request.args.get('org_name', type=str, default='')
     # TODO: setup similarity funcion to find positions like given org name
-    find_org_q = (g.session
+    limit = request.args.get('limit', type=int, default=50)
+    offset = request.args.get('offset', type=int, default=50)
+    org_name = request.args.get('org_name', type=str, default='')
+    find_orgs_q = (g.session
              .query(Organisation)
              .filter(Organisation.name.contains(org_name))
-             .limit(20)
+             .limit(limit)
     )
-    data = [{'id': o.id, 'name': o.name} for o in find_org_q.all()]
-    return jsonify(response=200, data=data)
+
+    schema = schemas.OrganisationSchema(exclude=('interviews', 'reviews'), many=True)
+    orgs = schema.dump(find_orgs_q)
+    return jsonify(response=200, orgs=orgs)
 
 
 @orgs.route('/<int:org_id>', methods=['GET'])
 def get_org(org_id):
     """Get overview, reviews and interviews for organisation."""
-    org = g.session.query(Organisation).filter(Organisation.id == org_id).scalar()
-    limit = request.args.get('limit', type=int, default=50)
+    review_limit = request.args.get('review_limit', type=int, default=50)
+    interview_limit = request.args.get('interview_limit', type=int, default=50)
     position = request.args.get('position', type=str, default='')
+    org = g.session.query(Organisation).filter(Organisation.id == org_id).scalar()
     review_sorted_q = (g.session
                 .query(Review)
                 .filter(
@@ -40,7 +45,7 @@ def get_org(org_id):
                     (Review.position.contains(position.lower()))
                 )
                 .order_by(Review.created_at.desc())
-                .limit(limit))
+                .limit(review_limit))
     interview_sorted_q = (g.session
                 .query(Interview)
                 .filter(
@@ -48,22 +53,22 @@ def get_org(org_id):
                     (Interview.position.contains(position.lower()))
                 )
                 .order_by(Interview.created_at.desc())
-                .limit(limit))
+                .limit(interview_limit))
+
     data = dict(
             org = schemas.OrganisationSchema(exclude=('interviews', 'reviews')).dump(org),
             reviews = schemas.ReviewSchema().dump(review_sorted_q, many=True),
             interviews = schemas.InterviewSchema().dump(interview_sorted_q, many=True),
         )
-    return jsonify(response=200, data=data)
+    return jsonify(response=200, org=data)
 
 
 @orgs.route('/<int:org_id>/reviews', methods=['GET'])
 def get_org_reviews(org_id):
-    schema = schemas.ReviewSchema()
-
+    # TODO: setup similarity funcion to find positions like given position
     position = request.args.get('position', type=str, default='')
     limit = request.args.get('limit', type=int, default=50)
-    # TODO: setup similarity funcion to find positions like given position
+    offset = request.args.get('offset', type=int, default=50)
     review_sorted_q = (g.session
                 .query(Review)
                 .filter(
@@ -72,17 +77,18 @@ def get_org_reviews(org_id):
                 )
                 .order_by(Review.created_at.desc())
                 .limit(limit))
+
+    schema = schemas.ReviewSchema()
     data = dict(reviews = schema.dump(review_sorted_q, many=True))
     return jsonify(response=200, data=data)
 
 
 @orgs.route('/<int:org_id>/interviews', methods=['GET'])
 def get_org_interviews(org_id):
-    schema = schemas.InterviewSchema()
-
+    # TODO: setup similarity funcion to find positions like given position
     position = request.args.get('position', type=str, default='')
     limit = request.args.get('limit', type=int, default=50)
-    # TODO: setup similarity funcion to find positions like given position
+    offset = request.args.get('offset', type=int, default=50)
     interview_sorted_q = (g.session
                 .query(Interview)
                 .filter(
@@ -91,6 +97,8 @@ def get_org_interviews(org_id):
                 )
                 .order_by(Interview.created_at.desc())
                 .limit(limit))
+
+    schema = schemas.InterviewSchema()
     data = dict(interviews = schema.dump(interview_sorted_q, many=True))
     return jsonify(response=200, data=data)
 
@@ -107,9 +115,6 @@ account = Blueprint('account', __name__, url_prefix='/account')
 
 @account.route('/<int:account_id>', methods=['GET'])
 def get_account(account_id):
-    account_schema = schemas.AccountSchema(exclude=('reviews', 'interviews'))
-    review_schema = schemas.ReviewSchema()
-
     limit = request.args.get('limit', type=int, default=5)
     account = g.session.query(Account).filter(Account.id == account_id).scalar()
     review_sorted_q = (g.session
@@ -117,6 +122,9 @@ def get_account(account_id):
                 .filter(Review.account_id == account_id)
                 .order_by(Review.created_at.desc())
                 .limit(limit))
+
+    account_schema = schemas.AccountSchema(exclude=('reviews', 'interviews'))
+    review_schema = schemas.ReviewSchema()
     data = dict(
             account = account_schema.dump(account),
             reviews = review_schema.dump(review_sorted_q, many=True)
@@ -126,51 +134,51 @@ def get_account(account_id):
 
 @account.route('/<int:account_id>/reviews', methods=['GET'])
 def get_account_reviews(account_id):
-    review_schema = schemas.ReviewSchema()
-
     limit = request.args.get('limit', type=int, default=50)
     review_sorted_q = (g.session
                 .query(Review)
                 .filter(Review.account_id == account_id)
                 .order_by(Review.created_at.desc())
                 .limit(limit))
-    data = dict(reviews = review_schema.dump(review_sorted_q, many=True))
+
+    schema = schemas.ReviewSchema()
+    data = dict(reviews = schema.dump(review_sorted_q, many=True))
     return jsonify(response=200, data=data)
 
 
 @account.route('/<int:account_id>/interviews', methods=['GET'])
 def get_account_interviews(account_id):
-    interview_schema = schemas.InterviewSchema()
-
     limit = request.args.get('limit', type=int, default=50)
     interview_sorted_q = (g.session
                 .query(Interview)
                 .filter(Interview.account_id == account_id)
                 .order_by(Interview.created_at.desc())
                 .limit(limit))
-    data = dict(interviews = interview_schema.dump(interview_sorted_q, many=True))
+
+    schema = schemas.InterviewSchema()
+    data = dict(interviews = schema.dump(interview_sorted_q, many=True))
     return jsonify(response=200, data=data)
 
 
 @account.route('/<int:account_id>/review_votes', methods=['GET'])
 def get_account_review_votes(account_id):
-    vote_schema = schemas.ReviewVoteSchema( exclude=['updated_at'])
     review_votes_sorted_q = (g.session
                 .query(ReviewVote)
                 .filter(ReviewVote.account_id == account_id)
                 .order_by(ReviewVote.created_at.desc()))
 
-    data = dict(review_votes = vote_schema.dump(review_votes_sorted_q, many=True))
+    schema = schemas.ReviewVoteSchema(exclude=['updated_at'])
+    data = dict(review_votes = schema.dump(review_votes_sorted_q, many=True))
     return jsonify(response=200, data=data)
 
 
 @account.route('/<int:account_id>/interview_votes', methods=['GET'])
 def get_account_interview_votes(account_id):
-    vote_schema = schemas.InterviewVoteSchema( exclude=['updated_at'])
     interview_votes_sorted_q = (g.session
                 .query(InterviewVote)
                 .filter(InterviewVote.account_id == account_id)
                 .order_by(InterviewVote.created_at.desc()))
 
-    data = dict(vote_schema.dump(interview_votes_sorted_q, many=True))
+    schema = schemas.InterviewVoteSchema(exclude=['updated_at'])
+    data = dict(schema.dump(interview_votes_sorted_q, many=True))
     return jsonify(response=200, data=data)

@@ -8,7 +8,7 @@ class InterviewVoteSchema(Schema):
     interview_id = fields.Int()
     vote = fields.Enum(Vote)
     created_at = fields.Int()
-    updated_at = fields.Int(exclude=True)
+    updated_at = fields.Int(load_only=True)
 
 class ReviewVoteSchema(Schema):
     id = fields.Int()
@@ -16,7 +16,7 @@ class ReviewVoteSchema(Schema):
     review_id = fields.Int()
     vote = fields.Enum(Vote)
     created_at = fields.Int()
-    updated_at = fields.Int(exclude=True)
+    updated_at = fields.Int(load_only=True)
 
 class ReviewSchema(Schema):
     id = fields.Int()
@@ -29,7 +29,7 @@ class ReviewSchema(Schema):
     account_id = fields.Int()
     org_id = fields.Int()
     created_at = fields.Int()
-    updated_at = fields.Int(exclude=True)
+    updated_at = fields.Int(load_only=True)
     review_votes = fields.Nested(ReviewVoteSchema, many=True, dump_only=True, exclude=('created_at', 'updated_at'))
     upvotes = fields.List(fields.Int())
     downvotes = fields.List(fields.Int())
@@ -42,7 +42,7 @@ class InterviewSchema(Schema):
     account_id = fields.Int()
     org_id = fields.Int()
     created_at = fields.Int()
-    updated_at = fields.Int(exclude=True)
+    updated_at = fields.Int(load_only=True)
     interview_votes = fields.Nested(InterviewVoteSchema, many=True, dump_only=True, exclude=('created_at', 'updated_at'))
     upvotes = fields.List(fields.Int())
     downvotes = fields.List(fields.Int())
@@ -51,7 +51,7 @@ class AccountSchema(Schema):
     id = fields.Int()
     username = fields.Str()
     created_at = fields.Int()
-    updated_at = fields.Int(exclude=True)
+    updated_at = fields.Int(load_only=True)
     reviews = fields.Nested(ReviewSchema, many=True, dump_only=True, exclude=['updated_at'])
     interviews = fields.Nested(InterviewSchema, many=True, dump_only=True, exclude=['updated_at'])
     interview_votes = fields.Nested(InterviewVoteSchema, many=True, dump_only=True, exclude=('created_at', 'updated_at'))
@@ -66,6 +66,6 @@ class OrganisationSchema(Schema):
     times_visited = fields.Str(load_only=True)
     industry = fields.Enum(Industry)
     created_at = fields.Int()
-    updated_at = fields.Int(exclude=True)
+    updated_at = fields.Int(load_only=True)
     reviews = fields.Nested(ReviewSchema, many=True, dump_only=True, exclude=['updated_at'])
     interviews = fields.Nested(InterviewSchema, many=True, dump_only=True, exclude=['updated_at'])

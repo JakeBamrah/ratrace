@@ -1,14 +1,19 @@
 <script lang="ts">
   import { onMount } from 'svelte'
 
-  import Input from '../lib/Input.svelte'
+  import Input from './Input.svelte'
 
+
+  export let getOrgs: () => any
 
   let company_filter = ""
   let position_filter = ""
   let company_input_el: HTMLInputElement
 
-  onMount(() => company_input_el.focus())
+  onMount(async () => {
+    company_input_el.focus()
+    console.log(getOrgs())
+  })
 </script>
 
 <div class="flex flex-col items-center justify-center p-0 sm:items-start sm:pl-24 h-screen">
