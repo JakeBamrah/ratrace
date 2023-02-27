@@ -62,6 +62,8 @@ class OrganisationSchema(Schema):
     name = fields.Str()
     url = fields.Str()
     size = fields.Int()
+    headquarters = fields.Str()
+    times_visited = fields.Str(load_only=True)
     industry = fields.Enum(Industry)
     created_at = fields.Int()
     updated_at = fields.Int(exclude=True)
