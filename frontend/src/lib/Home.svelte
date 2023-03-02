@@ -21,7 +21,7 @@
       <Dropdown
         id="industry-filter-input-el"
         bind:value={industry_filter}
-        bind:selected_value={selected_industry}
+        bind:selected_row={selected_industry}
         placeholder="Select industry"
         use_window_shortcut={true}
         rows={industry_rows}
@@ -32,7 +32,7 @@
       <Dropdown
         id="company-filter-input-el"
         bind:value={company_filter}
-        bind:selected_value={selected_company}
+        bind:selected_row={selected_company}
         placeholder="Search companies"
         rows={org_rows}
         onSelect={onCompanySelect}

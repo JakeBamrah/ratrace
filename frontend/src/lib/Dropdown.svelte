@@ -12,6 +12,7 @@
 
   export let id: string
   export let value: string
+  export let selected_row: SelectRow
   export let placeholder: string
   export let canClear: boolean = false
   export let onClear: () => void = () => null
@@ -22,6 +23,7 @@
   export let rows: SelectRow[] = []
 
   $: menu_open = false
+  $: filtered_rows = rows
 
   let dropdown_ref: HTMLElement
   let input_ref: HTMLInputElement
@@ -34,6 +36,7 @@
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape' || e.key == 'Tab') {
+      onSelect(selected_row ?? rows[0])
       menu_open = false
       return
     }
@@ -59,17 +62,30 @@
 
   const onHandleBlur = (e: Event) => {
     // if div children aren't focused then close
+    // onSelect(selected_row ?? rows[0])
     setTimeout(() => menu_open = false, 100)
+  }
+
+  const buildFilteredRows = (rows: SelectRow[]) => {
+    const new_rows = rows.slice()
+    const selected_index = rows.findIndex(r => r.value === selected_row?.value) ?? 0
+    if (selected_index > 0) {
+      const new_top_row: SelectRow[] = new_rows.splice(selected_index, 1)
+      new_rows.splice(0, 0, new_top_row[0])
+    }
+    return new_rows
   }
 
   const onHandleSelect = (row: SelectRow) => {
     onSelect(row)
     input_ref.focus()
     menu_open = false
+    selected_row = row
+    filtered_rows = buildFilteredRows(rows)
   }
 </script>
 
-<div bind:this={dropdown_ref}>
+<div class="relative" bind:this={dropdown_ref}>
   <Input
     id={id}
     bind:value={value}
@@ -84,11 +100,21 @@
     bind:ref={input_ref}
   />
 
-  <div>
+  <div
+    style="max-height:200px"
+    class="absolute w-full overflow-scroll z-10 mt-2 shadow-lg rounded-lg">
     {#if menu_open}
-      {#each rows as row}
+      {#each filtered_rows as row, idx}
         {#if row.value.includes(value)}
-          <div on:click={() => onHandleSelect(row)}>{row.value}</div>
+          <button
+            on:click={() => onHandleSelect(row)}
+            class="py-1 px-2 truncate w-full text-left
+            hover:bg-grey-100 hover:cursor-pointer
+            {idx === 0 ? 'bg-red-500' : '' }
+            "
+          >
+              {row.value}
+            </button>
         {/if}
       {/each}
     {/if}
