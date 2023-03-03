@@ -1,7 +1,8 @@
 import axios from 'axios'
 import type { AxiosInstance } from 'axios'
 
-type OrgType = {
+
+type Organisation = {
   name: string
   id: number
   created_at: number
@@ -42,9 +43,13 @@ export enum Industry {
 export type IndustryKey = keyof typeof Industry
 
 type OrgQueryParamsType = {
-  org_name: string
-  industry: IndustryKey
+  org_name?: string
+  org_id?: number
+  industry?: IndustryKey
   limit?: number
+  review_limit?: number
+  interview_limit?: number
+  position?: string
   offset?: number
 }
 
@@ -65,19 +70,19 @@ export default class ApiService {
     this.api = axios.create(config)
   }
 
-  getOrg = async (id: number, review_limit?: number, interview_limit?: number, position?: string): Promise<OrgType> => {
+  getOrg = async ({ org_id, review_limit, interview_limit, position }: OrgQueryParamsType): Promise<Organisation> => {
     const params = { review_limit, interview_limit, position }
-    const resp = await this.api.get(`/orgs/${id}`, { params })
+    const resp = await this.api.get(`/orgs/${org_id}`, { params })
     return resp.data.org
   }
 
-  getOrgNames = async ({ industry, offset, limit }: Omit<OrgQueryParamsType, 'org_name'>): Promise<Pick<OrgType, 'name'| 'id'>[]> => {
+  getOrgNames = async ({ industry, offset, limit }: Omit<OrgQueryParamsType, 'org_name'>): Promise<{ value: string, label: string }[]> => {
     const params = { industry, limit, offset }
     const resp = await this.api.get('/orgs/get_names', { params })
     return resp.data.org_names
   }
 
-  searchOrgs = async ({ org_name, industry, limit, offset }: OrgQueryParamsType): Promise<OrgType[]> => {
+  searchOrgs = async ({ org_name, industry, limit, offset }: OrgQueryParamsType): Promise<Organisation[]> => {
     const params = { org_name, industry, limit, offset }
     const resp = await this.api.get('/orgs/search', { params })
     return resp.data.orgs

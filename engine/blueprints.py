@@ -18,7 +18,7 @@ def get_names():
         queries.append(Organisation.industry == industry)
 
     find_orgs_q = (g.session.query(Organisation).filter(*queries).limit(limit))
-    org_names = [{'id': o.id, 'value': o.name} for o in find_orgs_q.all()]
+    org_names = [{'value': o.id, 'label': o.name} for o in find_orgs_q.all()]
     return jsonify(response=200, org_names=org_names)
 
 

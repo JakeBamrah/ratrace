@@ -8,44 +8,49 @@
 
 
   const api = new ApiService(import.meta.env.VITE_API_BASE_URL)
-
-  let industry_filter = ""
-  let company_filter = ""
-  let selected_industry: SelectRow = null
-  let selected_company: SelectRow = null
-
+  let selected_org: SelectRow
+  let selected_industry: SelectRow
   let orgs = []
-  const industries = Object.keys(Industry).map(k => ({id : k as IndustryKey, value: Industry[k]}))
-  const onIndustrySelect = async (row: SelectRow) => {
-    industry_filter = row.value
-    selected_industry = row
-    orgs = await api.getOrgNames({ industry: row.id as IndustryKey, limit: 10000 })
+  let loading = false
+  const industries = Object.keys(Industry).map(k => ({value : k as IndustryKey, label: Industry[k]}))
+
+  $: fetch = onIndustrySelect(selected_industry)
+
+  const onIndustrySelect = async (selected_industry: SelectRow) => {
+    if (!selected_industry) {
+      orgs = []
+      return
+    }
+
+    const params = { industry: selected_industry?.value as IndustryKey, limit: 10000 }
+    selected_org = null
+    loading = true
+    api.getOrgNames(params).then(resp => {orgs = resp; loading = false})
     return
   }
 
-  const onCompanySelect = async (row: any) => {
-    company_filter = row.value
-    return
+  const getOrg = async (org_id: number) => {
+    const params = { org_id }
+    return await api.getOrg(params)
   }
+
 </script>
 
 <main>
   <Router primary={false} url="/">
     <Route path="org/*">
       <Route path=":id" let:params let:navigate>
-        <Company id={params.id} navigate={navigate} />
+        <Company id={params.id} navigate={navigate} getOrg={getOrg} />
       </Route>
     </Route>
-    <Route>
+    <Route let:navigate>
         <Home
-          bind:industry_filter={industry_filter}
-          bind:company_filter={company_filter}
-          onIndustrySelect={onIndustrySelect}
-          onCompanySelect={onCompanySelect}
+          bind:selected_industry={selected_industry}
+          bind:selected_org={selected_org}
           industry_rows={industries}
           org_rows={orgs}
-          selected_industry={selected_industry}
-          selected_company={selected_company}
+          loading_orgs={loading}
+          navigate={navigate}
         />
     </Route>
   </Router>

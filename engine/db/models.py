@@ -29,7 +29,7 @@ class Industry(enum.Enum):
     ENERGY_AND_UTILITIES = 'Energy and Utilities'
     CREATIVE_ARTS_AND_DESIGN = 'Creative Arts and Design'
     CHARITY_AND_VOLUNTARY_WORK = 'Charity and Voluntary Work'
-    BUSINSS_CONSULTING_MANAGEMENT = 'Business, Consulting and Management'
+    BUSINESS_CONSULTING_MANAGEMENT = 'Business, Consulting and Management'
     ACCOUNTANCY_BANKING_FINANCE = 'Accountancy, Banking and Finance'
 
 class Currency(enum.Enum):
