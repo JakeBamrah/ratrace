@@ -1,7 +1,7 @@
 <script lang="ts" context="module">
   export type SelectRow = {
-    id: string | number
-    value: string
+    value: string | number
+    label: string
   }
 </script>
 
@@ -22,8 +22,10 @@
   export let focus_input_on_mount: boolean = false
   export let rows: SelectRow[] = []
 
-  $: menu_open = false
-  $: filtered_rows = rows
+  $: filtered_rows = buildFilteredRows(rows)
+  let menu_open = false
+  let highlighted_index = 0
+  let _placeholder = placeholder
 
   let dropdown_ref: HTMLElement
   let input_ref: HTMLInputElement
@@ -41,14 +43,34 @@
       return
     }
 
+    if (e.key === 'ArrowDown') {
+        if (highlighted_index < rows.length - 1) {
+            highlighted_index += 1
+        }
+
+        menu_open = true
+        return
+    }
+
+    if (e.key === 'ArrowUp') {
+        if (highlighted_index > 0) {
+            highlighted_index -= 1
+        }
+        return
+    }
+
+
     if (e.key === 'Enter') {
       // if we allow any free_text act as normal
       // if we have to select something, take the top item from filtered list
       // or take nothing
-      menu_open = false
+      onHandleSelect(filtered_rows[highlighted_index])
       return
     }
 
+    // any other key pressed, start from the top
+    filtered_rows = buildFilteredRows(rows)
+    highlighted_index = 0
     menu_open = true
   }
 
@@ -78,10 +100,13 @@
 
   const onHandleSelect = (row: SelectRow) => {
     onSelect(row)
-    input_ref.focus()
     menu_open = false
+    highlighted_index = 0
     selected_row = row
     filtered_rows = buildFilteredRows(rows)
+    _placeholder = selected_row.value
+
+    input_ref.focus()
   }
 </script>
 
@@ -89,7 +114,7 @@
   <Input
     id={id}
     bind:value={value}
-    placeholder={placeholder}
+    placeholder={_placeholder}
     canClear={canClear}
     onClear={onClear}
     onFocus={onHandleFocus}
@@ -111,6 +136,7 @@
             class="py-1 px-2 truncate w-full text-left
             hover:bg-grey-100 hover:cursor-pointer
             {idx === 0 ? 'bg-red-500' : '' }
+            {idx === highlighted_index ? 'bg-blue-500': '' }
             "
           >
               {row.value}
