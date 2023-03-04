@@ -1,12 +1,17 @@
 from flask import (
     Blueprint, g, request, url_for, jsonify
 )
+import pandas as pd
 
 from db.models import Organisation, Account, Review, Interview, ReviewVote, InterviewVote
 import db.schemas as schemas
 
 
 orgs = Blueprint('orgs', __name__, url_prefix='/orgs')
+
+def min_max_scale(df, col):
+    """Normalize column values between [0, 1]"""
+    return (df[col] - df[col].min()) / (df[col].max() - df[col].min())
 
 @orgs.route('/get_names', methods=['GET'])
 def get_names():
@@ -17,8 +22,16 @@ def get_names():
     if industry and industry != 'ALL':
         queries.append(Organisation.industry == industry)
 
-    find_orgs_q = (g.session.query(Organisation).filter(*queries).limit(limit))
-    org_names = [{'id': o.id, 'label': o.name} for o in find_orgs_q.all()]
+    find_orgs_q = (g.session.query(
+        Organisation.id, Organisation.name, Organisation.page_visits, Organisation.size
+    ).filter(*queries).limit(limit))
+
+    # create weight for sorting orgs (w = min_max(size) * min_max(page_visits))
+    df = pd.DataFrame(data=find_orgs_q.all(), columns=['id', 'label', 'page_visits', 'size'])
+    df['weight'] = round(min_max_scale(df, 'size') * min_max_scale(df, 'page_visits'), 3)
+    df = df.sort_values('weight', ascending=False)
+
+    org_names = df[['id', 'label']].to_dict('records')
     return jsonify(response=200, org_names=org_names)
 
 
