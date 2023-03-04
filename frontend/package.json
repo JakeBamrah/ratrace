@@ -25,6 +25,7 @@
     "vite": "^4.1.0"
   },
   "dependencies": {
+    "flexsearch": "^0.7.31",
     "svelte-navigator": "^3.2.2",
     "svelte-select": "^5.3.1"
   }
