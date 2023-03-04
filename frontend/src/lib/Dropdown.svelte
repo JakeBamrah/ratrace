@@ -1,6 +1,6 @@
 <script lang="ts" context="module">
-  export type SelectRow = {
-    value: string | number
+  export type SelectRow<T> = {
+    id: T
     label: string
   }
 </script>

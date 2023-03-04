@@ -1,17 +1,17 @@
 <script lang="ts">
   import Select from 'svelte-select'
 
-  import type { SelectRow } from './Dropdown.svelte'
-  import type { IndustryKey } from './data/apiService'
+  import type { SelectRow } from '../lib/Dropdown.svelte'
+  import type { IndustryKey } from '../lib/data/apiService'
 
 
-  export let selected_industry: SelectRow
-  export let selected_org: SelectRow
-  export let industry_rows: { value: IndustryKey, label: string }[]
-  export let org_rows: SelectRow[]
+  export let selected_industry: SelectRow<IndustryKey>
+  export let selected_org: SelectRow<number>
+  export let industry_rows: SelectRow<IndustryKey>[]
+  export let org_rows: SelectRow<number>[]
   export let loading_orgs: boolean
   export let navigate: any
-
+  export let filterOrgs: any
 </script>
 
 <div class="flex flex-col items-center justify-center p-0 sm:items-start sm:pl-24 h-screen">
@@ -20,6 +20,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-1">
       <Select
         id="industry-filter-input-el"
+        itemId="id"
         bind:value={selected_industry}
         placeholder="Search industries"
         clearable={false}
@@ -29,20 +30,21 @@
 
       <Select
         id="company-filter-input-el"
+        itemId="id"
         bind:value={selected_org}
         placeholder="Search companies"
         clearable={false}
         items={org_rows}
         disabled={!Boolean(selected_industry)}
         loading={loading_orgs}
+        filter={filterOrgs}
       />
 
       <button
-        on:click={() => navigate(`/org/${selected_org?.value}`)}
+        on:click={() => navigate(`/org/${selected_org?.id}`)}
       >
         Search
       </button>
-
     </div>
   </div>
 </div>

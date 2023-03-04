@@ -76,7 +76,7 @@ export default class ApiService {
     return resp.data.org
   }
 
-  getOrgNames = async ({ industry, offset, limit }: Omit<OrgQueryParamsType, 'org_name'>): Promise<{ value: string, label: string }[]> => {
+  getOrgNames = async ({ industry, offset, limit }: Omit<OrgQueryParamsType, 'org_name'>): Promise<{ id: string, label: string }[]> => {
     const params = { industry, limit, offset }
     const resp = await this.api.get('/orgs/get_names', { params })
     return resp.data.org_names
