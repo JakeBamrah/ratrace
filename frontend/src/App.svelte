@@ -4,8 +4,8 @@
 
   import Home from './routes/Home.svelte'
   import Company from './routes/Company.svelte'
-  import ApiService, { Industry } from './lib/data/apiService'
-  import type { IndustryKey } from './lib/data/apiService'
+  import ApiService, { Industry } from './utils/apiService'
+  import type { IndustryKey } from './utils/apiService'
   import type { SelectRow } from './lib/Dropdown.svelte'
   import { createFilter } from './utils/search'
 
@@ -17,6 +17,7 @@
   let loading = false
   const industries = Object.keys(Industry).map(k => ({id : k as IndustryKey, label: Industry[k]}))
 
+  // pull in all the orgs for a given industry each time industry is selected
   $: fetch = onIndustrySelect(selected_industry)
 
   const org_search_idx = new Index("performance")

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { Industry } from '../lib/data/apiService'
+  import { Industry } from '../utils/apiService'
 
 
   export let id: string

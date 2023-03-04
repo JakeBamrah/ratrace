@@ -2,7 +2,7 @@
   import Select from 'svelte-select'
 
   import type { SelectRow } from '../lib/Dropdown.svelte'
-  import type { IndustryKey } from '../lib/data/apiService'
+  import type { IndustryKey } from '../utils/apiService'
 
 
   export let selected_industry: SelectRow<IndustryKey>
