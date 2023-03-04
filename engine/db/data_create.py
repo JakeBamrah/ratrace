@@ -23,7 +23,9 @@ def generate_dummy_data():
                 size=randint(1, 5000),
                 headquarters="London, UK",
                 industry=industries[randint(0, 21)],
-                times_visited=randint(0, 5000)))
+                times_visited=randint(0, 5000),
+                url=f'www.org_{i}_website.com'
+                ))
             objs.append(Account(username=f'account_{i}'))
 
         print("creating reviews and interviews\n")
@@ -36,13 +38,17 @@ def generate_dummy_data():
                 review=f'This is review number: {i}.',
                 location='NY',
                 account_id=randint(1, MAX - 1),
-                org_id=randint(1, MAX - 1)))
+                org_id=randint(1, MAX - 1),
+                tag=ReviewTag.GOOD if randint(0, 1) == 1 else ReviewTag.BAD
+                ))
             objs.append(Interview(
                 position=f'interview_{1}',
                 interview=f'This is interview number: {i}.',
                 location='NY',
                 account_id=randint(1, MAX - 1),
-                org_id=randint(1, MAX - 1)))
+                org_id=randint(1, MAX - 1),
+                tag=ReviewTag.GOOD if randint(0, 1) == 1 else ReviewTag.BAD
+                ))
             objs.append(ReviewVote(
                 account_id=randint(1, MAX - 1),
                 review_id=randint(1, MAX - 1),

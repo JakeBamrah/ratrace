@@ -43,6 +43,11 @@ class Vote(enum.Enum):
     DOWNVOTE = 'downvote'
     UPVOTE = 'upvote'
 
+class ReviewTag(enum.Enum):
+    GOOD = 'good'
+    AVERAGE = 'average'
+    BAD = 'bad'
+
 
 EPOCH_QUERY = "(select strftime('%s', 'now'))"
 
@@ -78,6 +83,7 @@ class Organisation(db.Base):
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
     reviews = relationship('Review', backref='organisation', lazy=True)
     interviews = relationship('Interview', backref='organisation', lazy=True)
+    page_visits = Column(Integer, default=1)
 
     def __repr__(self):
         return (f"<Organisation({self.id})>")
@@ -101,6 +107,7 @@ class Review(db.Base):
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
     review_votes = relationship('ReviewVote', backref='review', lazy=True)
+    tag = Column(Enum(ReviewTag), default=ReviewTag.AVERAGE)
 
     def __repr__(self):
         return (f"<Review({self.id})>")
@@ -130,6 +137,7 @@ class Interview(db.Base):
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
     interview_votes = relationship('InterviewVote', backref='interview', lazy=True)
+    tag = Column(Enum(ReviewTag), default=ReviewTag.AVERAGE)
 
     def __repr__(self):
         return (f"<Interview({self.id})>")

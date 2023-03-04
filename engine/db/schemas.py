@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields
 
-from db.models import Currency, Industry, Vote
+from db.models import Currency, Industry, Vote, ReviewTag
 
 class InterviewVoteSchema(Schema):
     id = fields.Int()
@@ -33,6 +33,7 @@ class ReviewSchema(Schema):
     # review_votes = fields.Nested(ReviewVoteSchema, many=True, dump_only=True, exclude=('created_at', 'updated_at'))
     upvotes = fields.List(fields.Int())
     downvotes = fields.List(fields.Int())
+    review_tag = fields.Enum(ReviewTag)
 
 class InterviewSchema(Schema):
     id = fields.Int()
@@ -46,6 +47,7 @@ class InterviewSchema(Schema):
     # interview_votes = fields.Nested(InterviewVoteSchema, many=True, dump_only=True, exclude=('created_at', 'updated_at'))
     upvotes = fields.List(fields.Int())
     downvotes = fields.List(fields.Int())
+    interview_tag = fields.Enum(ReviewTag)
 
 class AccountSchema(Schema):
     id = fields.Int()
@@ -69,3 +71,4 @@ class OrganisationSchema(Schema):
     updated_at = fields.Int(load_only=True)
     reviews = fields.Nested(ReviewSchema, many=True, dump_only=True, exclude=['updated_at'])
     interviews = fields.Nested(InterviewSchema, many=True, dump_only=True, exclude=['updated_at'])
+    page_views = fields.Int(load_only=True)
