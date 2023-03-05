@@ -140,6 +140,8 @@ class Interview(db.Base):
     id = Column(Integer, primary_key=True, nullable=False)
     position = Column(String(32), nullable=False)
     location = Column(String, nullable=False)
+    offer = Column(Integer, default=0)
+    currency = Column(Enum(Currency), default=Currency.USD, nullable=False)
     interview = Column(String, nullable=False)
     account_id = Column(Integer, ForeignKey('account.id'), nullable=False)
     org_id = Column(Integer, ForeignKey('organisation.id'), nullable=False)

@@ -39,6 +39,8 @@ class InterviewSchema(Schema):
     id = fields.Int()
     position = fields.Str()
     location = fields.Str()
+    offer = fields.Int()
+    currency = fields.Enum(Currency)
     interview = fields.Str()
     account = fields.Nested('AccountSchema', only=('username', 'id'), dump_only=True)
     org_id = fields.Int()

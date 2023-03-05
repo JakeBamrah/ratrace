@@ -23,6 +23,7 @@ def generate_dummy_data():
                 size=randint(1, 5000),
                 headquarters="London, UK",
                 industry=industries[randint(0, 21)],
+                page_visits=randint(0, 5000),
                 times_visited=randint(0, 5000),
                 url=f'www.org_{i}_website.com'
                 ))
@@ -32,7 +33,7 @@ def generate_dummy_data():
         for i in range(1, 200000):
             objs.append(Review(
                 position=f'review_{i}',
-                salary=100,
+                salary=randint(25000, 150000),
                 currency=Currency.GBP,
                 duration_years=i / 5,
                 review=f'This is review number: {i}.',
@@ -42,20 +43,24 @@ def generate_dummy_data():
                 tag=ReviewTag.GOOD if randint(0, 1) == 1 else ReviewTag.BAD
                 ))
             objs.append(Interview(
-                position=f'interview_{1}',
+                position=f'interview_{i}',
                 interview=f'This is interview number: {i}.',
                 location='NY',
+                offer=randint(25000, 150000),
+                currency=Currency.GBP,
                 account_id=randint(1, MAX - 1),
                 org_id=randint(1, MAX - 1),
                 tag=ReviewTag.GOOD if randint(0, 1) == 1 else ReviewTag.BAD
                 ))
+        print("creating reviews and interviews votes\n")
+        for i in range(1, 500000):
             objs.append(ReviewVote(
                 account_id=randint(1, MAX - 1),
-                review_id=randint(1, MAX - 1),
+                review_id=randint(1, 200000 - 1),
                 vote=Vote.DOWNVOTE if randint(0, 1) == 1 else Vote.UPVOTE))
             objs.append(InterviewVote(
                 account_id=randint(1, MAX - 1),
-                interview_id=randint(1, MAX - 1),
+                interview_id=randint(1, 200000 - 1),
                 vote=Vote.DOWNVOTE if randint(0, 1) == 1 else Vote.UPVOTE))
 
         print(f"committing {len(objs)} rows\n")
