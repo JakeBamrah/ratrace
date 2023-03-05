@@ -24,7 +24,8 @@
 
 <script lang="ts">
   import { current_component } from "svelte/internal"
-  import feather from 'feather-icons'
+  import { icons } from 'feather-icons'
+
   import { getEventsAction } from "../utils/events"
 
 
@@ -115,7 +116,7 @@
       class="absolute right-0 text-xs mr-4 cursor-pointer hover:bg-white dark:hover:bg-dark-500 rounded-xl p-0.5"
     >
       <span class="text-grey-350 dark:text-dark-300 ">
-        {@html feather.icons.x.toSvg({ height: 24, width: 24 })}
+        {@html icons.x.toSvg({ height: 24, width: 24 })}
       </span>
     </button>
   {/if}

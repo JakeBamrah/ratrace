@@ -1,3 +1,10 @@
+<script lang="ts" context="module">
+  export type SelectRow<T> = {
+    id: T
+    label: string
+  }
+</script>
+
 <script lang="ts">
   import Index from 'flexsearch/src/index';
   import { Router, Route } from 'svelte-navigator'
@@ -5,8 +12,8 @@
   import Home from './routes/Home.svelte'
   import Company from './routes/Company.svelte'
   import ApiService, { Industry } from './utils/apiService'
+  import Navbar from './routes/Navbar.svelte'
   import type { IndustryKey } from './utils/apiService'
-  import type { SelectRow } from './lib/Dropdown.svelte'
   import { createFilter } from './utils/search'
 
 
@@ -55,21 +62,22 @@
 
 <main>
   <Router primary={false} url="/">
-    <Route path="org/*">
-      <Route path=":id" let:params let:navigate>
+    <Route let:navigate path="org/*">
+      <Navbar navigate={navigate} />
+      <Route path=":id" let:params>
         <Company id={params.id} navigate={navigate} getOrg={getOrg} />
       </Route>
     </Route>
     <Route let:navigate>
-        <Home
-          bind:selected_industry={selected_industry}
-          bind:selected_org={selected_org}
-          industry_rows={industries}
-          org_rows={orgs}
-          loading_orgs={loading}
-          navigate={navigate}
-          filterOrgs={createFilter(org_search_idx)}
-        />
+      <Home
+        bind:selected_industry={selected_industry}
+        bind:selected_org={selected_org}
+        industry_rows={industries}
+        org_rows={orgs}
+        loading_orgs={loading}
+        navigate={navigate}
+        filterOrgs={createFilter(org_search_idx)}
+      />
     </Route>
   </Router>
 </main>

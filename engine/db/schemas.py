@@ -33,7 +33,7 @@ class ReviewSchema(Schema):
     # review_votes = fields.Nested(ReviewVoteSchema, many=True, dump_only=True, exclude=('created_at', 'updated_at'))
     upvotes = fields.List(fields.Int())
     downvotes = fields.List(fields.Int())
-    review_tag = fields.Enum(ReviewTag)
+    tag = fields.Enum(ReviewTag)
 
 class InterviewSchema(Schema):
     id = fields.Int()
@@ -47,7 +47,7 @@ class InterviewSchema(Schema):
     # interview_votes = fields.Nested(InterviewVoteSchema, many=True, dump_only=True, exclude=('created_at', 'updated_at'))
     upvotes = fields.List(fields.Int())
     downvotes = fields.List(fields.Int())
-    interview_tag = fields.Enum(ReviewTag)
+    tag = fields.Enum(ReviewTag)
 
 class AccountSchema(Schema):
     id = fields.Int()

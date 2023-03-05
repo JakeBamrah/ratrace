@@ -1,7 +1,7 @@
 <script lang="ts">
   import Select from 'svelte-select'
 
-  import type { SelectRow } from '../lib/Dropdown.svelte'
+  import type { SelectRow } from '../App.svelte'
   import type { IndustryKey } from '../utils/apiService'
 
 
@@ -39,13 +39,16 @@
         loading={loading_orgs}
         filter={filterOrgs}
       />
+    </div>
 
+    <div class="DESKTOP_BUTTON flex justify-end w-full p-2">
       <button
         on:click={() => navigate(`/org/${selected_org?.id}`)}
       >
         Search
       </button>
     </div>
+
   </div>
 </div>
 
