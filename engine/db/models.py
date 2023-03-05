@@ -88,6 +88,15 @@ class Organisation(db.Base):
     def __repr__(self):
         return (f"<Organisation({self.id})>")
 
+    @hybrid_property
+    def total_reviews(self):
+        return len(self.reviews)
+
+    @hybrid_property
+    def total_interviews(self):
+        return len(self.interviews)
+
+
 organisation_size_idx = Index('organisation_size_idx', Organisation.size)
 organisation_industry_idx = Index('organisation_industry_idx', Organisation.industry)
 

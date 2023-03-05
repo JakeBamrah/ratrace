@@ -72,3 +72,5 @@ class OrganisationSchema(Schema):
     reviews = fields.Nested(ReviewSchema, many=True, dump_only=True, exclude=['updated_at'])
     interviews = fields.Nested(InterviewSchema, many=True, dump_only=True, exclude=['updated_at'])
     page_views = fields.Int(load_only=True)
+    total_reviews = fields.Int()
+    total_interviews = fields.Int()
