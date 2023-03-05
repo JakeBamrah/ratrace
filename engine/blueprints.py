@@ -18,13 +18,13 @@ def get_names():
     limit = request.args.get('limit', type=int, default=50)
     offset = request.args.get('offset', type=int, default=50)
     industry = request.args.get('industry', type=str, default='')
-    queries = []
+    filter_queries = []
     if industry and industry != 'ALL':
-        queries.append(Organisation.industry == industry)
+        filter_queries.append(Organisation.industry == industry)
 
     find_orgs_q = (g.session.query(
         Organisation.id, Organisation.name, Organisation.page_visits, Organisation.size
-    ).filter(*queries).limit(limit))
+    ).filter(*filter_queries).limit(limit))
 
     # create weight for sorting orgs (w = min_max(size) * min_max(page_visits))
     df = pd.DataFrame(data=find_orgs_q.all(), columns=['id', 'label', 'page_visits', 'size'])
