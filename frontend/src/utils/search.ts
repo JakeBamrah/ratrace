@@ -1,8 +1,10 @@
-export const createFilter = (search_index) => {
+export const createFilter = (search_index, original_items) => {
   /*
-   * Accepts a flexsearch index and returns a filter callback that uses this
-   * index to filter values for a svelte-select search component.
-   * svelte-select dropdown component.
+   * Accepts a flexsearch index and returns a filter callback which is used to
+   * search and index filter values for a svelte-select search component.
+   * The original_items list is also passed because the select dropdown is only
+   * given 500 items max and therefore is not capable of searching more than
+   * 500 items.
    *
    * All args are passed by svelte-select by default to fitler callback
    */
@@ -34,7 +36,7 @@ export const createFilter = (search_index) => {
     if (filterText) {
         filterResults = search_index
         .search(filterText, 100)
-        .map((idx: number) => items[idx])
+        .map((idx: number) => original_items[idx])
     }
 
     if (groupBy) {
