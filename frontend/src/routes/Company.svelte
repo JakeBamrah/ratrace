@@ -5,6 +5,7 @@
   import { Industry } from '../utils/apiService'
   import PageContainer from '../lib/PageContainer.svelte'
   import Reviews from './Reviews.svelte'
+  import Interviews from './Interviews.svelte'
 
 
   export let id: string
@@ -60,33 +61,33 @@
 
 <PageContainer>
   {#if org}
-  <div class="COMPANY_BIO w-full rounded-xl border px-6 py-4">
+  <div class="COMPANY_BIO w-full rounded-xl border px-6 py-4 space-y-2">
     <div class="w-full flex items-center space-x-2 pb-4">
       <div class="h-14 w-14 rounded-full bg-grey-300" />
       <p class="font-bold truncate w-48 sm:w-80">{org.name}</p>
     </div>
     <div class="flex items-center space-x-2">
       {@html icons.home.toSvg({ class: 'h-4 w-4'})}
-      <p class="truncate">{org.headquarters}</p>
+      <p class="text-sm truncate">{org.headquarters}</p>
     </div>
 
     <div class="flex items-center space-x-2">
       {@html icons.user.toSvg({ class: 'h-4 w-4'})}
-      <p>{getCompanySizeBracket(org.size)}</p>
+      <p class="text-sm">{getCompanySizeBracket(org.size)}</p>
     </div>
 
     <div class="flex items-center space-x-2">
       {@html icons.link.toSvg({ class: 'h-4 w-4'})}
       {#if org.url}
-        <a href={org.url} target="_blank" rel="noreferrer" class="truncate">{org.url}</a>
+        <a href={org.url} target="_blank" rel="noreferrer" class="text-sm truncate">{org.url}</a>
       {:else}
-        <p class="truncate">{'No url available'}</p>
+        <p class="text-sm truncate">{'No url available'}</p>
       {/if}
     </div>
 
     <div class="flex items-center space-x-2">
       {@html icons.globe.toSvg({ class: 'h-4 w-4'})}
-      <p class="truncate">{Industry[org.industry]}</p>
+      <p class="text-sm truncate">{Industry[org.industry]}</p>
     </div>
   </div>
 
@@ -111,7 +112,7 @@
     {#if info_panel === 'reviews'}
       <Reviews reviews={reviews} />
     {:else}
-      <p>Interiews: {interviews.length}</p>
+      <Interviews interviews={interviews} />
     {/if}
   </div>
   {:else}

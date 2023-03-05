@@ -43,9 +43,9 @@
     api.getOrgNames(params).then(resp => {
       loading = false
 
-      // limit the number of orgs to render in the dropdown
+      // NOTE: limit the number of orgs to render in the dropdown (see org_rows)
       // the search index will keep track of *all* available orgs for us
-      orgs = resp.length > 500 ? resp.slice(0, 500) : resp
+      orgs = resp
 
       // flex-search needs to use the same index id as our dropdown component
       // which relies on the array index rather than the item.id
@@ -73,10 +73,10 @@
         bind:selected_industry={selected_industry}
         bind:selected_org={selected_org}
         industry_rows={industries}
-        org_rows={orgs}
+        org_rows={orgs.length > 500 ? orgs.slice(0, 500) : orgs}
         loading_orgs={loading}
         navigate={navigate}
-        filterOrgs={createFilter(org_search_idx)}
+        filterOrgs={createFilter(org_search_idx, orgs)}
       />
     </Route>
   </Router>

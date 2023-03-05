@@ -2,6 +2,24 @@ import axios from 'axios'
 import type { AxiosInstance } from 'axios'
 
 
+export enum Currency {
+    GBP = 'gbp',
+    USD = 'usd',
+    EUR = 'eur',
+    JPY = 'jpy',
+    CNY = 'cny'
+}
+
+export type CurrencyKey = keyof typeof Currency
+
+export enum Rating {
+    GOOD = 'good',
+    AVERAGE = 'average',
+    BAD = 'bad'
+}
+
+export type RatingKey = keyof typeof Rating
+
 type Organisation = {
   name: string
   id: number
