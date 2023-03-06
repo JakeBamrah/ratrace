@@ -1,4 +1,5 @@
 import type { CurrencyKey, RatingKey } from './apiService'
+import { Rating } from './apiService'
 
 const SALARY_MAP = {
   'GBP': '£',
@@ -8,15 +9,9 @@ const SALARY_MAP = {
   'CNY': 'CNY (¥)'
 }
 
-const RATING_MAP = {
-  'GOOD': 'Good',
-  'AVERAGE': 'Meh',
-  'BAD': 'Rat-race'
-}
-
 export const salaryMapper   = (currency: CurrencyKey) =>  SALARY_MAP[currency]
 
-export const ratingsMapper  = (rating: RatingKey) => RATING_MAP[rating]
+export const ratingsMapper  = (rating: RatingKey) => Rating[rating]
 
 export const addCommasRegex = (num: string) => {
      // don't ask... copied from stack in a rush:

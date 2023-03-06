@@ -1,8 +1,9 @@
 <script lang="ts">
   import { icons } from 'feather-icons'
   import { onMount } from 'svelte'
+  import Select from 'svelte-select'
 
-  import { Industry } from '../utils/apiService'
+  import { Industry, Rating, ReviewSort } from '../utils/apiService'
   import Interviews from './Interviews.svelte'
   import PageContainer from '../lib/PageContainer.svelte'
   import Reviews from './Reviews.svelte'
@@ -15,6 +16,12 @@
 
   let selected_panel = 'Reviews'
   let panels = ['Reviews', 'Interviews']
+
+  let tags = Object.keys(Rating).map(k => ({ id: k, label: Rating[k]}))
+  let selected_tag = Rating.ALL
+
+  let sorts = Object.keys(ReviewSort).map(k => ({ id: k, label: ReviewSort[k] }))
+  let selected_sort = null
 
   $: org = null
   let reviews = []
@@ -34,6 +41,9 @@
           return
         }
 
+        console.log(r)
+        console.log(r.reviews.length)
+        console.log(r.interviews.length)
         org = r.org
         reviews = r.reviews
         interviews = r.interviews
@@ -94,12 +104,22 @@
 
   <div
     class="POSITION_FILTER
-      flex w-full grid grid-cols-6 gap-y-1
+      flex w-full grid grid-cols-8 gap-y-1 gap-x-2
       border rounded-xl px-6 py-4 divide-y sm:divide-y-0
     ">
-    <div class="col-span-6 sm:col-span-3 w-full">Position: </div>
-    <div class="col-span-3 sm:col-span-1 w-full pt-2 sm:pt-0">Tag: </div>
-    <div class="col-span-3 sm:col-span-2 w-full pt-2 sm:pt-0">Sort: </div>
+    <div class="col-span-8 sm:col-span-4 w-full pt-2 sm:pt-0">
+      Position:
+      <Select itemId='id' items={tags} bind:value={selected_tag} clearable={false} />
+    </div>
+    <div class="col-span-4 sm:col-span-2 w-full pt-2 sm:pt-0">
+      Tag:
+      <Select itemId='id' items={tags} bind:value={selected_tag} clearable={false} />
+    </div>
+
+    <div class="col-span-4 sm:col-span-2 pt-2 sm:pt-0">
+      Sort:
+      <Select itemId='id' items={sorts} bind:value={selected_sort} clearable={false} />
+    </div>
   </div>
 
   <div
@@ -117,6 +137,14 @@
     {:else}
       <Interviews interviews={interviews} />
     {/if}
+
+    {#if selected_panel == 'Reviews' && reviews.length < org.total_reviews}
+        LOAD MORE REVIEWS
+    {/if}
+    {#if selected_panel == 'Interviews' && interviews.length < org.total_interviews}
+        LOAD MORE INTERVIEWS
+    {/if}
+
   </div>
   {:else}
     <p>No company data <a href="/">search again</a></p>

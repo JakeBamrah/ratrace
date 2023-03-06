@@ -61,23 +61,25 @@
 </script>
 
 <main>
-  <Router primary={false} url="/">
-    <Route let:navigate path="org/*">
-      <Navbar navigate={navigate} />
-      <Route path=":id" let:params>
-        <Company id={params.id} navigate={navigate} getOrg={getOrg} />
+  <div class="pb-10">
+    <Router primary={false} url="/">
+      <Route let:navigate path="org/*">
+        <Navbar navigate={navigate} />
+        <Route path=":id" let:params>
+          <Company id={params.id} navigate={navigate} getOrg={getOrg} />
+        </Route>
       </Route>
-    </Route>
-    <Route let:navigate>
-      <Home
-        bind:selected_industry={selected_industry}
-        bind:selected_org={selected_org}
-        industry_rows={industries}
-        org_rows={orgs.length > 500 ? orgs.slice(0, 500) : orgs}
-        loading_orgs={loading}
-        navigate={navigate}
-        filterOrgs={createFilter(org_search_idx, orgs)}
-      />
-    </Route>
-  </Router>
+      <Route let:navigate>
+        <Home
+          bind:selected_industry={selected_industry}
+          bind:selected_org={selected_org}
+          industry_rows={industries}
+          org_rows={orgs.length > 500 ? orgs.slice(0, 500) : orgs}
+          loading_orgs={loading}
+          navigate={navigate}
+          filterOrgs={createFilter(org_search_idx, orgs)}
+        />
+      </Route>
+    </Router>
+  </div>
 </main>

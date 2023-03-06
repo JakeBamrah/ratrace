@@ -9,21 +9,28 @@ export enum Currency {
     JPY = 'jpy',
     CNY = 'cny'
 }
-
 export type CurrencyKey = keyof typeof Currency
 
 export enum Rating {
-    GOOD = 'good',
-    AVERAGE = 'average',
-    BAD = 'bad'
+    ALL = 'All',
+    GOOD = 'Good',
+    AVERAGE = 'Meh',
+    BAD = 'Rat-race'
 }
+export type RatingKey = keyof typeof Rating
+
+export enum ReviewSort {
+  COMPENSATION = 'Compensation',
+  TENURE = 'Tenure',
+  DOWNVOTES = 'Downvotes',
+  UPVOTES = 'Upvotes'
+}
+export type ReviewSortKey = keyof typeof ReviewSort
 
 export enum Vote {
     UPVOTE = 'upvote',
     DOWNVOTE = 'downvote'
 }
-
-export type RatingKey = keyof typeof Rating
 
 type Organisation = {
   name: string
@@ -62,7 +69,6 @@ export enum Industry {
     SOCIAL_CARE = 'Social care',
     TRANSPORT_AND_LOGISTICS = 'Transport and Logistics',
 }
-
 export type IndustryKey = keyof typeof Industry
 
 type OrgQueryParamsType = {
