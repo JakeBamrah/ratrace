@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { salaryMapper, ratingsMapper } from '../utils/mappers'
+  import { salaryMapper, ratingsMapper, numCommaFormatter } from '../utils/mappers'
   import Vote from '../lib/Vote.svelte'
 
   export let interviews
@@ -19,7 +19,10 @@
         </div>
         <div class="flex flex-col grid grid-cols-4 gap-x-2 w-full">
           <p class="col-span-2 text-sm truncate"><b>Position:</b> {interview.position}</p>
-          <p class="col-span-2 text-sm truncate"><b>Offer:</b> {`${salaryMapper(interview.currency)}${interview.offer > 0 ? interview.offer : 'NA'}`}</p>
+          <p class="col-span-2 text-sm truncate">
+            <b>Offer:</b>
+            {`${salaryMapper(interview.currency)}${interview.offer > 0 ? numCommaFormatter(interview.offer, 0) : 'NA'}`}
+          </p>
           <p class="col-span-2 text-sm truncate"><b>Location:</b> {interview.location.length > 0 ? interview.location : 'NA'}</p>
         </div>
         <p class="text-justify text-sm">

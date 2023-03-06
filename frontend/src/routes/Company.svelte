@@ -3,16 +3,18 @@
   import { onMount } from 'svelte'
 
   import { Industry } from '../utils/apiService'
+  import Interviews from './Interviews.svelte'
   import PageContainer from '../lib/PageContainer.svelte'
   import Reviews from './Reviews.svelte'
-  import Interviews from './Interviews.svelte'
+  import Tabs from '../lib/Tabs.svelte'
 
 
   export let id: string
   export let navigate: any
   export let getOrg: (org_id: number) => Promise<any>
 
-  let info_panel = 'reviews'
+  let selected_panel = 'Reviews'
+  let panels = ['Reviews', 'Interviews']
 
   $: org = null
   let reviews = []
@@ -31,7 +33,6 @@
           navigate('/')
           return
         }
-        console.log(r)
 
         org = r.org
         reviews = r.reviews
@@ -106,10 +107,12 @@
       w-full border rounded-xl px-6 py-4 space-y-2 divide-y
     ">
     <div class="w-full flex space-x-4 sm:space-x-2">
-      <button on:click={() => info_panel = 'reviews' }>Reviews</button>
-      <button on:click={() => info_panel = 'interviews' }>Interviews</button>
+      <Tabs
+        tabs={panels}
+        selected_tab={selected_panel}
+        onTabSelect={(panel) => selected_panel = panel} />
     </div>
-    {#if info_panel === 'reviews'}
+    {#if selected_panel === 'Reviews'}
       <Reviews reviews={reviews} />
     {:else}
       <Interviews interviews={interviews} />
