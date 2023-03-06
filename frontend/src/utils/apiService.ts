@@ -18,6 +18,11 @@ export enum Rating {
     BAD = 'bad'
 }
 
+export enum Vote {
+    UPVOTE = 'upvote',
+    DOWNVOTE = 'downvote'
+}
+
 export type RatingKey = keyof typeof Rating
 
 type Organisation = {
