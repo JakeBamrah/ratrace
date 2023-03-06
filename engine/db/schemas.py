@@ -28,6 +28,7 @@ class ReviewSchema(Schema):
     review = fields.Str()
     account = fields.Nested('AccountSchema', only=('username', 'id'), dump_only=True)
     org_id = fields.Int()
+    position = fields.Nested('PositionSchema', only=('name', 'id', 'org_id'), dump_only=True)
     created_at = fields.Int()
     updated_at = fields.Int(load_only=True)
     # review_votes = fields.Nested(ReviewVoteSchema, many=True, dump_only=True, exclude=('created_at', 'updated_at'))
@@ -44,6 +45,7 @@ class InterviewSchema(Schema):
     interview = fields.Str()
     account = fields.Nested('AccountSchema', only=('username', 'id'), dump_only=True)
     org_id = fields.Int()
+    position = fields.Nested('PositionSchema', only=('name', 'id', 'org_id'), dump_only=True)
     created_at = fields.Int()
     updated_at = fields.Int(load_only=True)
     # interview_votes = fields.Nested(InterviewVoteSchema, many=True, dump_only=True, exclude=('created_at', 'updated_at'))
@@ -61,6 +63,13 @@ class AccountSchema(Schema):
     interview_votes = fields.Nested(InterviewVoteSchema, many=True, dump_only=True, exclude=('created_at', 'updated_at'))
     review_votes = fields.Nested(ReviewVoteSchema, many=True, dump_only=True, exclude=('created_at', 'updated_at'))
 
+class PositionSchema(Schema):
+    id = fields.Int()
+    name = fields.Str()
+    org_id = fields.Int()
+    created_at = fields.Int()
+    updated_at = fields.Int(load_only=True)
+
 class OrganisationSchema(Schema):
     id = fields.Int()
     name = fields.Str()
@@ -72,6 +81,7 @@ class OrganisationSchema(Schema):
     updated_at = fields.Int(load_only=True)
     reviews = fields.Nested(ReviewSchema, many=True, dump_only=True, exclude=['updated_at'])
     interviews = fields.Nested(InterviewSchema, many=True, dump_only=True, exclude=['updated_at'])
+    positions = fields.Nested(PositionSchema, many=True, dump_only=True, exclude=['updated_at'])
     total_reviews = fields.Int()
     total_interviews = fields.Int()
     page_visits = fields.Str(load_only=True)

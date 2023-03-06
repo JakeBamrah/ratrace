@@ -57,21 +57,18 @@ def get_org(org_id):
     """Get overview, reviews and interviews for organisation."""
     review_limit = request.args.get('review_limit', type=int, default=50)
     interview_limit = request.args.get('interview_limit', type=int, default=50)
-    position = request.args.get('position', type=str, default='')
     org = g.session.query(Organisation).filter(Organisation.id == org_id).scalar()
     review_sorted_q = (g.session
                 .query(Review)
                 .filter(
-                    (Review.org_id == org_id) &
-                    (Review.position.contains(position.lower()))
+                    (Review.org_id == org_id)
                 )
                 .order_by(Review.created_at.desc())
                 .limit(review_limit))
     interview_sorted_q = (g.session
                 .query(Interview)
                 .filter(
-                    (Interview.org_id == org_id) &
-                    (Interview.position.contains(position.lower()))
+                    (Interview.org_id == org_id)
                 )
                 .order_by(Interview.created_at.desc())
                 .limit(interview_limit))
@@ -93,8 +90,7 @@ def get_org_reviews(org_id):
     review_sorted_q = (g.session
                 .query(Review)
                 .filter(
-                    (Review.org_id == org_id) &
-                    (Review.position.contains(position.lower()))
+                    (Review.org_id == org_id)
                 )
                 .order_by(Review.created_at.desc())
                 .limit(limit))
@@ -113,8 +109,7 @@ def get_org_interviews(org_id):
     interview_sorted_q = (g.session
                 .query(Interview)
                 .filter(
-                    (Interview.org_id == org_id) &
-                    (Interview.position.contains(position.lower()))
+                    (Interview.org_id == org_id)
                 )
                 .order_by(Interview.created_at.desc())
                 .limit(limit))

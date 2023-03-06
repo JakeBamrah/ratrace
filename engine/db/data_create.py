@@ -19,6 +19,7 @@ def generate_dummy_data():
         print("creating companies and accounts\n")
         for i in range(1, MAX):
             objs.append(Organisation(
+                id=i,
                 name=f'org_{randomword(randint(3, 15))}_{i}',
                 size=randint(1, 5000),
                 headquarters="London, UK",
@@ -28,29 +29,37 @@ def generate_dummy_data():
                 ))
             objs.append(Account(username=f'account_{i}'))
 
+            for j in range(1, 20):
+                objs.append(Position(
+                    name=f'position_{j}',
+                    org_id=i
+                ))
+
         print("creating reviews and interviews\n")
         for i in range(1, 200000):
             objs.append(Review(
-                position=f'review_{i}',
+                position_id=randint(1, 100000),
                 salary=randint(25000, 150000),
                 currency=Currency.GBP,
                 duration_years=i / 5,
                 review=f'This is review number: {i}.',
-                location='NY',
+                location='NY, USA',
                 account_id=randint(1, MAX - 1),
                 org_id=randint(1, MAX - 1),
                 tag=ReviewTag.GOOD if randint(0, 1) == 1 else ReviewTag.BAD
                 ))
+
             objs.append(Interview(
-                position=f'interview_{i}',
+                position_id=randint(1, 100000),
                 interview=f'This is interview number: {i}.',
-                location='NY',
+                location='San Francisco, CA, USA',
                 offer=randint(25000, 150000),
                 currency=Currency.GBP,
                 account_id=randint(1, MAX - 1),
                 org_id=randint(1, MAX - 1),
                 tag=ReviewTag.GOOD if randint(0, 1) == 1 else ReviewTag.BAD
                 ))
+
         print("creating reviews and interviews votes\n")
         for i in range(1, 500000):
             objs.append(ReviewVote(

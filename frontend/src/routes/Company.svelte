@@ -23,6 +23,9 @@
   let sorts = Object.keys(ReviewSort).map(k => ({ id: k, label: ReviewSort[k] }))
   let selected_sort = null
 
+  let positions = []
+  let selected_position = null
+
   $: org = null
   let reviews = []
   let interviews = []
@@ -41,10 +44,8 @@
           return
         }
 
-        console.log(r)
-        console.log(r.reviews.length)
-        console.log(r.interviews.length)
         org = r.org
+        positions = org.positions.map(p => ({id: p.id, label: p.name}))
         reviews = r.reviews
         interviews = r.interviews
       })
@@ -109,16 +110,30 @@
     ">
     <div class="col-span-8 sm:col-span-4 w-full pt-2 sm:pt-0">
       Position:
-      <Select itemId='id' items={tags} bind:value={selected_tag} clearable={false} />
+      <Select
+        placeholder='Filter position'
+        itemId='id'
+        items={positions}
+        bind:value={selected_position}
+        clearable={false} />
     </div>
     <div class="col-span-4 sm:col-span-2 w-full pt-2 sm:pt-0">
       Tag:
-      <Select itemId='id' items={tags} bind:value={selected_tag} clearable={false} />
+      <Select
+        itemId='id'
+        items={tags}
+        bind:value={selected_tag}
+        clearable={false} />
     </div>
 
     <div class="col-span-4 sm:col-span-2 pt-2 sm:pt-0">
       Sort:
-      <Select itemId='id' items={sorts} bind:value={selected_sort} clearable={false} />
+      <Select
+        placeholder='Select sort'
+        itemId='id'
+        items={sorts}
+        bind:value={selected_sort}
+        clearable={false} />
     </div>
   </div>
 

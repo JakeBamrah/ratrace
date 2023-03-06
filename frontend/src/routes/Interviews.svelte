@@ -18,7 +18,7 @@
             {ratingsMapper(interview.tag)}</p>
         </div>
         <div class="flex flex-col grid grid-cols-4 gap-x-2 w-full">
-          <p class="col-span-2 text-sm truncate"><b>Position:</b> {interview.position}</p>
+          <p class="col-span-2 text-sm truncate"><b>Position:</b> {interview.position.name}</p>
           <p class="col-span-2 text-sm truncate">
             <b>Offer:</b>
             {`${salaryMapper(interview.currency)}${interview.offer > 0 ? numCommaFormatter(interview.offer, 0) : 'NA'}`}
@@ -40,6 +40,6 @@
       </div>
     {/each}
   {:else}
-    <div>No reviews for this company</div>
+    <div>No interviews for this company</div>
   {/if}
 </div>

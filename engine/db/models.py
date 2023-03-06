@@ -82,6 +82,7 @@ class Organisation(db.Base):
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
     reviews = relationship('Review', backref='organisation', lazy=True)
     interviews = relationship('Interview', backref='organisation', lazy=True)
+    positions = relationship('Position', backref='organisation', lazy=True)
     page_visits = Column(Integer, default=1)
 
     def __repr__(self):
@@ -95,16 +96,28 @@ class Organisation(db.Base):
     def total_interviews(self):
         return len(self.interviews)
 
-
 organisation_size_idx = Index('organisation_size_idx', Organisation.size)
 organisation_industry_idx = Index('organisation_industry_idx', Organisation.industry)
+
+
+class Position(db.Base):
+    __tablename__ = 'position'
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    name = Column(String(32), nullable=False)
+    created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
+    updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
+    org_id = Column(Integer, ForeignKey('organisation.id'), nullable=False)
+    reviews = relationship('Review', backref='position', lazy=True)
+    interviews = relationship('Interview', backref='position', lazy=True)
+
+position_org_idx = Index('position_org_idx', Position.org_id)
 
 
 class Review(db.Base):
     __tablename__ = 'review'
 
     id = Column(Integer, primary_key=True, nullable=False)
-    position = Column(String(32), nullable=False)
     salary = Column(Integer, default=0, nullable=False)
     currency = Column(Enum(Currency), default=Currency.USD, nullable=False)
     location = Column(String, nullable=False)
@@ -112,6 +125,7 @@ class Review(db.Base):
     review = Column(String, nullable=False)
     account_id = Column(Integer, ForeignKey('account.id'), nullable=False)
     org_id = Column(Integer, ForeignKey('organisation.id'), nullable=False)
+    position_id = Column(Integer, ForeignKey('position.id'), nullable=False)
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
     review_votes = relationship('ReviewVote', backref='review', lazy=True)
@@ -131,19 +145,20 @@ class Review(db.Base):
 review_account_idx = Index('review_account_idx', Review.account_id)
 review_org_idx = Index('review_org_idx', Review.org_id)
 review_salary_idx = Index('review_salary_idx', Review.salary)
+review_position_idx = Index('review_position_idx', Review.position_id)
 
 
 class Interview(db.Base):
     __tablename__ = 'interview'
 
     id = Column(Integer, primary_key=True, nullable=False)
-    position = Column(String(32), nullable=False)
     location = Column(String, nullable=False)
     offer = Column(Integer, default=0)
     currency = Column(Enum(Currency), default=Currency.USD, nullable=False)
     interview = Column(String, nullable=False)
     account_id = Column(Integer, ForeignKey('account.id'), nullable=False)
     org_id = Column(Integer, ForeignKey('organisation.id'), nullable=False)
+    position_id = Column(Integer, ForeignKey('position.id'), nullable=False)
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
     interview_votes = relationship('InterviewVote', backref='interview', lazy=True)
@@ -163,6 +178,7 @@ class Interview(db.Base):
 interview_account_idx = Index('interview_account_idx', Interview.account_id)
 interview_org_idx = Index('interview_org_idx', Interview.org_id)
 interview_offer_idx = Index('interview_offer_idx', Interview.offer)
+interview_position_idx = Index('interview_position_idx', Interview.position_id)
 
 
 class InterviewVote(db.Base):

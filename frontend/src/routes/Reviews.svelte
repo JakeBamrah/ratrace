@@ -18,7 +18,7 @@
             {ratingsMapper(review.tag)}</p>
         </div>
         <div class="flex flex-col grid grid-cols-4 gap-x-2 w-full">
-          <p class="col-span-2 text-sm truncate"><b>Position:</b> {review.position}</p>
+          <p class="col-span-2 text-sm truncate"><b>Position:</b> {review.position.name}</p>
           <p class="col-span-2 text-sm truncate">
             <b>Salary:</b>
             {`${salaryMapper(review.currency)}${review.salary > 0 ? numCommaFormatter(review.salary, 0) : 'NA'}`}
