@@ -32,18 +32,6 @@ export enum Vote {
     DOWNVOTE = 'downvote'
 }
 
-type Organisation = {
-  name: string
-  id: number
-  created_at: number
-  headquarters: string
-  industry: Industry
-  size: number
-  url?: string
-  reviews: any[]
-  interviews: any[]
-}
-
 export enum Industry {
     ALL = 'All',
     ACCOUNTANCY_BANKING_FINANCE = 'Accountancy, Banking and Finance',
@@ -71,6 +59,18 @@ export enum Industry {
 }
 export type IndustryKey = keyof typeof Industry
 
+export type Organisation = {
+  name: string
+  id: number
+  created_at: number
+  headquarters: string
+  industry: Industry
+  size: number
+  url?: string
+  reviews: any[]
+  interviews: any[]
+}
+
 type OrgQueryParamsType = {
   org_name?: string
   org_id?: number
@@ -80,6 +80,47 @@ type OrgQueryParamsType = {
   interview_limit?: number
   position?: string
   offset?: number
+}
+
+type AccountID = number
+export type Account = {
+  id: AccountID
+  username: string
+}
+
+export type Position = {
+  id: number
+  name: string
+  org_id: number
+}
+
+export type Review = {
+  account: Account
+  position: Position
+  created_at: number
+  location: string
+  org_id: number
+  tag: RatingKey
+  upvotes: AccountID[]
+  downvotes: AccountID[]
+  duration_years: number
+  review: string
+  currency: CurrencyKey
+  salary: number
+}
+
+export type Interview = {
+  account: Account
+  position: Position
+  created_at: number
+  location: string
+  org_id: number
+  tag: RatingKey
+  upvotes: AccountID[]
+  downvotes: AccountID[]
+  interview: string
+  currency: CurrencyKey
+  offer: number
 }
 
 
