@@ -78,7 +78,6 @@ class Organisation(db.Base):
     size = Column(Integer, default=1, nullable=False)
     headquarters = Column(String(32), nullable=False)
     industry = Column(Enum(Industry), nullable=False)
-    times_visited = Column(Integer, default=0)
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
     reviews = relationship('Review', backref='organisation', lazy=True)
@@ -163,6 +162,7 @@ class Interview(db.Base):
 
 interview_account_idx = Index('interview_account_idx', Interview.account_id)
 interview_org_idx = Index('interview_org_idx', Interview.org_id)
+interview_offer_idx = Index('interview_offer_idx', Interview.offer)
 
 
 class InterviewVote(db.Base):

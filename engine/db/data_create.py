@@ -24,7 +24,6 @@ def generate_dummy_data():
                 headquarters="London, UK",
                 industry=industries[randint(0, 21)],
                 page_visits=randint(0, 5000),
-                times_visited=randint(0, 5000),
                 url=f'www.org_{i}_website.com'
                 ))
             objs.append(Account(username=f'account_{i}'))
