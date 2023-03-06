@@ -1,8 +1,9 @@
 <script lang="ts">
+  import type { Interview } from '../utils/apiService'
   import { salaryMapper, ratingsMapper, numCommaFormatter } from '../utils/mappers'
   import Vote from '../lib/Vote.svelte'
 
-  export let interviews
+  export let interviews: Interview[]
 </script>
 
 <div class="REVIEW_CONTAINER w-full divide-y space-y-4">

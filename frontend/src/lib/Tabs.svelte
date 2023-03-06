@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let onTabSelect: (tab: string) => void
+  export let onTabSelect: (tab: any) => void
   export let selected_tab: string
   export let tabs: string[]
 </script>
