@@ -4,11 +4,12 @@
   import Select from 'svelte-select'
 
   import { Industry, Rating, ReviewSort } from '../utils/apiService'
-  import type { Review, Interview, ReviewSortKey, RatingKey, Position } from '../utils/apiService'
+  import type { Review, Interview, ReviewSortKey, RatingKey, Position, OrgQueryParamsType } from '../utils/apiService'
   import Interviews from './Interviews.svelte'
   import PageContainer from '../lib/PageContainer.svelte'
   import Reviews from './Reviews.svelte'
   import Tabs from '../lib/Tabs.svelte'
+  import { getCompanySizeBracket } from '../utils/mappers'
 
 
   type SelectedPanel = 'Reviews' | 'Interviews'
@@ -16,12 +17,13 @@
   export let id: string
   export let navigate: any
   export let getOrg: (org_id: number) => Promise<any>
+  export let getReviewsAndInterviews: (org_id: OrgQueryParamsType) => Promise<any>
 
   // review and interview filter options
   let selected_panel: SelectedPanel = 'Reviews'
-  let panels: SelectedPanel[] = ['Reviews', 'Interviews']
+  const panels: SelectedPanel[] = ['Reviews', 'Interviews']
 
-  let tags = Object.keys(Rating).map(k => ({ id: k, label: Rating[k]}))
+  const tags = Object.keys(Rating).map(k => ({ id: k, label: Rating[k]}))
   let selected_tag: { id: RatingKey, label: Rating } = {
     id: Rating.ALL.toUpperCase() as RatingKey,
     label: Rating.ALL
@@ -43,6 +45,7 @@
   $: org = null
   let reviews: Review[] = []
   let interviews: Interview[] = []
+  let offset: number = 0
 
   const sortItems = (args : {
     items: (Review | Interview)[]
@@ -154,27 +157,11 @@
         reviews = r.reviews
         interviews = r.interviews
         positions = org.positions.map((p: Position) => ({id: p.id, label: p.name}))
+        offset = Math.max(r.reviews.length, r.interviews.length)
       })
+
+      getReviewsAndInterviews({ org_id: 10, position_id: 500000, tag: 'GOOD', sort_order: 'COMPENSATION', offset: 50 }).then(r => console.log(r))
   })
-
-  const getCompanySizeBracket = (size: number) => {
-    if (size > 5000)
-      return "5000-1000"
-    if (size > 1000)
-      return "1000-5000"
-    if (size > 500)
-      return "500-1000"
-    if (size > 200)
-      return "200-500"
-    if (size > 100)
-      return "100-200"
-    if (size > 50)
-      return "50-100"
-    if (size > 10)
-      return "10-50"
-
-    return "1-10"
-  }
 </script>
 
 <PageContainer>
@@ -259,10 +246,10 @@
     {/if}
 
     {#if selected_panel == 'Reviews' && reviews.length < org.total_reviews}
-        LOAD MORE REVIEWS
+        <button>LOAD MORE REVIEWS</button>
     {/if}
     {#if selected_panel == 'Interviews' && interviews.length < org.total_interviews}
-        LOAD MORE INTERVIEWS
+        <button>LOAD MORE INTERVIEWS</button>
     {/if}
 
   </div>

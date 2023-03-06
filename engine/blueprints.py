@@ -16,15 +16,17 @@ def min_max_scale(df, col):
 @orgs.route('/get_names', methods=['GET'])
 def get_names():
     limit = request.args.get('limit', type=int, default=50)
-    offset = request.args.get('offset', type=int, default=50)
+    offset = request.args.get('offset', type=int, default=0)
     industry = request.args.get('industry', type=str, default='')
     filter_queries = []
     if industry and industry != 'ALL':
         filter_queries.append(Organisation.industry == industry)
 
     find_orgs_q = (g.session.query(
-        Organisation.id, Organisation.name, Organisation.page_visits, Organisation.size
-    ).filter(*filter_queries).limit(limit))
+                        Organisation.id, Organisation.name, Organisation.page_visits, Organisation.size
+                    ).filter(*filter_queries)
+                   .offset(offset)
+                   .limit(limit))
 
     # create weight for sorting orgs (w = min_max(size) * min_max(page_visits))
     df = pd.DataFrame(data=find_orgs_q.all(), columns=['id', 'label', 'page_visits', 'size'])
@@ -39,13 +41,18 @@ def get_names():
 def search_orgs():
     # TODO: setup similarity funcion to find positions like given org name
     limit = request.args.get('limit', type=int, default=50)
-    offset = request.args.get('offset', type=int, default=50)
+    offset = request.args.get('offset', type=int, default=0)
     org_name = request.args.get('org_name', type=str, default='')
     industry = request.args.get('industry', type=str, default='')
     queries = [Organisation.name.contains(org_name)]
     if industry and industry != 'ALL':
         queries.append(Organisation.industry == industry)
-    find_orgs_q = (g.session.query(Organisation).filter(*queries).limit(limit))
+
+    find_orgs_q = (g.session
+                   .query(Organisation)
+                   .filter(*queries)
+                   .offset(offset)
+                   .limit(limit))
 
     schema = schemas.OrganisationSchema(exclude=('interviews', 'reviews'), many=True)
     orgs = schema.dump(find_orgs_q)
@@ -81,42 +88,56 @@ def get_org(org_id):
     return jsonify(response=200, org=data)
 
 
-@orgs.route('/<int:org_id>/reviews', methods=['GET'])
-def get_org_reviews(org_id):
+@orgs.route('/<int:org_id>/reviews_and_interviews', methods=['GET'])
+def get_org_reviews_and_interviews(org_id):
     # TODO: setup similarity funcion to find positions like given position
-    position = request.args.get('position', type=str, default='')
+    position_id = request.args.get('position_id', type=int, default=None)
+    tag = request.args.get('tag', type=str, default='ALL')
+    sort_order = request.args.get('sort_order', type=str, default=None)
     limit = request.args.get('limit', type=int, default=50)
-    offset = request.args.get('offset', type=int, default=50)
+    offset = request.args.get('offset', type=int, default=0)
+
+    review_queries = [(Review.org_id == org_id)]
+    interview_queries = [(Interview.org_id == org_id)]
+    if position_id:
+        review_queries.append(Review.position_id == position_id)
+        interview_queries.append(Interview.position_id == position_id)
+    if tag and tag != 'ALL':
+        review_queries.append(Review.tag == tag)
+        interview_queries.append(Interview.tag == tag)
+
+    review_order = Review.created_at.desc()
+    interview_order = Interview.created_at.desc()
+    if sort_order == 'UPVOTES':
+        review_order = Review.upvotes.amount.desc()
+        interview_order = Interview.upvotes.amount.desc()
+    if sort_order == 'DOWNVOTES':
+        review_order = Review.downvotes.amount.desc()
+        interview_order = Interview.downvotes.amount.desc()
+    if sort_order == 'TENURE':
+        review_order = Review.duration_years.desc()
+    if sort_order == 'COMPENSATION':
+        review_order = Review.salary.desc()
+        interview_order = Interview.offer.desc()
+
     review_sorted_q = (g.session
                 .query(Review)
-                .filter(
-                    (Review.org_id == org_id)
-                )
-                .order_by(Review.created_at.desc())
+                .filter(*review_queries)
+                .order_by(review_order)
+                .offset(offset)
                 .limit(limit))
-
-    schema = schemas.ReviewSchema()
-    data = dict(reviews = schema.dump(review_sorted_q, many=True))
-    return jsonify(response=200, data=data)
-
-
-@orgs.route('/<int:org_id>/interviews', methods=['GET'])
-def get_org_interviews(org_id):
-    # TODO: setup similarity funcion to find positions like given position
-    position = request.args.get('position', type=str, default='')
-    limit = request.args.get('limit', type=int, default=50)
-    offset = request.args.get('offset', type=int, default=50)
     interview_sorted_q = (g.session
                 .query(Interview)
-                .filter(
-                    (Interview.org_id == org_id)
-                )
-                .order_by(Interview.created_at.desc())
+                .filter(*interview_queries)
+                .order_by(interview_order)
+                .offset(offset)
                 .limit(limit))
 
-    schema = schemas.InterviewSchema()
-    data = dict(interviews = schema.dump(interview_sorted_q, many=True))
-    return jsonify(response=200, data=data)
+    data = dict(
+            reviews = schemas.ReviewSchema().dump(review_sorted_q, many=True),
+            interviews = schemas.InterviewSchema().dump(interview_sorted_q, many=True)
+        )
+    return jsonify(response=200, reviews_and_interviews=data)
 
 
 @orgs.route('/<int:org_id>/salary_info', methods=['GET'])

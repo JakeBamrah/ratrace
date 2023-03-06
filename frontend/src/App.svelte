@@ -12,6 +12,7 @@
   import Home from './routes/Home.svelte'
   import Company from './routes/Company.svelte'
   import ApiService, { Industry } from './utils/apiService'
+  import type { OrgQueryParamsType } from './utils/apiService'
   import Navbar from './routes/Navbar.svelte'
   import type { IndustryKey } from './utils/apiService'
   import { createFilter } from './utils/search'
@@ -58,6 +59,10 @@
     const params = { org_id }
     return await api.getOrg(params)
   }
+
+  const getOrgReviewsAndInterviews = async (params: OrgQueryParamsType) => {
+    return await api.getOrgReviewsAndInterviews(params)
+  }
 </script>
 
 <main>
@@ -66,7 +71,12 @@
       <Route let:navigate path="org/*">
         <Navbar navigate={navigate} />
         <Route path=":id" let:params>
-          <Company id={params.id} navigate={navigate} getOrg={getOrg} />
+          <Company
+            id={params.id}
+            navigate={navigate}
+            getOrg={getOrg}
+            getReviewsAndInterviews={getOrgReviewsAndInterviews}
+          />
         </Route>
       </Route>
       <Route let:navigate>

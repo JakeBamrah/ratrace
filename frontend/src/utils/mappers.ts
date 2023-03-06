@@ -34,3 +34,22 @@ export const numCommaFormatter   = (num: number, decimals = 2) => {
 
   return addCommasRegex(num_str)
 }
+
+export const getCompanySizeBracket = (size: number) => {
+  if (size > 5000)
+      return "5000-1000"
+  if (size > 1000)
+      return "1000-5000"
+  if (size > 500)
+      return "500-1000"
+  if (size > 200)
+      return "200-500"
+  if (size > 100)
+      return "100-200"
+  if (size > 50)
+      return "50-100"
+  if (size > 10)
+      return "10-50"
+
+  return "1-10"
+}

@@ -71,14 +71,14 @@ export type Organisation = {
   interviews: any[]
 }
 
-type OrgQueryParamsType = {
+export type OrgQueryParamsType = {
   org_name?: string
   org_id?: number
   industry?: IndustryKey
+  tag?: RatingKey
+  sort_order?: ReviewSortKey
+  position_id?: number
   limit?: number
-  review_limit?: number
-  interview_limit?: number
-  position?: string
   offset?: number
 }
 
@@ -140,8 +140,8 @@ export default class ApiService {
     this.api = axios.create(config)
   }
 
-  getOrg = async ({ org_id, review_limit, interview_limit, position }: OrgQueryParamsType): Promise<Organisation> => {
-    const params = { review_limit, interview_limit, position }
+  getOrg = async ({ org_id, limit = 50}: OrgQueryParamsType): Promise<Organisation> => {
+    const params = { org_id, limit }
     const resp = await this.api.get(`/orgs/${org_id}`, { params })
     return resp.data.org
   }
@@ -156,5 +156,20 @@ export default class ApiService {
     const params = { org_name, industry, limit, offset }
     const resp = await this.api.get('/orgs/search', { params })
     return resp.data.orgs
+  }
+
+  getOrgReviewsAndInterviews = async(args: OrgQueryParamsType) => {
+    const {
+      org_id,
+      position_id,
+      tag,
+      sort_order,
+      limit,
+      offset
+    } = args
+
+    const params = { position_id, tag, sort_order, limit, offset }
+    const resp = await this.api.get(`/orgs/${org_id}/reviews_and_interviews`, { params })
+    return resp.data.reviews_and_interviews
   }
 }
