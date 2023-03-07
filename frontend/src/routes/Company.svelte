@@ -37,15 +37,16 @@
       label: ReviewSort[k],
       selectable: !(is_tenure && selected_panel === 'Interviews')
     }})
-  let selected_sort = null
+  let selected_sort: { id: ReviewSortKey, label: ReviewSort } | null = null
 
   let positions = []
-  let selected_position = null
+  let selected_position: Position & { label: string } | null = null
 
-  $: org = null
+  let org = null
   let reviews: Review[] = []
   let interviews: Interview[] = []
-  let offset: number = 0
+  let review_offset: number = 0
+  let interview_offset: number = 0
 
   const sortItems = (args : {
     items: (Review | Interview)[]
@@ -156,12 +157,47 @@
         org = r.org
         reviews = r.reviews
         interviews = r.interviews
-        positions = org.positions.map((p: Position) => ({id: p.id, label: p.name}))
-        offset = Math.max(r.reviews.length, r.interviews.length)
+        positions = org.positions.map((p: Position) => ({label: p.name, ...p}))
+        review_offset = r.reviews.length
+        interview_offset = r.interviews.length
       })
-
-      getReviewsAndInterviews({ org_id: 10, position_id: 500000, tag: 'GOOD', sort_order: 'COMPENSATION', offset: 50 }).then(r => console.log(r))
   })
+
+  // keep track of the *total* max offset for interviews and reviews
+  // use org-wide total reviews/interviews if no position is selected
+  $: review_offset_max = selected_position ? selected_position.total_reviews : org?.total_reviews ?? 0
+  $: interview_offset_max = selected_position ? selected_position.total_interviews : org?.total_interviews ?? 0
+  const onGetReviewsAndInterviews = (reset: boolean = false) => {
+    // if we have reached the max offset for interviews and/or reviews
+    // then is no reason to retrieve more rows.
+    const max_offset = Math.max(review_offset_max, interview_offset_max)
+    if (review_offset === max_offset || interview_offset === max_offset)
+      return
+
+    const params: OrgQueryParamsType = {
+      org_id: org.id,
+      position_id: selected_position?.id,
+      tag: selected_tag.id,
+      sort_order: selected_sort?.id,
+      // we take the max offset because it helps us avoid pulling in duplicate
+      // rows for entity (interview or review) with less items
+      offset: Math.max(review_offset, interview_offset)
+    }
+    getReviewsAndInterviews(params).then(r => {
+      reviews = reset ? r.reviews : reviews.concat(r.reviews)
+      interviews = reset ? r.interviews : interviews.concat(r.interviews)
+      review_offset = reviews.length
+      interview_offset = interviews.length
+    })
+  }
+
+  const onPositionClear = () => {
+    // reload back to initial state if position is cleared
+    review_offset = 0
+    interview_offset = 0
+    selected_position = null
+    onGetReviewsAndInterviews(true)
+  }
 </script>
 
 <PageContainer>
@@ -207,7 +243,8 @@
         placeholder='Filter position'
         itemId='id'
         items={positions}
-        bind:value={selected_position} />
+        bind:value={selected_position}
+        on:clear={onPositionClear} />
     </div>
     <div class="col-span-4 sm:col-span-2 w-full pt-2 sm:pt-0">
       Tag:
@@ -245,12 +282,16 @@
       <Interviews interviews={filtered_interviews} />
     {/if}
 
-    {#if selected_panel == 'Reviews' && reviews.length < org.total_reviews}
-        <button>LOAD MORE REVIEWS</button>
-    {/if}
-    {#if selected_panel == 'Interviews' && interviews.length < org.total_interviews}
-        <button>LOAD MORE INTERVIEWS</button>
-    {/if}
+      {#if selected_panel == 'Reviews' && review_offset < review_offset_max}
+        <div class="w-full flex justify-center">
+          <button on:click={() => onGetReviewsAndInterviews()}>LOAD MORE REVIEWS</button>
+        </div>
+      {/if}
+      {#if selected_panel == 'Interviews' && interview_offset < interview_offset_max}
+        <div class="w-full flex justify-center">
+          <button on:click={() => onGetReviewsAndInterviews()}>LOAD MORE INTERVIEWS</button>
+        </div>
+      {/if}
 
   </div>
   {:else}
