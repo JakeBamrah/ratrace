@@ -1,6 +1,8 @@
 import axios from 'axios'
 import type { AxiosInstance } from 'axios'
 
+import { alphabeticalSort } from './mappers'
+
 
 export enum Currency {
     GBP = 'gbp',
@@ -69,6 +71,8 @@ export type Organisation = {
   url?: string
   reviews: any[]
   interviews: any[]
+  total_reviews: number
+  total_interviews: number
 }
 
 export type OrgQueryParamsType = {
@@ -92,6 +96,8 @@ export type Position = {
   id: number
   name: string
   org_id: number
+  total_reviews: number
+  total_interviews: number
 }
 
 export type Review = {
@@ -143,11 +149,20 @@ export default class ApiService {
   getOrg = async ({ org_id, limit = 50}: OrgQueryParamsType): Promise<Organisation> => {
     const params = { org_id, limit }
     const resp = await this.api.get(`/orgs/${org_id}`, { params })
+
+    // sort positions for selected org
+    const org = resp.data.org.org
+    org.positions.sort((a, b) => alphabeticalSort(a.name, b.name))
+
     return resp.data.org
   }
 
   getOrgNames = async ({ industry, offset, limit }: Omit<OrgQueryParamsType, 'org_name'>): Promise<{ id: string, label: string }[]> => {
-    const params = { industry, limit, offset }
+    const params = {
+      industry: industry && industry !== 'ALL' ? industry : null,
+      limit,
+      offset
+    }
     const resp = await this.api.get('/orgs/get_names', { params })
     return resp.data.org_names
   }
@@ -168,7 +183,13 @@ export default class ApiService {
       offset
     } = args
 
-    const params = { position_id, tag, sort_order, limit, offset }
+    const params = {
+      position_id,
+      tag: tag === Rating.ALL.toUpperCase() ? null : tag,
+      sort_order,
+      limit,
+      offset
+    }
     const resp = await this.api.get(`/orgs/${org_id}/reviews_and_interviews`, { params })
     return resp.data.reviews_and_interviews
   }
