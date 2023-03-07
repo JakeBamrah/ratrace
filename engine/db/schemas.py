@@ -69,6 +69,8 @@ class PositionSchema(Schema):
     org_id = fields.Int()
     created_at = fields.Int()
     updated_at = fields.Int(load_only=True)
+    total_reviews = fields.Int()
+    total_interviews = fields.Int()
 
 class OrganisationSchema(Schema):
     id = fields.Int()

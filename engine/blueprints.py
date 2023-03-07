@@ -17,9 +17,9 @@ def min_max_scale(df, col):
 def get_names():
     limit = request.args.get('limit', type=int, default=50)
     offset = request.args.get('offset', type=int, default=0)
-    industry = request.args.get('industry', type=str, default='')
+    industry = request.args.get('industry', type=str, default=None)
     filter_queries = []
-    if industry and industry != 'ALL':
+    if industry:
         filter_queries.append(Organisation.industry == industry)
 
     find_orgs_q = (g.session.query(
@@ -92,7 +92,7 @@ def get_org(org_id):
 def get_org_reviews_and_interviews(org_id):
     # TODO: setup similarity funcion to find positions like given position
     position_id = request.args.get('position_id', type=int, default=None)
-    tag = request.args.get('tag', type=str, default='ALL')
+    tag = request.args.get('tag', type=str, default=None)
     sort_order = request.args.get('sort_order', type=str, default=None)
     limit = request.args.get('limit', type=int, default=50)
     offset = request.args.get('offset', type=int, default=0)
@@ -102,7 +102,7 @@ def get_org_reviews_and_interviews(org_id):
     if position_id:
         review_queries.append(Review.position_id == position_id)
         interview_queries.append(Interview.position_id == position_id)
-    if tag and tag != 'ALL':
+    if tag:
         review_queries.append(Review.tag == tag)
         interview_queries.append(Interview.tag == tag)
 

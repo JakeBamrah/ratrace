@@ -111,6 +111,17 @@ class Position(db.Base):
     reviews = relationship('Review', backref='position', lazy=True)
     interviews = relationship('Interview', backref='position', lazy=True)
 
+    def __repr__(self):
+        return (f"<Position({self.id})>")
+
+    @hybrid_property
+    def total_reviews(self):
+        return len(self.reviews)
+
+    @hybrid_property
+    def total_interviews(self):
+        return len(self.interviews)
+
 position_org_idx = Index('position_org_idx', Position.org_id)
 
 
