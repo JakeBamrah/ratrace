@@ -12,7 +12,12 @@
   import { getCompanySizeBracket } from '../utils/mappers'
 
 
+  const LIMIT = 50
+  const ALL_POSITIONS = { id: -1, label: 'All'}
+  const DEFAULT_SORT = { id: ReviewSort.DATE_CREATED.toUpperCase() as ReviewSortKey, label: ReviewSort.DATE_CREATED }
+
   type SelectedPanel = 'Reviews' | 'Interviews'
+  type SelectSort = { id: ReviewSortKey, label: ReviewSort }
 
   export let id: string
   export let navigate: any
@@ -36,51 +41,57 @@
       id: k,
       label: ReviewSort[k],
       selectable: !(is_tenure && selected_panel === 'Interviews')
-    }})
-  let selected_sort: { id: ReviewSortKey, label: ReviewSort } | null = null
-
-  let positions = []
-  let selected_position: Position & { label: string } | null = null
+    }}) as SelectSort[]
+  let selected_sort: SelectSort = DEFAULT_SORT
+  let positions = [ALL_POSITIONS]
+  let selected_position: { id: number, label: string } = ALL_POSITIONS
 
   let org = null
   let reviews: Review[] = []
   let interviews: Interview[] = []
+
+  // offset used for loading more rows (pagination)
   let review_offset: number = 0
   let interview_offset: number = 0
+
+  // included in the api to determine if we've maxed out the rows for the filter
+  let filter_review_max_reached = false
+  let filter_interview_max_reached = false
+
+  // check if we've pulled all reviews for the org
+  $: maxed_out_reviews = reviews.length === org?.total_reviews
+  $: maxed_out_interviews = interviews.length === org?.total_interviews
 
   const sortItems = (args : {
     items: (Review | Interview)[]
     tag: RatingKey
     sort: ReviewSortKey
     position_id: number
-    requires_api: boolean
     selected_panel: SelectedPanel
   }) => {
     /*
-     * We load reviews and interviews in batches of 50. If we have <= 50 reviews
-     * or interviews, we can sort the items without pulling in more data.
-     * If however, there are more than 50, we need to pull in more data from the
-     * api because sorting may require new rows (not previously loaded) to
-     * be displayed.
-     *
-     * Data from the api will be returned to us in the required sorting order.
+     * Items are pulled in from api (getOrg or onGetReviewsAndInterviews). If
+     * data has come directly from the api it has already been sorted. If all
+     * data has been loaded we sort in-app.
      */
     const {
       items,
       tag,
       sort,
       position_id,
-      requires_api,
-      selected_panel,
+      selected_panel
     } = args
 
-    let sorted_items = items
-    if (requires_api) {
-      console.log("Do api sort")
-      // return items
+    // if max not reached, we've had to pull in data (pre-sorted) from api
+    if (selected_panel === 'Reviews' && !maxed_out_reviews) {
+      return reviews
+    }
+    if (selected_panel === 'Interviews' && !maxed_out_interviews) {
+      return interviews
     }
 
-    // filter for reviews with specific ratings or send them all through
+    // we have no more items to collect from api so we can sort in memory
+    let sorted_items = items
     if (tag !== Rating.ALL.toUpperCase()) {
       sorted_items = items.filter(i => i.tag === tag)
     }
@@ -113,20 +124,18 @@
         sorted_items.sort((a: Review, b: Review) => a.salary < b.salary ? 1 : 0)
     }
 
-    if (position_id) {
+    if (position_id !== -1) {
       sorted_items = sorted_items.filter(i => i.position.id === position_id)
     }
 
     return sorted_items
   }
 
-  $: requires_api = org?.total_reviews > reviews.length || org?.total_interviews > reviews.length
   $: filtered_reviews = sortItems({
     items: reviews,
     tag: selected_tag?.id,
     sort: selected_sort?.id,
     position_id: selected_position?.id,
-    requires_api: requires_api,
     selected_panel: selected_panel
   }) as Review[]
 
@@ -135,9 +144,56 @@
     tag: selected_tag?.id,
     sort: selected_sort?.id,
     position_id: selected_position?.id,
-    requires_api: requires_api,
     selected_panel: selected_panel
   }) as Interview[]
+
+  const onGetReviewsAndInterviews = (reset: boolean = false) => {
+    /*
+     * We load reviews and interviews in batches of 50.
+     * We need to pull in more data from the api everytime the select menu is
+     * toggled because sorting may require new rows (not previously loaded)
+     * to be displayed. If we have retrieved *all* data available we can avoid
+     * calling the api and default to sortItems
+     *
+     * Data from the api will be returned to us in the required sorting order.
+     */
+
+    if (maxed_out_interviews && maxed_out_reviews) {
+      // we have no more data to pull in so just sort on client-side
+      // not totally ideal because we may pull in some data unnecessarily but
+      // it's a compromise for simplicity.
+      return
+    }
+
+    const params: OrgQueryParamsType = {
+      org_id: org.id,
+      position_id: selected_position?.id,
+      tag: selected_tag.id,
+      sort_order: selected_sort?.id,
+      // we take the max offset because it helps us avoid pulling in duplicate
+      // rows for entity (interview or review) with less items
+      offset: Math.max(review_offset, interview_offset)
+    }
+    getReviewsAndInterviews(params).then(r => {
+      reviews = reset ? r.reviews : reviews.concat(r.reviews)
+      interviews = reset ? r.interviews : interviews.concat(r.interviews)
+
+      // reset the offsets back to initial 50
+      review_offset = reviews.length
+      interview_offset = interviews.length
+
+      filter_review_max_reached = r.no_more_reviews
+      filter_interview_max_reached = r.no_more_interviews
+    })
+  }
+
+  const onSortChange = () => {
+    // pull in fresh, sorted data from scratch everytime filters change
+    // not the most efficient but keeps the code simple
+    review_offset = 0
+    interview_offset = 0
+    onGetReviewsAndInterviews(true)
+  }
 
   // pull in org data on mount
   const int_id = Number(id)
@@ -157,47 +213,17 @@
         org = r.org
         reviews = r.reviews
         interviews = r.interviews
-        positions = org.positions.map((p: Position) => ({label: p.name, ...p}))
+        positions = positions.concat(
+          org.positions.map((p: Position) => ({ id: p.id, label: p.name }))
+        )
+
         review_offset = r.reviews.length
         interview_offset = r.interviews.length
+
+        filter_review_max_reached = r.reviews.length < LIMIT
+        filter_interview_max_reached = r.interviews.length < LIMIT
       })
   })
-
-  // keep track of the *total* max offset for interviews and reviews
-  // use org-wide total reviews/interviews if no position is selected
-  $: review_offset_max = selected_position ? selected_position.total_reviews : org?.total_reviews ?? 0
-  $: interview_offset_max = selected_position ? selected_position.total_interviews : org?.total_interviews ?? 0
-  const onGetReviewsAndInterviews = (reset: boolean = false) => {
-    // if we have reached the max offset for interviews and/or reviews
-    // then is no reason to retrieve more rows.
-    const max_offset = Math.max(review_offset_max, interview_offset_max)
-    if (review_offset === max_offset || interview_offset === max_offset)
-      return
-
-    const params: OrgQueryParamsType = {
-      org_id: org.id,
-      position_id: selected_position?.id,
-      tag: selected_tag.id,
-      sort_order: selected_sort?.id,
-      // we take the max offset because it helps us avoid pulling in duplicate
-      // rows for entity (interview or review) with less items
-      offset: Math.max(review_offset, interview_offset)
-    }
-    getReviewsAndInterviews(params).then(r => {
-      reviews = reset ? r.reviews : reviews.concat(r.reviews)
-      interviews = reset ? r.interviews : interviews.concat(r.interviews)
-      review_offset = reviews.length
-      interview_offset = interviews.length
-    })
-  }
-
-  const onPositionClear = () => {
-    // reload back to initial state if position is cleared
-    review_offset = 0
-    interview_offset = 0
-    selected_position = null
-    onGetReviewsAndInterviews(true)
-  }
 </script>
 
 <PageContainer>
@@ -244,7 +270,8 @@
         itemId='id'
         items={positions}
         bind:value={selected_position}
-        on:clear={onPositionClear} />
+        clearable={false}
+        on:change={onSortChange} />
     </div>
     <div class="col-span-4 sm:col-span-2 w-full pt-2 sm:pt-0">
       Tag:
@@ -252,7 +279,8 @@
         itemId='id'
         items={tags}
         bind:value={selected_tag}
-        clearable={false} />
+        clearable={false}
+        on:change={onSortChange} />
     </div>
 
     <div class="col-span-4 sm:col-span-2 pt-2 sm:pt-0">
@@ -262,7 +290,8 @@
         itemId='id'
         items={sorts}
         bind:value={selected_sort}
-        clearable={false} />
+        clearable={false}
+        on:change={onSortChange} />
     </div>
   </div>
 
@@ -282,12 +311,12 @@
       <Interviews interviews={filtered_interviews} />
     {/if}
 
-      {#if selected_panel == 'Reviews' && review_offset < review_offset_max}
+      {#if selected_panel == 'Reviews' && !filter_review_max_reached}
         <div class="w-full flex justify-center">
           <button on:click={() => onGetReviewsAndInterviews()}>LOAD MORE REVIEWS</button>
         </div>
       {/if}
-      {#if selected_panel == 'Interviews' && interview_offset < interview_offset_max}
+      {#if selected_panel == 'Interviews' && !filter_interview_max_reached}
         <div class="w-full flex justify-center">
           <button on:click={() => onGetReviewsAndInterviews()}>LOAD MORE INTERVIEWS</button>
         </div>

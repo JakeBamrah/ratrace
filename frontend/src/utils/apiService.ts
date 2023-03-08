@@ -22,6 +22,7 @@ export enum Rating {
 export type RatingKey = keyof typeof Rating
 
 export enum ReviewSort {
+  DATE_CREATED = 'Date created',
   COMPENSATION = 'Compensation',
   TENURE = 'Tenure',
   DOWNVOTES = 'Downvotes',
@@ -184,7 +185,7 @@ export default class ApiService {
     } = args
 
     const params = {
-      position_id,
+      position_id: position_id === -1 ? null : position_id,
       tag: tag === Rating.ALL.toUpperCase() ? null : tag,
       sort_order,
       limit,

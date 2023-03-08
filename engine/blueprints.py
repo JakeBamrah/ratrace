@@ -109,8 +109,8 @@ def get_org_reviews_and_interviews(org_id):
     review_order = Review.created_at.desc()
     interview_order = Interview.created_at.desc()
     if sort_order == 'UPVOTES':
-        review_order = Review.upvotes.amount.desc()
-        interview_order = Interview.upvotes.amount.desc()
+        review_order = Review.upvotes.amount
+        interview_order = Interview.upvotes.amount
     if sort_order == 'DOWNVOTES':
         review_order = Review.downvotes.amount.desc()
         interview_order = Interview.downvotes.amount.desc()
@@ -120,6 +120,13 @@ def get_org_reviews_and_interviews(org_id):
         review_order = Review.salary.desc()
         interview_order = Interview.offer.desc()
 
+    # for disabling load more reviews button
+    max_reviews_for_filter = (g.session
+                .query(Review)
+                .filter(*review_queries).count())
+    max_interviews_for_filter = (g.session
+                .query(Interview)
+                .filter(*interview_queries).count())
     review_sorted_q = (g.session
                 .query(Review)
                 .filter(*review_queries)
@@ -135,7 +142,9 @@ def get_org_reviews_and_interviews(org_id):
 
     data = dict(
             reviews = schemas.ReviewSchema().dump(review_sorted_q, many=True),
-            interviews = schemas.InterviewSchema().dump(interview_sorted_q, many=True)
+            no_more_reviews = max_reviews_for_filter <= offset + limit,
+            interviews = schemas.InterviewSchema().dump(interview_sorted_q, many=True),
+            no_more_interviews = max_interviews_for_filter <= offset + limit
         )
     return jsonify(response=200, reviews_and_interviews=data)
 
