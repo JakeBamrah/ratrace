@@ -1,6 +1,6 @@
-from flask import (
-    Blueprint, g, request, url_for, jsonify
-)
+import gzip
+
+from flask import Blueprint, g, request, jsonify, json, make_response
 import pandas as pd
 from sqlalchemy import func, desc
 
@@ -13,6 +13,14 @@ orgs = Blueprint('orgs', __name__, url_prefix='/orgs')
 def min_max_scale(df, col):
     """Normalize column values between [0, 1]"""
     return (df[col] - df[col].min()) / (df[col].max() - df[col].min())
+
+def gzippify(data):
+    """Compress data and create gzip response"""
+    content = gzip.compress(json.dumps(data).encode('utf8'))
+    response = make_response(content)
+    response.headers['Content-length'] = len(content)
+    response.headers['Content-Encoding'] = 'gzip'
+    return response
 
 @orgs.route('/get_names', methods=['GET'])
 def get_names():
@@ -35,7 +43,7 @@ def get_names():
     df = df.sort_values('weight', ascending=False)
 
     org_names = df[['id', 'label']].to_dict('records')
-    return jsonify(response=200, org_names=org_names)
+    return gzippify(org_names)
 
 
 @orgs.route('/search', methods=['GET'])

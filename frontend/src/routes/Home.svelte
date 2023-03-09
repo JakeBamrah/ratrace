@@ -12,6 +12,7 @@
   export let loading_orgs: boolean
   export let navigate: any
   export let filterOrgs: any
+  export let onIndustrySelect: any
 </script>
 
 <div class="flex flex-col items-center justify-center p-0 sm:items-start sm:pl-24 h-screen">
@@ -26,6 +27,7 @@
         clearable={false}
         focused={true}
         items={industry_rows}
+        on:change={onIndustrySelect}
       ></Select>
 
       <Select

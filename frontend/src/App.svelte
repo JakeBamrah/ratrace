@@ -25,11 +25,8 @@
   let loading = false
   const industries = Object.keys(Industry).map(k => ({id : k as IndustryKey, label: Industry[k]}))
 
-  // pull in all the orgs for a given industry each time industry is selected
-  $: fetch = onIndustrySelect(selected_industry)
-
   const org_search_idx = new Index("performance")
-  const onIndustrySelect = async (selected_industry: SelectRow<IndustryKey>) => {
+  const onIndustrySelect = async () => {
     if (!selected_industry) {
       orgs = []
       return
@@ -88,6 +85,7 @@
           loading_orgs={loading}
           navigate={navigate}
           filterOrgs={createFilter(org_search_idx, orgs)}
+          onIndustrySelect={onIndustrySelect}
         />
       </Route>
     </Router>

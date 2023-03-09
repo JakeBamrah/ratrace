@@ -1,8 +1,7 @@
 import enum
-from collections import Counter
 
 from sqlalchemy import Column, Integer, Float, String, Enum, Index, ForeignKey, text
-from sqlalchemy.orm import relationship, validates
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from . import database as db

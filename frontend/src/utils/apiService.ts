@@ -138,7 +138,7 @@ export default class ApiService {
   constructor(base_url: string) {
     let config = {
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': ['application/json', 'gzip'],
         'Access-Control-Allow-Origin': '*'
       },
       baseURL: base_url
@@ -165,7 +165,7 @@ export default class ApiService {
       offset
     }
     const resp = await this.api.get('/orgs/get_names', { params })
-    return resp.data.org_names
+    return resp.data
   }
 
   searchOrgs = async ({ org_name, industry, limit, offset }: OrgQueryParamsType): Promise<Organisation[]> => {
