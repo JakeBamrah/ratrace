@@ -40,8 +40,8 @@ class Currency(enum.Enum):
     CNY = 'cny'
 
 class Vote(enum.Enum):
-    DOWNVOTE = 'downvote'
-    UPVOTE = 'upvote'
+    UPVOTE = 1
+    DOWNVOTE = -1
 
 class ReviewTag(enum.Enum):
     GOOD = 'good'
@@ -139,7 +139,7 @@ class Review(db.Base):
     position_id = Column(Integer, ForeignKey('position.id'), nullable=False)
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
-    review_votes = relationship('ReviewVote', backref='review', lazy=True)
+    votes = relationship('ReviewVote', backref='review', lazy=True)
     tag = Column(Enum(ReviewTag), default=ReviewTag.AVERAGE)
 
     def __repr__(self):
@@ -147,11 +147,11 @@ class Review(db.Base):
 
     @hybrid_property
     def upvotes(self):
-        return [i.account_id for i in self.review_votes if i.vote == Vote.UPVOTE]
+        return [i.account_id for i in self.votes if i.vote == Vote.UPVOTE.value]
 
     @hybrid_property
     def downvotes(self):
-        return [i.account_id for i in self.review_votes if i.vote == Vote.DOWNVOTE]
+        return [i.account_id for i in self.votes if i.vote == Vote.DOWNVOTE.value]
 
 review_account_idx = Index('review_account_idx', Review.account_id)
 review_org_idx = Index('review_org_idx', Review.org_id)
@@ -172,7 +172,7 @@ class Interview(db.Base):
     position_id = Column(Integer, ForeignKey('position.id'), nullable=False)
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
-    interview_votes = relationship('InterviewVote', backref='interview', lazy=True)
+    votes = relationship('InterviewVote', backref='interview', lazy=True)
     tag = Column(Enum(ReviewTag), default=ReviewTag.AVERAGE)
 
     def __repr__(self):
@@ -180,11 +180,11 @@ class Interview(db.Base):
 
     @hybrid_property
     def upvotes(self):
-        return [i.account_id for i in self.interview_votes if i.vote == Vote.UPVOTE]
+        return [i.account_id for i in self.votes if i.vote == Vote.UPVOTE.value]
 
     @hybrid_property
     def downvotes(self):
-        return [i.account_id for i in self.interview_votes if i.vote == Vote.DOWNVOTE]
+        return [i.account_id for i in self.votes if i.vote == Vote.DOWNVOTE.value]
 
 interview_account_idx = Index('interview_account_idx', Interview.account_id)
 interview_org_idx = Index('interview_org_idx', Interview.org_id)
@@ -198,7 +198,7 @@ class InterviewVote(db.Base):
     id = Column(Integer, primary_key=True, nullable=False)
     account_id = Column(Integer, ForeignKey('account.id'), nullable=False)
     interview_id = Column(Integer, ForeignKey('interview.id'), nullable=False)
-    vote = Column(Enum(Vote), nullable=False)
+    vote = Column(Integer, default=0, nullable=False)
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
 
@@ -215,7 +215,7 @@ class ReviewVote(db.Base):
     id = Column(Integer, primary_key=True, nullable=False)
     account_id = Column(Integer, ForeignKey('account.id'), nullable=False)
     review_id = Column(Integer, ForeignKey('review.id'), nullable=False)
-    vote = Column(Enum(Vote), nullable=False)
+    vote = Column(Integer, default=0, nullable=False)
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
 

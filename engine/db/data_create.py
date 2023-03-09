@@ -65,11 +65,11 @@ def generate_dummy_data():
             objs.append(ReviewVote(
                 account_id=randint(1, MAX - 1),
                 review_id=randint(1, 200000 - 1),
-                vote=Vote.DOWNVOTE if randint(0, 1) == 1 else Vote.UPVOTE))
+                vote=Vote.DOWNVOTE.value if randint(0, 1) == 1 else Vote.UPVOTE.value))
             objs.append(InterviewVote(
                 account_id=randint(1, MAX - 1),
                 interview_id=randint(1, 200000 - 1),
-                vote=Vote.DOWNVOTE if randint(0, 1) == 1 else Vote.UPVOTE))
+                vote=Vote.DOWNVOTE.value if randint(0, 1) == 1 else Vote.UPVOTE.value))
 
         print(f"committing {len(objs)} rows\n")
         db.session.add_all(objs)
