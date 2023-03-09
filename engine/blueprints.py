@@ -2,6 +2,7 @@ from flask import (
     Blueprint, g, request, url_for, jsonify
 )
 import pandas as pd
+from sqlalchemy import func, desc
 
 from db.models import Organisation, Account, Review, Interview, ReviewVote, InterviewVote
 import db.schemas as schemas
@@ -97,45 +98,69 @@ def get_org_reviews_and_interviews(org_id):
     limit = request.args.get('limit', type=int, default=50)
     offset = request.args.get('offset', type=int, default=0)
 
-    review_queries = [(Review.org_id == org_id)]
-    interview_queries = [(Interview.org_id == org_id)]
+    review = g.session.query(Review)
+    interview = g.session.query(Interview)
+
+    review_filter_queries = [(Review.org_id == org_id)]
+    interview_filter_queries = [(Interview.org_id == org_id)]
     if position_id:
-        review_queries.append(Review.position_id == position_id)
-        interview_queries.append(Interview.position_id == position_id)
+        review_filter_queries.append(Review.position_id == position_id)
+        interview_filter_queries.append(Interview.position_id == position_id)
     if tag:
-        review_queries.append(Review.tag == tag)
-        interview_queries.append(Interview.tag == tag)
+        review_filter_queries.append(Review.tag == tag)
+        interview_filter_queries.append(Interview.tag == tag)
 
     review_order = Review.created_at.desc()
     interview_order = Interview.created_at.desc()
-    if sort_order == 'UPVOTES':
-        review_order = Review.upvotes.amount
-        interview_order = Interview.upvotes.amount
-    if sort_order == 'DOWNVOTES':
-        review_order = Review.downvotes.amount.desc()
-        interview_order = Interview.downvotes.amount.desc()
     if sort_order == 'TENURE':
         review_order = Review.duration_years.desc()
     if sort_order == 'COMPENSATION':
         review_order = Review.salary.desc()
         interview_order = Interview.offer.desc()
 
+    if sort_order in {'DOWNVOTES', 'UPVOTES'}:
+        # upvotes downvotes is a bit special
+        # we need to find the vote score for each review in an org and (cte)
+        # join this cte vote score table to actual review objects
+        review_vote_score_q = (g.session
+            .query(
+                ReviewVote.review_id.label('review_id'),
+                func.sum(ReviewVote.vote).label('vote_count')
+            )
+            .join( Review, isouter=True)
+            .filter(Review.org_id == org_id)
+            .group_by(ReviewVote.review_id)).cte('review_vote_count')
+        review = g.session.query(Review).join(review_vote_score_q, review_vote_score_q.c.review_id == Review.id, isouter=True)
+        review_order = desc(func.coalesce(review_vote_score_q.c.vote_count, 0))
+
+        inter_vote_score_q = (g.session
+            .query(
+                InterviewVote.interview_id.label('interview_id'),
+                func.sum(InterviewVote.vote).label('vote_count')
+            )
+            .join( Interview, isouter=True)
+            .filter(Interview.org_id == org_id)
+            .group_by(InterviewVote.interview_id)).cte('interview_vote_count')
+        interview = g.session.query(Interview).join(inter_vote_score_q, inter_vote_score_q.c.interview_id == Interview.id, isouter=True)
+
+        if sort_order == 'DOWNVOTES':
+            review_order = func.coalesce(review_vote_score_q.c.vote_count, 0)
+            interview_order = func.coalesce(inter_vote_score_q.c.vote_count, 0)
+        else:
+            review_order = desc(func.coalesce(review_vote_score_q.c.vote_count, 0))
+            interview_order = desc(func.coalesce(inter_vote_score_q.c.vote_count, 0))
+
+
     # for disabling load more reviews button
-    max_reviews_for_filter = (g.session
-                .query(Review)
-                .filter(*review_queries).count())
-    max_interviews_for_filter = (g.session
-                .query(Interview)
-                .filter(*interview_queries).count())
-    review_sorted_q = (g.session
-                .query(Review)
-                .filter(*review_queries)
+    max_reviews_for_filter = review.filter(*review_filter_queries).count()
+    max_interviews_for_filter = interview.filter(*interview_filter_queries).count()
+    review_sorted_q = (review
+                .filter(*review_filter_queries)
                 .order_by(review_order)
                 .offset(offset)
                 .limit(limit))
-    interview_sorted_q = (g.session
-                .query(Interview)
-                .filter(*interview_queries)
+    interview_sorted_q = (interview
+                .filter(*interview_filter_queries)
                 .order_by(interview_order)
                 .offset(offset)
                 .limit(limit))
