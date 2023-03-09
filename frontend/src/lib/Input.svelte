@@ -22,7 +22,7 @@
   }
 </script>
 
-<script lang="ts">
+<script setup lang="ts">
   import { current_component } from "svelte/internal"
   import { icons } from 'feather-icons'
 

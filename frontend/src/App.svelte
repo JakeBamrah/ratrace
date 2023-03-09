@@ -13,6 +13,8 @@
   import Company from './routes/Company.svelte'
   import ApiService, { Industry } from './utils/apiService'
   import type { OrgQueryParamsType } from './utils/apiService'
+  import Login from './routes/Login.svelte'
+  import CreateAccount from './routes/CreateAccount.svelte'
   import Navbar from './routes/Navbar.svelte'
   import type { IndustryKey } from './utils/apiService'
   import { createFilter } from './utils/search'
@@ -63,27 +65,31 @@
 </script>
 
 <main>
-  <div class="pb-10">
+  <div class="pb-10 h-screen">
     <Router primary={false} url="/">
-      <Route let:navigate path="org/*">
-        <Navbar navigate={navigate} />
+      <Navbar />
+      <Route path="/login">
+        <Login />
+      </Route>
+      <Route path="/create-account">
+        <CreateAccount />
+      </Route>
+      <Route path="org/*">
         <Route path=":id" let:params>
           <Company
             id={params.id}
-            navigate={navigate}
             getOrg={getOrg}
             getReviewsAndInterviews={getOrgReviewsAndInterviews}
           />
         </Route>
       </Route>
-      <Route let:navigate>
+      <Route>
         <Home
           bind:selected_industry={selected_industry}
           bind:selected_org={selected_org}
           industry_rows={industries}
           org_rows={orgs.length > 500 ? orgs.slice(0, 500) : orgs}
           loading_orgs={loading}
-          navigate={navigate}
           filterOrgs={createFilter(org_search_idx, orgs)}
           onIndustrySelect={onIndustrySelect}
         />

@@ -2,6 +2,7 @@
   import { icons } from 'feather-icons'
   import { onMount } from 'svelte'
   import Select from 'svelte-select'
+  import { useNavigate } from 'svelte-navigator'
 
   import { Industry, Rating, ReviewSort } from '../utils/apiService'
   import type { Review, Interview, ReviewSortKey, RatingKey, Position, OrgQueryParamsType } from '../utils/apiService'
@@ -20,9 +21,10 @@
   type SelectSort = { id: ReviewSortKey, label: ReviewSort }
 
   export let id: string
-  export let navigate: any
   export let getOrg: (org_id: number) => Promise<any>
   export let getReviewsAndInterviews: (org_id: OrgQueryParamsType) => Promise<any>
+
+  const navigate = useNavigate()
 
   // review and interview filter options
   let selected_panel: SelectedPanel = 'Reviews'

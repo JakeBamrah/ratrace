@@ -1,5 +1,6 @@
 <script lang="ts">
   import Select from 'svelte-select'
+  import { useNavigate } from 'svelte-navigator'
 
   import type { SelectRow } from '../App.svelte'
   import type { IndustryKey } from '../utils/apiService'
@@ -10,12 +11,13 @@
   export let industry_rows: SelectRow<IndustryKey>[]
   export let org_rows: SelectRow<number>[]
   export let loading_orgs: boolean
-  export let navigate: any
   export let filterOrgs: any
   export let onIndustrySelect: any
+
+  const navigate = useNavigate()
 </script>
 
-<div class="flex flex-col items-center justify-center p-0 sm:items-start sm:pl-24 h-screen">
+<div class="flex flex-col items-center justify-center p-0 px-2 h-4/5 relative">
   <div class="w-80 sm:w-4/5 md:max-w-xl lg:max-w-2xl">
     <p class="text-3xl pb-2 pl-1">ratrace.run</p>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-1">
