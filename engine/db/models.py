@@ -75,8 +75,8 @@ class Account(db.Base):
     password = Column(String(64), nullable=False)
     reviews = relationship('Review', backref='account', lazy=True)
     interviews = relationship('Interview', backref='account', lazy=True)
-    interview_votes = relationship('InterviewVote', backref='account', lazy=True)
-    review_votes = relationship('ReviewVote', backref='account', lazy=True)
+    interview_votes = relationship('InterviewVote', backref='account', lazy=True, cascade="all, delete-orphan")
+    review_votes = relationship('ReviewVote', backref='account', lazy=True, cascade="all, delete-orphan")
 
     def __repr__(self):
         return (f"<Account({self.id})>")
@@ -108,9 +108,9 @@ class Organisation(db.Base):
     industry = Column(Enum(Industry), nullable=False)
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
-    reviews = relationship('Review', backref='organisation', lazy=True)
-    interviews = relationship('Interview', backref='organisation', lazy=True)
-    positions = relationship('Position', backref='organisation', lazy=True)
+    reviews = relationship('Review', backref='organisation', lazy=True, cascade="all, delete-orphan")
+    interviews = relationship('Interview', backref='organisation', lazy=True, cascade="all, delete-orphan")
+    positions = relationship('Position', backref='organisation', lazy=True, cascade="all, delete-orphan")
     page_visits = Column(Integer, default=1)
 
     def __repr__(self):
@@ -167,7 +167,7 @@ class Review(db.Base):
     position_id = Column(Integer, ForeignKey('position.id'), nullable=False)
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
-    votes = relationship('ReviewVote', backref='review', lazy=True)
+    votes = relationship('ReviewVote', backref='review', lazy=True, cascade="all, delete-orphan")
     tag = Column(Enum(ReviewTag), default=ReviewTag.AVERAGE)
 
     def __repr__(self):
@@ -200,7 +200,7 @@ class Interview(db.Base):
     position_id = Column(Integer, ForeignKey('position.id'), nullable=False)
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
-    votes = relationship('InterviewVote', backref='interview', lazy=True)
+    votes = relationship('InterviewVote', backref='interview', lazy=True, cascade="all, delete-orphan")
     tag = Column(Enum(ReviewTag), default=ReviewTag.AVERAGE)
 
     def __repr__(self):
