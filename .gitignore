@@ -1,5 +1,6 @@
 env/
-ratrace.db
 __pycache__
 node_modules/
 .vscode/extensions.json
+engine/db/ratrace.db
+engine/flask_session
