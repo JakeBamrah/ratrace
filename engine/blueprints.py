@@ -1,8 +1,9 @@
 import gzip
 
-from flask import Blueprint, g, request, jsonify, json, make_response
+from flask import Blueprint, g, request, jsonify, json, make_response, session
 import pandas as pd
 from sqlalchemy import func, desc
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from db.models import Organisation, Account, Review, Interview, ReviewVote, InterviewVote
 import db.schemas as schemas
@@ -31,9 +32,10 @@ def get_names():
     if industry:
         filter_queries.append(Organisation.industry == industry)
 
-    find_orgs_q = (g.session.query(
-                        Organisation.id, Organisation.name, Organisation.page_visits, Organisation.size
-                    ).filter(*filter_queries)
+    find_orgs_q = (g.session
+                   .query(Organisation.id, Organisation.name,
+                        Organisation.page_visits, Organisation.size)
+                   .filter(*filter_queries)
                    .offset(offset)
                    .limit(limit))
 
@@ -58,10 +60,10 @@ def search_orgs():
         queries.append(Organisation.industry == industry)
 
     find_orgs_q = (g.session
-                   .query(Organisation)
-                   .filter(*queries)
-                   .offset(offset)
-                   .limit(limit))
+            .query(Organisation)
+            .filter(*queries)
+            .offset(offset)
+            .limit(limit))
 
     schema = schemas.OrganisationSchema(exclude=('interviews', 'reviews'), many=True)
     orgs = schema.dump(find_orgs_q)
@@ -75,19 +77,15 @@ def get_org(org_id):
     interview_limit = request.args.get('interview_limit', type=int, default=50)
     org = g.session.query(Organisation).filter(Organisation.id == org_id).scalar()
     review_sorted_q = (g.session
-                .query(Review)
-                .filter(
-                    (Review.org_id == org_id)
-                )
-                .order_by(Review.created_at.desc())
-                .limit(review_limit))
+            .query(Review)
+            .filter(Review.org_id == org_id)
+            .order_by(Review.created_at.desc())
+            .limit(review_limit))
     interview_sorted_q = (g.session
-                .query(Interview)
-                .filter(
-                    (Interview.org_id == org_id)
-                )
-                .order_by(Interview.created_at.desc())
-                .limit(interview_limit))
+            .query(Interview)
+            .filter(Interview.org_id == org_id)
+            .order_by(Interview.created_at.desc())
+            .limit(interview_limit))
 
     data = dict(
             org = schemas.OrganisationSchema(exclude=('interviews', 'reviews')).dump(org),
@@ -163,15 +161,15 @@ def get_org_reviews_and_interviews(org_id):
     max_reviews_for_filter = review.filter(*review_filter_queries).count()
     max_interviews_for_filter = interview.filter(*interview_filter_queries).count()
     review_sorted_q = (review
-                .filter(*review_filter_queries)
-                .order_by(review_order)
-                .offset(offset)
-                .limit(limit))
+            .filter(*review_filter_queries)
+            .order_by(review_order)
+            .offset(offset)
+            .limit(limit))
     interview_sorted_q = (interview
-                .filter(*interview_filter_queries)
-                .order_by(interview_order)
-                .offset(offset)
-                .limit(limit))
+            .filter(*interview_filter_queries)
+            .order_by(interview_order)
+            .offset(offset)
+            .limit(limit))
 
     data = dict(
             reviews = schemas.ReviewSchema().dump(review_sorted_q, many=True),
@@ -190,6 +188,68 @@ def get_org_salary_info(org_id):
     return str(org.interviews)
 
 
+auth = Blueprint('auth', __name__, url_prefix='/auth')
+
+@auth.route('/login', methods=['POST'])
+def login():
+    username = request.form.get('username', '').lower()
+    password = request.form.get('password', '')
+
+    if not username or not password:
+        return jsonify(response=200, authenticated=False)
+
+    # check if user actually exists
+    account = (g.session
+            .query(Account)
+            .filter(Account.username == username)
+            .scalar())
+    if not account or not account.check_password(password):
+        return jsonify(response=200, authenticated=False)
+
+    session['account_id'] = account.id
+
+    return jsonify(response=200, authenticated=True)
+
+
+@auth.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return jsonify(response=200)
+
+
+@auth.route('/signup', methods=['POST'])
+def signup():
+    username = request.form.get('username', '').lower()
+    password = request.form.get('password', '')
+
+    error_message = None
+    if not username or not password or len(password) < 8:
+        error_message = "Username or password not given"
+        return jsonify(response=200, error=error_message)
+
+    # check if user actually exists
+    account = (g.session
+            .query(Account)
+            .filter(Account.username == username)
+            .scalar())
+    if account:
+        error_message = "Account already exists"
+        return jsonify(response=200, error=error_message)
+
+    # create user and attempt to commit user
+    new_account = Account(username=username)
+    new_account.add_password(password)
+
+    account_created = g.db_commit(g.session, [new_account])
+    if not account_created:
+        error_message = "Failed to create account"
+
+    return jsonify(
+            response=200,
+            error=error_message,
+            account_id=new_account.id if new_account else -1)
+
+
 account = Blueprint('account', __name__, url_prefix='/account')
 
 @account.route('/<int:account_id>', methods=['GET'])
@@ -197,10 +257,10 @@ def get_account(account_id):
     limit = request.args.get('limit', type=int, default=5)
     account = g.session.query(Account).filter(Account.id == account_id).scalar()
     review_sorted_q = (g.session
-                .query(Review)
-                .filter(Review.account_id == account_id)
-                .order_by(Review.created_at.desc())
-                .limit(limit))
+            .query(Review)
+            .filter(Review.account_id == account_id)
+            .order_by(Review.created_at.desc())
+            .limit(limit))
 
     account_schema = schemas.AccountSchema(exclude=('reviews', 'interviews'))
     review_schema = schemas.ReviewSchema()
@@ -215,10 +275,10 @@ def get_account(account_id):
 def get_account_reviews(account_id):
     limit = request.args.get('limit', type=int, default=50)
     review_sorted_q = (g.session
-                .query(Review)
-                .filter(Review.account_id == account_id)
-                .order_by(Review.created_at.desc())
-                .limit(limit))
+            .query(Review)
+            .filter(Review.account_id == account_id)
+            .order_by(Review.created_at.desc())
+            .limit(limit))
 
     schema = schemas.ReviewSchema()
     data = dict(reviews = schema.dump(review_sorted_q, many=True))
@@ -229,10 +289,10 @@ def get_account_reviews(account_id):
 def get_account_interviews(account_id):
     limit = request.args.get('limit', type=int, default=50)
     interview_sorted_q = (g.session
-                .query(Interview)
-                .filter(Interview.account_id == account_id)
-                .order_by(Interview.created_at.desc())
-                .limit(limit))
+            .query(Interview)
+            .filter(Interview.account_id == account_id)
+            .order_by(Interview.created_at.desc())
+            .limit(limit))
 
     schema = schemas.InterviewSchema()
     data = dict(interviews = schema.dump(interview_sorted_q, many=True))
@@ -242,9 +302,9 @@ def get_account_interviews(account_id):
 @account.route('/<int:account_id>/review_votes', methods=['GET'])
 def get_account_review_votes(account_id):
     review_votes_sorted_q = (g.session
-                .query(ReviewVote)
-                .filter(ReviewVote.account_id == account_id)
-                .order_by(ReviewVote.created_at.desc()))
+            .query(ReviewVote)
+            .filter(ReviewVote.account_id == account_id)
+            .order_by(ReviewVote.created_at.desc()))
 
     schema = schemas.ReviewVoteSchema(exclude=['updated_at'])
     data = dict(review_votes = schema.dump(review_votes_sorted_q, many=True))
@@ -254,9 +314,9 @@ def get_account_review_votes(account_id):
 @account.route('/<int:account_id>/interview_votes', methods=['GET'])
 def get_account_interview_votes(account_id):
     interview_votes_sorted_q = (g.session
-                .query(InterviewVote)
-                .filter(InterviewVote.account_id == account_id)
-                .order_by(InterviewVote.created_at.desc()))
+            .query(InterviewVote)
+            .filter(InterviewVote.account_id == account_id)
+            .order_by(InterviewVote.created_at.desc()))
 
     schema = schemas.InterviewVoteSchema(exclude=['updated_at'])
     data = dict(schema.dump(interview_votes_sorted_q, many=True))

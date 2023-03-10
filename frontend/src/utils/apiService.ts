@@ -141,7 +141,9 @@ export default class ApiService {
         'Content-Type': ['application/json', 'gzip'],
         'Access-Control-Allow-Origin': '*'
       },
-      baseURL: base_url
+      baseURL: base_url,
+      // allow cookies to be set from a http request from a different domain
+      withCredentials: true
     }
 
     this.api = axios.create(config)

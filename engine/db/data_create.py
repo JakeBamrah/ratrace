@@ -15,6 +15,7 @@ def generate_dummy_data():
     industries = list(Industry)
     with DBSessionContext(engine) as db:
         MAX = 10000
+        MAX_REVIEWS = 24
         objs = []
         print("creating companies and accounts\n")
         for i in range(1, MAX):
@@ -27,48 +28,52 @@ def generate_dummy_data():
                 page_visits=randint(0, 5000),
                 url=f'www.org_{i}_website.com'
                 ))
-            objs.append(Account(username=f'account_{i}'))
 
-            for j in range(1, 20):
+            account = Account(username=f'account_{i}')
+            account.add_password('account_i')
+            objs.append(account)
+
+            start_range = (i - 1) * 20
+            end_range = ((i - 1) * 20) + 20
+            for j in range(start_range, end_range):
                 objs.append(Position(
                     name=f'position_{j}',
                     org_id=i
                 ))
 
-        print("creating reviews and interviews\n")
-        for i in range(1, 200000):
-            objs.append(Review(
-                position_id=randint(1, 100000),
-                salary=randint(25000, 150000),
-                currency=Currency.GBP,
-                duration_years=i / 5,
-                review=f'This is review number: {i}.',
-                location='NY, USA',
-                account_id=randint(1, MAX - 1),
-                org_id=randint(1, MAX - 1),
-                tag=ReviewTag.GOOD if randint(0, 1) == 1 else ReviewTag.BAD
-                ))
+            for z in range(1, MAX_REVIEWS):
+                objs.append(Review(
+                    position_id=randint(start_range, end_range),
+                    salary=randint(25000, 150000),
+                    currency=Currency.GBP,
+                    duration_years=z / 5,
+                    review=f'This is review number: {z}.',
+                    location='NY, USA',
+                    account_id=randint(1, MAX - 1),
+                    org_id=i,
+                    tag=ReviewTag.GOOD if randint(0, 1) == 1 else ReviewTag.BAD
+                    ))
 
-            objs.append(Interview(
-                position_id=randint(1, 100000),
-                interview=f'This is interview number: {i}.',
-                location='San Francisco, CA, USA',
-                offer=randint(25000, 150000),
-                currency=Currency.GBP,
-                account_id=randint(1, MAX - 1),
-                org_id=randint(1, MAX - 1),
-                tag=ReviewTag.GOOD if randint(0, 1) == 1 else ReviewTag.BAD
-                ))
+                objs.append(Interview(
+                    position_id=randint(start_range, end_range),
+                    interview=f'This is interview number: {z}.',
+                    location='San Francisco, CA, USA',
+                    offer=randint(25000, 150000),
+                    currency=Currency.GBP,
+                    account_id=randint(1, MAX - 1),
+                    org_id=i,
+                    tag=ReviewTag.GOOD if randint(0, 1) == 1 else ReviewTag.BAD
+                    ))
 
         print("creating reviews and interviews votes\n")
         for i in range(1, 500000):
             objs.append(ReviewVote(
                 account_id=randint(1, MAX - 1),
-                review_id=randint(1, 200000 - 1),
+                review_id=randint(1, MAX * MAX_REVIEWS),
                 vote=Vote.DOWNVOTE.value if randint(0, 1) == 1 else Vote.UPVOTE.value))
             objs.append(InterviewVote(
                 account_id=randint(1, MAX - 1),
-                interview_id=randint(1, 200000 - 1),
+                interview_id=randint(1, MAX * MAX_REVIEWS),
                 vote=Vote.DOWNVOTE.value if randint(0, 1) == 1 else Vote.UPVOTE.value))
 
         print(f"committing {len(objs)} rows\n")

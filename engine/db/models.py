@@ -1,8 +1,10 @@
 import enum
 
-from sqlalchemy import Column, Integer, Float, String, Enum, Index, ForeignKey, text
+from sqlalchemy import (
+        Column, Integer, Float, String, Enum, Index, ForeignKey, text, Boolean)
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from . import database as db
 
@@ -47,6 +49,15 @@ class ReviewTag(enum.Enum):
     AVERAGE = 'average'
     BAD = 'bad'
 
+class AccountStatus(enum.Enum):
+    ACTIVE = 'active'
+    SUSPENDED = 'suspended'
+    INACTIVE = 'inactive'
+
+class AccountType(enum.Enum):
+    USER = 'user'
+    ADMIN = 'admin'
+
 
 EPOCH_QUERY = "(select strftime('%s', 'now'))"
 
@@ -57,6 +68,11 @@ class Account(db.Base):
     username = Column(String(32), unique=True, nullable=False)
     created_at = Column(Integer, default=text(EPOCH_QUERY), nullable=False)
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
+    status = Column(Enum(AccountStatus), default=AccountStatus.ACTIVE, nullable=False)
+    type = Column(Enum(AccountType), default=AccountType.USER, nullable=False)
+    anonymous = Column(Boolean, default=False)
+    dark_mode = Column(Boolean, default=False)
+    password = Column(String(64), nullable=False)
     reviews = relationship('Review', backref='account', lazy=True)
     interviews = relationship('Interview', backref='account', lazy=True)
     interview_votes = relationship('InterviewVote', backref='account', lazy=True)
@@ -64,6 +80,19 @@ class Account(db.Base):
 
     def __repr__(self):
         return (f"<Account({self.id})>")
+
+    @hybrid_property
+    def is_active(self):
+        return self.status == AccountStatus.ACTIVE
+
+    @hybrid_method
+    def check_password(self, password):
+        return check_password_hash(str(self.password), password)
+
+    @hybrid_method
+    def add_password(self, password):
+        self.password = generate_password_hash(password, method='sha256')
+
 
 account_username_idx = Index('account_username_idx', Account.username)
 
