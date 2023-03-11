@@ -8,7 +8,7 @@
   {#each tabs as tab}
     <button
       class="
-        px-2 py-1 rounded-lg
+        px-3 py-1 rounded-full
         {selected_tab === tab ? 'bg-grey-300 text-white' : 'bg-transparent'}
       "
       on:click={() => onTabSelect(tab)}>

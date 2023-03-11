@@ -19,15 +19,15 @@
             {ratingsMapper(interview.tag)}</p>
         </div>
         <div class="flex flex-col grid grid-cols-4 gap-x-2 w-full">
-          <p class="col-span-2 text-sm truncate"><b>Position:</b> {interview.position.name}</p>
-          <p class="col-span-2 text-sm truncate">
+          <p class="col-span-2 truncate"><b>Position:</b> {interview.position.name}</p>
+          <p class="col-span-2 truncate">
             <b>Offer:</b>
             {`${salaryMapper(interview.currency)}${interview.offer > 0 ? numCommaFormatter(interview.offer, 0) : 'NA'}`}
           </p>
-          <p class="col-span-2 text-sm truncate"><b>Location:</b> {interview.location.length > 0 ? interview.location : 'NA'}</p>
+          <p class="col-span-2 truncate"><b>Location:</b> {interview.location.length > 0 ? interview.location : 'NA'}</p>
         </div>
-        <p class="text-justify text-sm">
-            <span class="font-bold text-sm">
+        <p class="text-justify">
+            <span class="font-bold">
                 Review:
             </span>
             {interview.interview}

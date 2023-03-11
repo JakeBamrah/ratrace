@@ -237,35 +237,35 @@
     </div>
     <div class="flex items-center space-x-2">
       {@html icons.home.toSvg({ class: 'h-4 w-4'})}
-      <p class="text-sm truncate">{org.headquarters}</p>
+      <p class="truncate">{org.headquarters}</p>
     </div>
 
     <div class="flex items-center space-x-2">
       {@html icons.user.toSvg({ class: 'h-4 w-4'})}
-      <p class="text-sm">{getCompanySizeBracket(org.size)}</p>
+      <p>{getCompanySizeBracket(org.size)}</p>
     </div>
 
     <div class="flex items-center space-x-2">
       {@html icons.link.toSvg({ class: 'h-4 w-4'})}
       {#if org.url}
-        <a href={org.url} target="_blank" rel="noreferrer" class="text-sm truncate">{org.url}</a>
+        <a href={org.url} target="_blank" rel="noreferrer" class="truncate">{org.url}</a>
       {:else}
-        <p class="text-sm truncate">{'No url available'}</p>
+        <p class="truncate">{'No url available'}</p>
       {/if}
     </div>
 
     <div class="flex items-center space-x-2">
       {@html icons.globe.toSvg({ class: 'h-4 w-4'})}
-      <p class="text-sm truncate">{Industry[org.industry]}</p>
+      <p class="truncate">{Industry[org.industry]}</p>
     </div>
   </div>
 
   <div
     class="POSITION_FILTER
       flex w-full grid grid-cols-8 gap-y-1 gap-x-2
-      border rounded-xl px-6 py-4 divide-y sm:divide-y-0
+      border rounded-xl px-6 py-4
     ">
-    <div class="col-span-8 sm:col-span-4 w-full pt-2 sm:pt-0">
+    <div class="col-span-8 sm:col-span-4 w-full pt-0">
       Position:
       <Select
         placeholder='Filter position'
