@@ -8,11 +8,12 @@
 <script lang="ts">
   import Index from 'flexsearch/src/index';
   import { Router, Route } from 'svelte-navigator'
+  import { onMount } from 'svelte'
 
   import Home from './routes/Home.svelte'
   import Company from './routes/Company.svelte'
   import ApiService, { Industry } from './utils/apiService'
-  import type { OrgQueryParamsType } from './utils/apiService'
+  import type { OrgQueryParamsType, AccountQueryParams } from './utils/apiService'
   import Login from './routes/Login.svelte'
   import CreateAccount from './routes/CreateAccount.svelte'
   import Navbar from './routes/Navbar.svelte'
@@ -62,16 +63,33 @@
   const getOrgReviewsAndInterviews = async (params: OrgQueryParamsType) => {
     return await api.getOrgReviewsAndInterviews(params)
   }
+
+  let account = null
+  const onLogin = async (params: AccountQueryParams) => {
+    const resp = await api.login(params)
+    if (resp.authenticated) {
+      account = resp.account
+    }
+
+    return resp.authenticated
+  }
+
+  onMount(async () => {
+    const resp = await api.checkLogin()
+    if (resp.authenticated) {
+      account = resp.account
+    }
+  })
 </script>
 
 <main>
   <div class="pb-10 h-screen">
     <Router primary={false} url="/">
-      <Navbar />
+      <Navbar authenticated={Boolean(account)}/>
       <Route path="/login">
-        <Login />
+        <Login onLogin={onLogin} />
       </Route>
-      <Route path="/create-account">
+      <Route path="/signup">
         <CreateAccount />
       </Route>
       <Route path="org/*">

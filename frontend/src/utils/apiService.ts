@@ -91,6 +91,18 @@ type AccountID = number
 export type Account = {
   id: AccountID
   username: string
+  dark_mode: boolean
+  anonymous: boolean
+  reviews?: Review[]
+  interviews?: Interview[]
+}
+
+export type AccountQueryParams = {
+  username: string
+  account_id?: number
+  password?: string
+  dark_mode?: Boolean
+  anonymous?: string
 }
 
 export type Position = {
@@ -195,5 +207,15 @@ export default class ApiService {
     }
     const resp = await this.api.get(`/orgs/${org_id}/reviews_and_interviews`, { params })
     return resp.data.reviews_and_interviews
+  }
+
+  login = async(args: AccountQueryParams): Promise<any> => {
+    const resp = await this.api.post(`/auth/login`, args)
+    return resp.data
+  }
+
+  checkLogin = async(): Promise<any> => {
+    const resp = await this.api.get(`/auth/check_session`)
+    return resp.data
   }
 }

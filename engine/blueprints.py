@@ -3,7 +3,6 @@ import gzip
 from flask import Blueprint, g, request, jsonify, json, make_response, session
 import pandas as pd
 from sqlalchemy import func, desc
-from werkzeug.security import generate_password_hash, check_password_hash
 
 from db.models import Organisation, Account, Review, Interview, ReviewVote, InterviewVote
 import db.schemas as schemas
@@ -192,8 +191,9 @@ auth = Blueprint('auth', __name__, url_prefix='/auth')
 
 @auth.route('/login', methods=['POST'])
 def login():
-    username = request.form.get('username', '').lower()
-    password = request.form.get('password', '')
+    r = request.get_json()
+    username = r.get('username', '').lower()
+    password = r.get('password', '')
 
     if not username or not password:
         return jsonify(response=200, authenticated=False)
@@ -208,7 +208,26 @@ def login():
 
     session['account_id'] = account.id
 
-    return jsonify(response=200, authenticated=True)
+    schema = schemas.AccountSchema(only=(['id', 'username', 'anonymous', 'dark_mode']))
+    return jsonify(response=200, authenticated=True, account=schema.dump(account))
+
+
+@auth.route('/check_session', methods=['GET'])
+def check_session():
+    account_id = session.get('account_id')
+    schema = schemas.AccountSchema(only=(['id', 'username', 'anonymous', 'dark_mode']))
+
+    data = None
+    if account_id:
+        account = (g.session
+                .query(Account)
+                .filter(Account.id == account_id)
+                .scalar())
+        data = schema.dump(account)
+        session.clear()
+        session['account_id'] = account_id
+
+    return jsonify(response=200, authenticated=bool(account_id), account=data)
 
 
 @auth.route('/logout', methods=['POST'])
@@ -219,8 +238,9 @@ def logout():
 
 @auth.route('/signup', methods=['POST'])
 def signup():
-    username = request.form.get('username', '').lower()
-    password = request.form.get('password', '')
+    r = request.get_json()
+    username = r.get('username', '').lower()
+    password = r.get('password', '')
 
     error_message = None
     if not username or not password or len(password) < 8:

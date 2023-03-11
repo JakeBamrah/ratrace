@@ -37,9 +37,12 @@
   export let onFocus: (e: Event) => void = () => null
   export let onBlur: (e: Event) => void = () => null
   export let onKeyDown: (e: Event) => void = () => null
-  export let shortcut: string = ""
+  export let shortcut: string = ''
   export let use_window_shortcut: boolean = false
   export let ref: HTMLInputElement
+  export let type: string = 'text'
+  export let error: boolean = false
+  export let errorMessage: string = null
 
   let original_value = ""
   $: empty = value?.length === 0
@@ -85,7 +88,12 @@
 
 <svelte:window on:keydown={createFocusInputShortcut(id, use_window_shortcut)}/>
 
-<div class="w-full bg-grey-100 dark:bg-dark-400 rounded-3xl px-4 pt-1.5 pb-1.5 relative flex items-center rounded-l-3xl">
+<div
+  class="
+    w-full px-4 pt-1.5 pb-1.5 relative flex items-center
+    bg-grey-100 dark:bg-dark-400 rounded-3xl border
+    { error ? 'border-red-500' : 'bg-grey-100' }
+  ">
   <input
     id={id}
     placeholder={placeholder}
@@ -94,6 +102,7 @@
     on:keydown={onHandleKeyDown}
     on:focus={onFocus}
     bind:this={ref}
+    type={type}
 
     use:events
     {value}

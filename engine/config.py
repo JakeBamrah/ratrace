@@ -10,6 +10,7 @@ class Config(object):
     SESSION_COOKIE_HTTPONLY = True
     PERMANENT_SESSION_LIFETIME = one_day
     APPLICATION_ROOT = '/'
+    SESSION_PERMANENT = True
 
 class DevConfig(Config):
     DEBUG = True
