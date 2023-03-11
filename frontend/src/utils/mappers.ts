@@ -18,7 +18,7 @@ export const addCommasRegex = (num: string) => {
      // https://stackoverflow.com/questions/2901102/how-to-format-a-number-with-commas-as-thousands-separators
      // adds commas to a string number (can handle decimals but removes zeroes)
      // e.g. 10000.50 -> 10,000.5
-    return num.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+    return num.toString().replace(/\B(?!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 }
 
 export const numCommaFormatter   = (num: number, decimals = 2) => {
