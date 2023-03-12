@@ -1,5 +1,7 @@
 <script lang="ts">
-  import  { VoteModelEnum } from '../utils/apiService'
+  import { marked } from 'marked'
+
+  import { VoteModelEnum } from '../utils/apiService'
   import type { Interview, VoteParams, onVote } from '../utils/apiService'
   import { salaryMapper, ratingsMapper, numCommaFormatter } from '../utils/mappers'
   import Vote from '../lib/Vote.svelte'
@@ -37,7 +39,7 @@
             <span class="font-bold">
                 Interview:
             </span>
-            {interview.interview}
+            {@html marked.parse(interview.interview)}
         </p>
         <div class="w-full flex justify-end">
           <Vote
