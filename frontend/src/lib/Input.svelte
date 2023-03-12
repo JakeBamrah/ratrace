@@ -39,7 +39,7 @@
   export let onKeyDown: (e: Event) => void = () => null
   export let shortcut: string = ''
   export let use_window_shortcut: boolean = false
-  export let ref: HTMLInputElement
+  export let ref: HTMLInputElement = null
   export let type: string = 'text'
   export let error: boolean = false
   export let errorMessage: string = null
@@ -116,6 +116,7 @@
     <div class="hidden sm:block absolute right-0 text-xs mr-4">
       <span class="flex text-grey-350 dark:text-dark-300 ">
         <span>{shortcut}</span>
+      </span>
       <span class="shortcut-slash ml-1 font-semibold"> / </span>
     </div>
   {/if}

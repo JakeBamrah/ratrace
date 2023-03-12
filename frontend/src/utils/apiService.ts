@@ -155,7 +155,8 @@ export enum PostEnum {
   INTERVIEW = 'interview'
 }
 
-export type Post = Review | Interview
+// HACK: Extend types hack to silence errors
+export type Post = (Review | Interview) & { stages?: number, duration_years?: number }
 
 export type VoteParams = {
   post_id: number

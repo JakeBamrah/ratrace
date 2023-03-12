@@ -61,7 +61,7 @@
         placeholder="username"
         type="text"
         bind:ref={login_input}
-        error={form_errors.username}
+        error={Boolean(form_errors.username)}
       />
 
       <Input
@@ -69,7 +69,7 @@
         bind:value={password}
         placeholder="password"
         type="password"
-        error={form_errors.password}
+        error={Boolean(form_errors.password)}
       />
       <div class="flex w-full justify-end space-x-4">
         <SecondaryButton on:click={() => navigate('/')}>Back</SecondaryButton>
