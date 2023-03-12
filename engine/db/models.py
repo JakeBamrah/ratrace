@@ -201,6 +201,7 @@ class Interview(db.Base):
     compensation = Column(Integer, default=0)
     currency = Column(Enum(Currency), default=Currency.USD, nullable=False)
     post = Column(String, nullable=False)
+    stages = Column(Integer, default=0)
     account_id = Column(Integer, ForeignKey('account.id'), nullable=False)
     org_id = Column(Integer, ForeignKey('organisation.id'), nullable=False)
     position_id = Column(Integer, ForeignKey('position.id'), nullable=False)

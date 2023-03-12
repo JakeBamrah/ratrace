@@ -42,6 +42,7 @@ class InterviewSchema(Schema):
     position = fields.Str()
     location = fields.Str()
     compensation = fields.Int()
+    stages = fields.Int()
     currency = fields.Enum(Currency)
     post = fields.Str()
     account = fields.Nested('AccountSchema', only=('username', 'id', 'anonymous'), dump_only=True)

@@ -140,6 +140,7 @@ export type Interview = {
   created_at: number
   location: string
   org_id: number
+  stages: number
   tag: RatingKey
   upvotes: AccountID[]
   downvotes: AccountID[]
