@@ -5,7 +5,8 @@
 
 @layer base {
   div {
-    @apply text-base sm:text-sm;
+    /* @apply text-base sm:text-sm; */
+    @apply text-sm;
   }
 }
 

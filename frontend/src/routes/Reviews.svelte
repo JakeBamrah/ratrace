@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Review } from '../utils/apiService'
   import { salaryMapper, ratingsMapper, numCommaFormatter } from '../utils/mappers'
+  import { formatTimestamp } from '../utils/timeago'
   import Vote from '../lib/Vote.svelte'
 
   export let reviews: Review[]
@@ -38,7 +39,7 @@
         </div>
         <p class="text-justify">
             <span class="font-bold">
-                Review:
+                Review [{formatTimestamp(review.created_at)}]:
             </span>
             {review.review}
         </p>
