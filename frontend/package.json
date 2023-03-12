@@ -12,6 +12,7 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.0.2",
     "@tsconfig/svelte": "^3.0.0",
+    "@types/dompurify": "^2.4.0",
     "@types/feather-icons": "^4.29.1",
     "@types/marked": "^4.0.8",
     "autoprefixer": "^10.4.13",
@@ -26,6 +27,7 @@
     "vite": "^4.1.0"
   },
   "dependencies": {
+    "dompurify": "^3.0.1",
     "flexsearch": "^0.7.31",
     "marked": "^4.2.12",
     "svelte-navigator": "^3.2.2",
