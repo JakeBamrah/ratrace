@@ -16,6 +16,7 @@
   import type { OrgQueryParamsType, AccountQueryParams } from './utils/apiService'
   import Login from './routes/Login.svelte'
   import CreateAccount from './routes/CreateAccount.svelte'
+  import Account from './routes/Account.svelte'
   import Navbar from './routes/Navbar.svelte'
   import type { IndustryKey } from './utils/apiService'
   import { createFilter } from './utils/search'
@@ -74,6 +75,22 @@
     return resp.authenticated
   }
 
+  const onLogout = async () => {
+    api.logout().then(r => {
+      if (!r.authenticated)
+        account = null
+    })
+    return
+  }
+
+  const onSignUp = async (params: AccountQueryParams) => {
+    const resp = await api.signup(params)
+    if (!resp.error)
+      account = resp.account
+
+    return Boolean(resp.error)
+  }
+
   onMount(async () => {
     const resp = await api.checkLogin()
     if (resp.authenticated) {
@@ -90,7 +107,10 @@
         <Login onLogin={onLogin} />
       </Route>
       <Route path="/signup">
-        <CreateAccount />
+        <CreateAccount onSignUp={onSignUp} />
+      </Route>
+      <Route path="/account">
+        <Account onLogout={onLogout} />
       </Route>
       <Route path="org/*">
         <Route path=":id" let:params>

@@ -210,12 +210,22 @@ export default class ApiService {
   }
 
   login = async(args: AccountQueryParams): Promise<any> => {
-    const resp = await this.api.post(`/auth/login`, args)
+    const resp = await this.api.post('/auth/login', args)
     return resp.data
   }
 
   checkLogin = async(): Promise<any> => {
-    const resp = await this.api.get(`/auth/check_session`)
+    const resp = await this.api.get('/auth/check_session')
+    return resp.data
+  }
+
+  logout = async () => {
+    const resp = await this.api.get('/auth/logout')
+    return resp.data
+  }
+
+  signup = async (args: AccountQueryParams): Promise<any> => {
+    const resp = await this.api.post('/auth/signup', args)
     return resp.data
   }
 }

@@ -1,5 +1,6 @@
 <script lang="ts">
   import PageContainer from '../lib/PageContainer.svelte'
+  import SecondaryButton from '../lib/SecondaryButton.svelte'
   import { useNavigate } from 'svelte-navigator'
 
 
@@ -17,11 +18,11 @@
             on:click={() => navigate('/')} />
       </div>
       <div class="space-x-4 sm:space-x-2 z-1">
-        <button class="hover:underline" on:click={() => navigate('/')}>
+        <SecondaryButton on:click={() => navigate('/')}>
           About
-        </button>
+        </SecondaryButton>
         {#if authenticated}
-          <button class="hover:underline" on:click={() => navigate('/')}>
+          <button class="hover:underline" on:click={() => navigate('/account')}>
             Account
           </button>
         {:else}

@@ -230,10 +230,10 @@ def check_session():
     return jsonify(response=200, authenticated=bool(account_id), account=data)
 
 
-@auth.route('/logout', methods=['POST'])
+@auth.route('/logout', methods=['GET'])
 def logout():
     session.clear()
-    return jsonify(response=200)
+    return jsonify(response=200, authenticated=False)
 
 
 @auth.route('/signup', methods=['POST'])
@@ -264,10 +264,14 @@ def signup():
     if not account_created:
         error_message = "Failed to create account"
 
+    # add account id to the session so session can be checked on re-direct
+    session['account_id'] = new_account.id
+    schema = schemas.AccountSchema(only=(['id', 'username', 'anonymous', 'dark_mode']))
+
     return jsonify(
             response=200,
             error=error_message,
-            account_id=new_account.id if new_account else -1)
+            account=schema.dump(new_account))
 
 
 account = Blueprint('account', __name__, url_prefix='/account')

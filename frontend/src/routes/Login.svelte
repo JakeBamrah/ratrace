@@ -4,7 +4,7 @@
   import { string } from 'yup';
 
   import Input from '../lib/Input.svelte'
-  import PageContainer from '../lib/PageContainer.svelte'
+  import SecondaryButton from '../lib/SecondaryButton.svelte'
   import type { AccountQueryParams } from '../utils/apiService'
   import { validateYupValues } from '../utils/validators'
   import type { validationError } from '../utils/validators'
@@ -48,10 +48,13 @@
   }
 </script>
 
-<div class="flex flex-col items-center justify-center p-0 px-2 h-4/5 relative">
-  <PageContainer>
+<div
+  class="
+    flex flex-col items-center justify-center w-full
+    p-0 px-2 h-4/5 relative
+  ">
     <p class="text-3xl pb-2 pl-1">Login</p>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-1">
+    <div class="grid grid-cols-1 gap-3 w-80">
       <Input
         id="username-input"
         bind:value={username}
@@ -59,7 +62,7 @@
         type="text"
         bind:ref={login_input}
         error={form_errors.username}
-        />
+      />
 
       <Input
         id="password-input"
@@ -67,10 +70,18 @@
         placeholder="password"
         type="password"
         error={form_errors.password}
-        />
+      />
+      <div class="flex w-full justify-end space-x-4">
+        <SecondaryButton on:click={() => navigate('/')}>Back</SecondaryButton>
         <button on:click={onSubmit}>Login</button>
+      </div>
+      <div class="w-full border-t border-grey-300 py-3 text-center">
+        <p>
+          No account?
+          <button
+            class="hover:underline text-grey-400"
+            on:click={() => navigate('/signup')}>Sign-up!</button>
+        </p>
+      </div>
     </div>
-  </PageContainer>
 </div>
-
-
