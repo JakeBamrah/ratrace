@@ -5,7 +5,9 @@
   import { useNavigate } from 'svelte-navigator'
 
   import { Industry, Rating, ReviewSort } from '../utils/apiService'
-  import type { Review, Interview, ReviewSortKey, RatingKey, Position, OrgQueryParamsType } from '../utils/apiService'
+  import type {
+    Review, Interview, ReviewSortKey,
+    RatingKey, Position, OrgQueryParamsType } from '../utils/apiService'
   import Interviews from './Interviews.svelte'
   import PageContainer from '../lib/PageContainer.svelte'
   import Reviews from './Reviews.svelte'

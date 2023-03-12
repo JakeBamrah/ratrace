@@ -66,7 +66,7 @@ def search_orgs():
 
     schema = schemas.OrganisationSchema(exclude=('interviews', 'reviews'), many=True)
     orgs = schema.dump(find_orgs_q)
-    return jsonify(response=200, orgs=orgs)
+    return jsonify(orgs=orgs)
 
 
 @orgs.route('/<int:org_id>', methods=['GET'])
@@ -91,7 +91,7 @@ def get_org(org_id):
             reviews = schemas.ReviewSchema().dump(review_sorted_q, many=True),
             interviews = schemas.InterviewSchema().dump(interview_sorted_q, many=True),
         )
-    return jsonify(response=200, org=data)
+    return jsonify(org=data)
 
 
 @orgs.route('/<int:org_id>/reviews_and_interviews', methods=['GET'])
@@ -176,7 +176,7 @@ def get_org_reviews_and_interviews(org_id):
             interviews = schemas.InterviewSchema().dump(interview_sorted_q, many=True),
             no_more_interviews = max_interviews_for_filter <= offset + limit
         )
-    return jsonify(response=200, reviews_and_interviews=data)
+    return jsonify(reviews_and_interviews=data)
 
 
 @orgs.route('/<int:org_id>/salary_info', methods=['GET'])
@@ -196,7 +196,7 @@ def login():
     password = r.get('password', '')
 
     if not username or not password:
-        return jsonify(response=200, authenticated=False)
+        return jsonify(authenticated=False)
 
     # check if user actually exists
     account = (g.session
@@ -204,12 +204,12 @@ def login():
             .filter(Account.username == username)
             .scalar())
     if not account or not account.check_password(password):
-        return jsonify(response=200, authenticated=False)
+        return jsonify(authenticated=False)
 
     session['account_id'] = account.id
 
     schema = schemas.AccountSchema(only=(['id', 'username', 'anonymous', 'dark_mode']))
-    return jsonify(response=200, authenticated=True, account=schema.dump(account))
+    return jsonify(authenticated=True, account=schema.dump(account))
 
 
 @auth.route('/check_session', methods=['GET'])
@@ -227,13 +227,13 @@ def check_session():
         session.clear()
         session['account_id'] = account_id
 
-    return jsonify(response=200, authenticated=bool(account_id), account=data)
+    return jsonify(authenticated=bool(account_id), account=data)
 
 
 @auth.route('/logout', methods=['GET'])
 def logout():
     session.clear()
-    return jsonify(response=200, authenticated=False)
+    return jsonify(authenticated=False)
 
 
 @auth.route('/signup', methods=['POST'])
@@ -245,7 +245,7 @@ def signup():
     error_message = None
     if not username or not password or len(password) < 8:
         error_message = "Username or password not given"
-        return jsonify(response=200, error=error_message)
+        return jsonify(error=error_message)
 
     # check if user actually exists
     account = (g.session
@@ -254,7 +254,7 @@ def signup():
             .scalar())
     if account:
         error_message = "Account already exists"
-        return jsonify(response=200, error=error_message)
+        return jsonify(error=error_message)
 
     # create user and attempt to commit user
     new_account = Account(username=username)
@@ -268,10 +268,7 @@ def signup():
     session['account_id'] = new_account.id
     schema = schemas.AccountSchema(only=(['id', 'username', 'anonymous', 'dark_mode']))
 
-    return jsonify(
-            response=200,
-            error=error_message,
-            account=schema.dump(new_account))
+    return jsonify(error=error_message, account=schema.dump(new_account))
 
 
 account = Blueprint('account', __name__, url_prefix='/account')
@@ -292,7 +289,7 @@ def get_account(account_id):
             account = account_schema.dump(account),
             reviews = review_schema.dump(review_sorted_q, many=True)
         )
-    return jsonify(response=200, data=data)
+    return jsonify(data=data)
 
 
 @account.route('/<int:account_id>/reviews', methods=['GET'])
@@ -306,7 +303,7 @@ def get_account_reviews(account_id):
 
     schema = schemas.ReviewSchema()
     data = dict(reviews = schema.dump(review_sorted_q, many=True))
-    return jsonify(response=200, data=data)
+    return jsonify(data=data)
 
 
 @account.route('/<int:account_id>/interviews', methods=['GET'])
@@ -320,7 +317,7 @@ def get_account_interviews(account_id):
 
     schema = schemas.InterviewSchema()
     data = dict(interviews = schema.dump(interview_sorted_q, many=True))
-    return jsonify(response=200, data=data)
+    return jsonify(data=data)
 
 
 @account.route('/<int:account_id>/review_votes', methods=['GET'])
@@ -332,7 +329,7 @@ def get_account_review_votes(account_id):
 
     schema = schemas.ReviewVoteSchema(exclude=['updated_at'])
     data = dict(review_votes = schema.dump(review_votes_sorted_q, many=True))
-    return jsonify(response=200, data=data)
+    return jsonify(data=data)
 
 
 @account.route('/<int:account_id>/interview_votes', methods=['GET'])
@@ -344,4 +341,4 @@ def get_account_interview_votes(account_id):
 
     schema = schemas.InterviewVoteSchema(exclude=['updated_at'])
     data = dict(schema.dump(interview_votes_sorted_q, many=True))
-    return jsonify(response=200, data=data)
+    return jsonify(data=data)

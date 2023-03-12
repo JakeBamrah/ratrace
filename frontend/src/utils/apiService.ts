@@ -1,5 +1,7 @@
 import axios from 'axios'
 import type { AxiosInstance } from 'axios'
+import { writable, derived } from 'svelte/store';
+import type { Writable, Readable } from 'svelte/store'
 
 import { alphabeticalSort } from './mappers'
 
@@ -143,6 +145,10 @@ export type Interview = {
 }
 
 
+// store for top level account subscription
+export const account: Writable<Account> = writable(null)
+export const authenticated: Readable<Boolean> = derived(account, $account => Boolean($account))
+
 export default class ApiService {
   base_url: string
   api: AxiosInstance
@@ -211,21 +217,34 @@ export default class ApiService {
 
   login = async(args: AccountQueryParams): Promise<any> => {
     const resp = await this.api.post('/auth/login', args)
-    return resp.data
+    if (resp.data && resp.data.authenticated) {
+      account.set(resp.data.account)
+    }
+    return resp.data.authenticated
   }
 
-  checkLogin = async(): Promise<any> => {
+  authenticate = async(): Promise<any> => {
     const resp = await this.api.get('/auth/check_session')
-    return resp.data
+    if (resp.data && resp.data.authenticated) {
+      account.set(resp.data.account)
+    }
+
+    return resp.data.authenticated
   }
 
   logout = async () => {
     const resp = await this.api.get('/auth/logout')
-    return resp.data
+    if (resp.data && !resp.data.authenticated) {
+      account.set(null)
+    }
+    return resp.data.authenticated
   }
 
   signup = async (args: AccountQueryParams): Promise<any> => {
     const resp = await this.api.post('/auth/signup', args)
-    return resp.data
+    if (resp.data && !resp.data.error) {
+      account.set(resp.data.account)
+    }
+    return Boolean(resp.data.error)
   }
 }
