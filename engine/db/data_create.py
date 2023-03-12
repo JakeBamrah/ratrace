@@ -47,7 +47,7 @@ def generate_dummy_data():
                     salary=randint(25000, 150000),
                     currency=Currency.GBP,
                     duration_years=z / 5,
-                    review=f'This is review number: {z}.',
+                    post=f'This is review number: {z}.',
                     location='NY, USA',
                     account_id=randint(1, MAX - 1),
                     org_id=i,
@@ -56,7 +56,7 @@ def generate_dummy_data():
 
                 objs.append(Interview(
                     position_id=randint(start_range, end_range),
-                    interview=f'This is interview number: {z}.',
+                    post=f'This is interview number: {z}.',
                     location='San Francisco, CA, USA',
                     offer=randint(25000, 150000),
                     currency=Currency.GBP,

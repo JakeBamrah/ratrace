@@ -39,7 +39,7 @@
             <span class="font-bold">
                 Interview:
             </span>
-            {@html marked.parse(interview.interview)}
+            {@html marked.parse(interview.post)}
         </p>
         <div class="w-full flex justify-end">
           <Vote

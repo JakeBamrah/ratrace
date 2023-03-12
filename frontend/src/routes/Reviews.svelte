@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { marked } from 'marked'
+
   import { VoteModelEnum } from '../utils/apiService'
   import type { Review, onVote, VoteParams } from '../utils/apiService'
   import { salaryMapper, ratingsMapper, numCommaFormatter, yearFormatter } from '../utils/mappers'
@@ -49,7 +51,7 @@
             <span class="font-bold">
                 Review:
             </span>
-            {review.review}
+            {@html marked.parse(review.post)}
         </p>
         <div class="w-full flex justify-end">
           <Vote

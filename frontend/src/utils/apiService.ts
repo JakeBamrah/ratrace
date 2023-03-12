@@ -126,9 +126,10 @@ export type Review = {
   upvotes: AccountID[]
   downvotes: AccountID[]
   duration_years: number
-  review: string
+  post: string
   currency: CurrencyKey
   salary: number
+  reported: boolean
 }
 
 export type Interview = {
@@ -141,9 +142,10 @@ export type Interview = {
   tag: RatingKey
   upvotes: AccountID[]
   downvotes: AccountID[]
-  interview: string
+  post: string
   currency: CurrencyKey
   offer: number
+  reported: boolean
 }
 
 export enum VoteModelEnum {

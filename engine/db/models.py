@@ -165,7 +165,7 @@ class Review(db.Base):
     currency = Column(Enum(Currency), default=Currency.USD, nullable=False)
     location = Column(String, nullable=False)
     duration_years = Column(Float, default=1, nullable=False)
-    review = Column(String, nullable=False)
+    post = Column(String, nullable=False)
     account_id = Column(Integer, ForeignKey('account.id'), nullable=False)
     org_id = Column(Integer, ForeignKey('organisation.id'), nullable=False)
     position_id = Column(Integer, ForeignKey('position.id'), nullable=False)
@@ -173,6 +173,7 @@ class Review(db.Base):
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
     votes = relationship('ReviewVote', backref='review', lazy=True, cascade="all, delete-orphan")
     tag = Column(Enum(ReviewTag), default=ReviewTag.AVERAGE)
+    reported = Column(Boolean, default=False)
 
     def __repr__(self):
         return (f"<Review({self.id})>")
@@ -198,7 +199,7 @@ class Interview(db.Base):
     location = Column(String, nullable=False)
     offer = Column(Integer, default=0)
     currency = Column(Enum(Currency), default=Currency.USD, nullable=False)
-    interview = Column(String, nullable=False)
+    post = Column(String, nullable=False)
     account_id = Column(Integer, ForeignKey('account.id'), nullable=False)
     org_id = Column(Integer, ForeignKey('organisation.id'), nullable=False)
     position_id = Column(Integer, ForeignKey('position.id'), nullable=False)
@@ -206,6 +207,7 @@ class Interview(db.Base):
     updated_at = Column(Integer, default=text(EPOCH_QUERY), onupdate=text(EPOCH_QUERY))
     votes = relationship('InterviewVote', backref='interview', lazy=True, cascade="all, delete-orphan")
     tag = Column(Enum(ReviewTag), default=ReviewTag.AVERAGE)
+    reported = Column(Boolean, default=False)
 
     def __repr__(self):
         return (f"<Interview({self.id})>")

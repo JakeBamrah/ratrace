@@ -25,7 +25,7 @@ class ReviewSchema(Schema):
     currency = fields.Enum(Currency)
     location = fields.Str()
     duration_years = fields.Float()
-    review = fields.Str()
+    post = fields.Str()
     account = fields.Nested('AccountSchema', only=('username', 'id', 'anonymous'), dump_only=True)
     org_id = fields.Int()
     position = fields.Nested('PositionSchema', only=('name', 'id', 'org_id'), dump_only=True)
@@ -35,6 +35,7 @@ class ReviewSchema(Schema):
     upvotes = fields.List(fields.Int())
     downvotes = fields.List(fields.Int())
     tag = fields.Enum(ReviewTag)
+    reported = fields.Bool()
 
 class InterviewSchema(Schema):
     id = fields.Int()
@@ -42,7 +43,7 @@ class InterviewSchema(Schema):
     location = fields.Str()
     offer = fields.Int()
     currency = fields.Enum(Currency)
-    interview = fields.Str()
+    post = fields.Str()
     account = fields.Nested('AccountSchema', only=('username', 'id', 'anonymous'), dump_only=True)
     org_id = fields.Int()
     position = fields.Nested('PositionSchema', only=('name', 'id', 'org_id'), dump_only=True)
@@ -52,6 +53,7 @@ class InterviewSchema(Schema):
     upvotes = fields.List(fields.Int())
     downvotes = fields.List(fields.Int())
     tag = fields.Enum(ReviewTag)
+    reported = fields.Bool()
 
 class AccountSchema(Schema):
     id = fields.Int(dump_only=True)
