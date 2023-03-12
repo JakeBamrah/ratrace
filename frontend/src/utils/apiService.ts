@@ -23,14 +23,14 @@ export enum Rating {
 }
 export type RatingKey = keyof typeof Rating
 
-export enum ReviewSort {
+export enum PostSort {
   DATE_CREATED = 'Date created',
   COMPENSATION = 'Compensation',
   TENURE = 'Tenure',
   DOWNVOTES = 'Downvotes',
   UPVOTES = 'Upvotes'
 }
-export type ReviewSortKey = keyof typeof ReviewSort
+export type PostSortKey = keyof typeof PostSort
 
 export enum Vote {
     UPVOTE = 1,
@@ -84,7 +84,7 @@ export type OrgQueryParamsType = {
   org_id?: number
   industry?: IndustryKey
   tag?: RatingKey
-  sort_order?: ReviewSortKey
+  sort_order?: PostSortKey
   position_id?: number
   limit?: number
   offset?: number
@@ -129,7 +129,7 @@ export type Review = {
   duration_years: number
   post: string
   currency: CurrencyKey
-  salary: number
+  compensation: number
   reported: boolean
 }
 
@@ -145,11 +145,11 @@ export type Interview = {
   downvotes: AccountID[]
   post: string
   currency: CurrencyKey
-  offer: number
+  compensation: number
   reported: boolean
 }
 
-export enum VoteModelEnum {
+export enum PostEnum {
   REVIEW = 'review',
   INTERVIEW = 'interview'
 }
@@ -161,7 +161,7 @@ export type VoteParams = {
   vote: Vote
   already_upvoted?: boolean
   already_downvoted?: boolean
-  vote_model_type?: VoteModelEnum
+  vote_model_type?: PostEnum
 }
 export type onVote = (args: VoteParams) => Promise<any>
 

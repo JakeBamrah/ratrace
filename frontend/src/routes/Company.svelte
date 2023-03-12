@@ -4,25 +4,23 @@
   import Select from 'svelte-select'
   import { useNavigate } from 'svelte-navigator'
 
-  import { account, Industry, Rating, ReviewSort, Vote as VoteEnum } from '../utils/apiService'
+  import { Industry, Rating, PostSort, PostEnum } from '../utils/apiService'
   import type {
-    Review, Interview, ReviewSortKey, onVote, Vote as VoteType,
-    RatingKey, Position, OrgQueryParamsType, VoteParams,
-    VoteModelEnum
+    Review, Interview, PostSortKey, onVote,
+    RatingKey, Position, OrgQueryParamsType, Post
   } from '../utils/apiService'
-  import Interviews from './Interviews.svelte'
+  import Posts from './Posts.svelte'
   import PageContainer from '../lib/PageContainer.svelte'
-  import Reviews from './Reviews.svelte'
   import Tabs from '../lib/Tabs.svelte'
   import { getCompanySizeBracket } from '../utils/mappers'
 
 
   const LIMIT = 50
   const ALL_POSITIONS = { id: -1, label: 'All'}
-  const DEFAULT_SORT = { id: ReviewSort.DATE_CREATED.toUpperCase() as ReviewSortKey, label: ReviewSort.DATE_CREATED }
+  const DEFAULT_SORT = { id: PostSort.DATE_CREATED.toUpperCase() as PostSortKey, label: PostSort.DATE_CREATED }
 
   type SelectedPanel = 'Reviews' | 'Interviews'
-  type SelectSort = { id: ReviewSortKey, label: ReviewSort }
+  type SelectSort = { id: PostSortKey, label: PostSort }
 
   export let id: string
   export let getOrg: (org_id: number) => Promise<any>
@@ -41,12 +39,12 @@
     label: Rating.ALL
   }
 
-  $: sorts = Object.keys(ReviewSort).map(k => {
+  $: sorts = Object.keys(PostSort).map(k => {
     // tenure is only available as a choice for the reviews panel
-    const is_tenure = ReviewSort[k] === ReviewSort.TENURE
+    const is_tenure = PostSort[k] === PostSort.TENURE
     return {
       id: k,
-      label: ReviewSort[k],
+      label: PostSort[k],
       selectable: !(is_tenure && selected_panel === 'Interviews')
     }}) as SelectSort[]
   let selected_sort: SelectSort = DEFAULT_SORT
@@ -72,7 +70,7 @@
   const sortItems = (args : {
     items: (Review | Interview)[]
     tag: RatingKey
-    sort: ReviewSortKey
+    sort: PostSortKey
     position_id: number
     selected_panel: SelectedPanel
   }) => {
@@ -107,15 +105,15 @@
       sorted_items.sort((a, b) => a.created_at >= b.created_at ? 1 : 0)
     }
 
-    if (sort === ReviewSort.DOWNVOTES.toUpperCase()) {
+    if (sort === PostSort.DOWNVOTES.toUpperCase()) {
       sorted_items.sort((a, b) => (a.upvotes.length - a.downvotes.length) >= (b.upvotes.length - b.downvotes.length) ? 1 : 0)
     }
 
-    if (sort === ReviewSort.UPVOTES.toUpperCase()) {
+    if (sort === PostSort.UPVOTES.toUpperCase()) {
       sorted_items.sort((a, b) => (a.upvotes.length - a.downvotes.length) <= (b.upvotes.length - b.downvotes.length) ? 1 : 0)
     }
 
-    if (sort === ReviewSort.TENURE.toUpperCase()) {
+    if (sort === PostSort.TENURE.toUpperCase()) {
       if (selected_panel === 'Interviews')
         selected_sort = null
 
@@ -123,12 +121,9 @@
         sorted_items.sort((a: Review, b: Review) => a.duration_years < b.duration_years ? 1 : 0)
     }
 
-    if (sort === ReviewSort.COMPENSATION.toUpperCase()) {
+    if (sort === PostSort.COMPENSATION.toUpperCase()) {
       if (selected_panel === 'Interviews')
-        sorted_items.sort((a: Interview, b: Interview) => a.offer < b.offer ? 1 : 0)
-
-      if (selected_panel === 'Reviews')
-        sorted_items.sort((a: Review, b: Review) => a.salary < b.salary ? 1 : 0)
+        sorted_items.sort((a: Post, b: Post) => a.compensation < b.compensation ? 1 : 0)
     }
 
     if (position_id !== -1) {
@@ -313,9 +308,17 @@
         onTabSelect={(panel) => selected_panel = panel} />
     </div>
     {#if selected_panel === 'Reviews'}
-      <Reviews onVote={onVote} reviews={filtered_reviews} />
+      <Posts
+        onVote={onVote}
+        posts={filtered_reviews}
+        post_type={PostEnum.REVIEW}
+      />
     {:else}
-      <Interviews onVote={onVote} interviews={filtered_interviews} />
+      <Posts
+        onVote={onVote}
+        posts={filtered_interviews}
+        post_type={PostEnum.INTERVIEW}
+      />
     {/if}
 
       {#if selected_panel == 'Reviews' && !filter_review_max_reached}

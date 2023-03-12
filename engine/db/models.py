@@ -162,7 +162,7 @@ class Review(db.Base):
     __tablename__ = 'review'
 
     id = Column(Integer, primary_key=True, nullable=False)
-    salary = Column(Integer, default=0, nullable=False)
+    compensation = Column(Integer, default=0, nullable=False)
     currency = Column(Enum(Currency), default=Currency.USD, nullable=False)
     location = Column(String, nullable=False)
     duration_years = Column(Float, default=1, nullable=False)
@@ -189,7 +189,7 @@ class Review(db.Base):
 
 review_account_idx = Index('review_account_idx', Review.account_id)
 review_org_idx = Index('review_org_idx', Review.org_id)
-review_salary_idx = Index('review_salary_idx', Review.salary)
+review_compensation_idx = Index('review_compensation_idx', Review.compensation)
 review_position_idx = Index('review_position_idx', Review.position_id)
 
 
@@ -198,7 +198,7 @@ class Interview(db.Base):
 
     id = Column(Integer, primary_key=True, nullable=False)
     location = Column(String, nullable=False)
-    offer = Column(Integer, default=0)
+    compensation = Column(Integer, default=0)
     currency = Column(Enum(Currency), default=Currency.USD, nullable=False)
     post = Column(String, nullable=False)
     account_id = Column(Integer, ForeignKey('account.id'), nullable=False)
@@ -223,7 +223,7 @@ class Interview(db.Base):
 
 interview_account_idx = Index('interview_account_idx', Interview.account_id)
 interview_org_idx = Index('interview_org_idx', Interview.org_id)
-interview_offer_idx = Index('interview_offer_idx', Interview.offer)
+interview_compensation_idx = Index('interview_compensation_idx', Interview.compensation)
 interview_position_idx = Index('interview_position_idx', Interview.position_id)
 
 

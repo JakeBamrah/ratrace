@@ -45,7 +45,7 @@ def generate_dummy_data():
             for z in range(1, MAX_REVIEWS):
                 objs.append(Review(
                     position_id=randint(start_range, end_range),
-                    salary=randint(25000, 150000),
+                    compensation=randint(25000, 150000),
                     currency=Currency.GBP,
                     duration_years=z / 5,
                     post=f'This is review number: {z}.',
@@ -59,7 +59,7 @@ def generate_dummy_data():
                     position_id=randint(start_range, end_range),
                     post=f'This is interview number: {z}.',
                     location='San Francisco, CA, USA',
-                    offer=randint(25000, 150000),
+                    compensation=randint(25000, 150000),
                     currency=Currency.GBP,
                     account_id=randint(1, MAX - 1),
                     org_id=i,

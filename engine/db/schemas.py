@@ -21,7 +21,7 @@ class ReviewVoteSchema(Schema):
 class ReviewSchema(Schema):
     id = fields.Int()
     position = fields.Str()
-    salary = fields.Int()
+    compensation = fields.Int()
     currency = fields.Enum(Currency)
     location = fields.Str()
     duration_years = fields.Float()
@@ -41,7 +41,7 @@ class InterviewSchema(Schema):
     id = fields.Int()
     position = fields.Str()
     location = fields.Str()
-    offer = fields.Int()
+    compensation = fields.Int()
     currency = fields.Enum(Currency)
     post = fields.Str()
     account = fields.Nested('AccountSchema', only=('username', 'id', 'anonymous'), dump_only=True)

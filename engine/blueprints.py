@@ -124,8 +124,8 @@ def get_org_reviews_and_interviews(org_id):
     if sort_order == 'TENURE':
         review_order = Review.duration_years.desc()
     if sort_order == 'COMPENSATION':
-        review_order = Review.salary.desc()
-        interview_order = Interview.offer.desc()
+        review_order = Review.compensation.desc()
+        interview_order = Interview.compensation.desc()
 
     if sort_order in {'DOWNVOTES', 'UPVOTES'}:
         # upvotes downvotes is a bit special
@@ -183,9 +183,9 @@ def get_org_reviews_and_interviews(org_id):
     return jsonify(reviews_and_interviews=data)
 
 
-@orgs.route('/<int:org_id>/salary_info', methods=['GET'])
-def get_org_salary_info(org_id):
-    # TODO: build a nice query that aggregates salary info for us for a given
+@orgs.route('/<int:org_id>/compensation_summary', methods=['GET'])
+def get_org_comp_info(org_id):
+    # TODO: build a nice query that aggregates comp info for us for a given
     # company and position
     org = g.session.query(Organisation).filter(Organisation.id == org_id).all()
     return str(org.interviews)

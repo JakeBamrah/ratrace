@@ -1,4 +1,5 @@
-import type { CurrencyKey, RatingKey } from './apiService'
+import type { CurrencyKey, RatingKey, Post } from './apiService'
+import  { PostEnum } from './apiService'
 import { Rating } from './apiService'
 
 const SALARY_MAP = {
@@ -74,4 +75,8 @@ export const alphabeticalSort = (a: string, b: string) => {
     return 1
 
   return 0
+}
+
+export const findPostType = (post: any) => {
+    return post.duration_years === undefined ? PostEnum.INTERVIEW : PostEnum.REVIEW
 }
