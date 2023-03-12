@@ -21,7 +21,7 @@ export const addCommasRegex = (num: string) => {
     return num.toString().replace(/\B(?!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 }
 
-export const numCommaFormatter   = (num: number, decimals = 2) => {
+export const numCommaFormatter = (num: number, decimals = 2) => {
   if (isNaN(num))
     return "0"
 
@@ -33,6 +33,19 @@ export const numCommaFormatter   = (num: number, decimals = 2) => {
   }
 
   return addCommasRegex(num_str)
+}
+
+export const yearFormatter = (year: number) => {
+    if (year < 1 && year > 0) {
+        const months = (12 * year).toFixed(0)
+        return `${months}m`
+    }
+
+    let years = "0"
+    if (year >= 1)
+        years = numCommaFormatter(year, 0)
+
+    return `${years}y`
 }
 
 export const getCompanySizeBracket = (size: number) => {

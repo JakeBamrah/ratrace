@@ -1,7 +1,7 @@
 <script lang="ts">
   import { VoteModelEnum } from '../utils/apiService'
   import type { Review, onVote, VoteParams } from '../utils/apiService'
-  import { salaryMapper, ratingsMapper, numCommaFormatter } from '../utils/mappers'
+  import { salaryMapper, ratingsMapper, numCommaFormatter, yearFormatter } from '../utils/mappers'
   import { formatTimestamp } from '../utils/timeago'
   import Vote from '../lib/Vote.svelte'
 
@@ -42,7 +42,7 @@
           </p>
           <p class="col-span-2 truncate">
             <b>Tenure:</b>
-            {review.duration_years > 0 ? `${numCommaFormatter(review.duration_years, 0)}y` : 'NA'}
+            {review.duration_years > 0 ? `${yearFormatter(review.duration_years)}` : 'NA'}
           </p>
         </div>
         <p class="text-justify">
