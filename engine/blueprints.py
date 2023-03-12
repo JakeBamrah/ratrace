@@ -31,7 +31,7 @@ def get_names():
     limit = request.args.get('limit', type=int, default=50)
     offset = request.args.get('offset', type=int, default=0)
     industry = request.args.get('industry', type=str, default=None)
-    filter_queries = []
+    filter_queries = [Organisation.verified == True]
     if industry:
         filter_queries.append(Organisation.industry == industry)
 

@@ -1,14 +1,17 @@
 <script lang="ts">
   import { marked } from 'marked'
+  import DOMPurify from 'dompurify'
 
   import { PostEnum } from '../utils/apiService'
   import type { Post, VoteParams, onVote } from '../utils/apiService'
-  import { salaryMapper, ratingsMapper, numCommaFormatter } from '../utils/mappers'
+  import { salaryMapper, ratingsMapper, numCommaFormatter, yearFormatter } from '../utils/mappers'
   import Vote from '../lib/Vote.svelte'
 
   export let posts: Post[]
   export let onVote: onVote
   export let post_type: PostEnum
+
+  const sanitize_config = { USE_PROFILES: { html: true } }
 
   const handlePostVote = async (params: VoteParams) => {
     onVote({ ...params, vote_model_type: post_type })
@@ -29,18 +32,32 @@
             {ratingsMapper(post.tag)}</p>
         </div>
         <div class="flex flex-col grid grid-cols-4 gap-x-2 w-full">
-          <p class="col-span-2 truncate"><b>Position:</b> {post.position.name}</p>
-          <p class="col-span-2 truncate">
+          <p class="col-span-4 sm:col-span-2 truncate"><b>Position:</b> {post.position.name}</p>
+          <p class="col-span-4 sm:col-span-2 truncate">
               <b>{post_type === PostEnum.REVIEW ? 'Salary' : 'Offer'}</b>
               {`${salaryMapper(post.currency)}${post.compensation > 0 ? numCommaFormatter(post.compensation, 0) : 'NA'}`}
           </p>
-          <p class="col-span-2 truncate"><b>Location:</b> {post.location.length > 0 ? post.location : 'NA'}</p>
+          <p class="col-span-4 sm:col-span-2 truncate">
+            <b>Location:</b>
+            {post.location.length > 0 ? post.location : 'NA'}
+          </p>
+          {#if post_type === PostEnum.REVIEW}
+            <p class="col-span-4 sm:col-span-2 truncate">
+              <b>Tenure:</b>
+              {post.duration_years > 0 ? `${yearFormatter(post.duration_years)}` : 'NA'}
+            </p>
+          {:else}
+            <p class="col-span-4 sm:col-span-2 truncate">
+              <b>Stages completed:</b>
+              {post.stages > 0 ? post.stages : 'NA'}
+            </p>
+          {/if}
         </div>
         <p class="text-justify">
             <span class="font-bold">
                 Interview:
             </span>
-            {@html marked.parse(post.post)}
+            {@html DOMPurify.sanitize(marked.parse(post.post), sanitize_config)}
         </p>
         <div class="w-full flex justify-end">
           <Vote
