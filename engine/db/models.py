@@ -116,6 +116,7 @@ class Organisation(db.Base):
     interviews = relationship('Interview', backref='organisation', lazy=True, cascade="all, delete-orphan")
     positions = relationship('Position', backref='organisation', lazy=True, cascade="all, delete-orphan")
     page_visits = Column(Integer, default=1)
+    verified = Column(Boolean, default=False, nullable=False)
 
     def __repr__(self):
         return (f"<Organisation({self.id})>")

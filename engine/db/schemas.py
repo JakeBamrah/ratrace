@@ -91,3 +91,4 @@ class OrganisationSchema(Schema):
     total_reviews = fields.Int()
     total_interviews = fields.Int()
     page_visits = fields.Str(load_only=True)
+    verified = fields.Bool()

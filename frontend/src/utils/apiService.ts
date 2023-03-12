@@ -76,6 +76,7 @@ export type Organisation = {
   interviews: any[]
   total_reviews: number
   total_interviews: number
+  verified: boolean
 }
 
 export type OrgQueryParamsType = {

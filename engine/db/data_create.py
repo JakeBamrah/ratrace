@@ -26,7 +26,8 @@ def generate_dummy_data():
                 headquarters="London, UK",
                 industry=industries[randint(0, 21)],
                 page_visits=randint(0, 5000),
-                url=f'www.org_{i}_website.com'
+                url=f'www.org_{i}_website.com',
+                verified=True
                 ))
 
             account = Account(username=f'account_{i}')
