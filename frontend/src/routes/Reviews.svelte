@@ -1,10 +1,18 @@
 <script lang="ts">
-  import type { Review } from '../utils/apiService'
+  import { VoteModelEnum } from '../utils/apiService'
+  import type { Review, onVote, VoteParams } from '../utils/apiService'
   import { salaryMapper, ratingsMapper, numCommaFormatter } from '../utils/mappers'
   import { formatTimestamp } from '../utils/timeago'
   import Vote from '../lib/Vote.svelte'
 
   export let reviews: Review[]
+  export let onVote: onVote
+
+  const handleReviewVote = async (params: VoteParams) => {
+    onVote({ ...params, vote_model_type: VoteModelEnum.REVIEW })
+    return
+  }
+ // [{formatTimestamp(review.created_at)}]
 </script>
 
 <div class="REVIEW_CONTAINER w-full divide-y space-y-4">
@@ -39,15 +47,14 @@
         </div>
         <p class="text-justify">
             <span class="font-bold">
-                Review [{formatTimestamp(review.created_at)}]:
+                Review:
             </span>
             {review.review}
         </p>
         <div class="w-full flex justify-end">
           <Vote
-            upvotes={review.upvotes}
-            downvotes={review.downvotes}
-            onVote={(vote) => console.log(vote)} />
+            post={review}
+            onVote={handleReviewVote} />
         </div>
       </div>
     {/each}

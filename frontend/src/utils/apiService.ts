@@ -33,8 +33,8 @@ export enum ReviewSort {
 export type ReviewSortKey = keyof typeof ReviewSort
 
 export enum Vote {
-    UPVOTE = 'upvote',
-    DOWNVOTE = 'downvote'
+    UPVOTE = 1,
+    DOWNVOTE = -1
 }
 
 export enum Industry {
@@ -116,6 +116,7 @@ export type Position = {
 }
 
 export type Review = {
+  id: number
   account: Account
   position: Position
   created_at: number
@@ -131,6 +132,7 @@ export type Review = {
 }
 
 export type Interview = {
+  id: number
   account: Account
   position: Position
   created_at: number
@@ -144,6 +146,21 @@ export type Interview = {
   offer: number
 }
 
+export enum VoteModelEnum {
+  REVIEW = 'review',
+  INTERVIEW = 'interview'
+}
+
+export type Post = Review | Interview
+
+export type VoteParams = {
+  post_id: number
+  vote: Vote
+  already_upvoted?: boolean
+  already_downvoted?: boolean
+  vote_model_type?: VoteModelEnum
+}
+export type onVote = (args: VoteParams) => Promise<any>
 
 // store for top level account subscription
 export const account: Writable<Account> = writable(null)
@@ -173,7 +190,7 @@ export default class ApiService {
 
     // sort positions for selected org
     const org = resp.data.org.org
-    org.positions.sort((a, b) => alphabeticalSort(a.name, b.name))
+    org.positions.sort((a: Organisation, b: Organisation) => alphabeticalSort(a.name, b.name))
 
     return resp.data.org
   }
@@ -246,5 +263,11 @@ export default class ApiService {
       account.set(resp.data.account)
     }
     return Boolean(resp.data.error)
+  }
+
+  vote = async (args: VoteParams): Promise<any> => {
+    const params = {...args}
+    const resp = await this.api.put('/account/vote', params)
+    return resp
   }
 }

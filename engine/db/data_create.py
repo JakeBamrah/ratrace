@@ -7,7 +7,7 @@ import string
 
 def randomword(length):
     letters = string.ascii_lowercase
-    return ''.join(choice(letters) for i in range(length))
+    return ''.join(choice(letters) for _ in range(length))
 
 def generate_dummy_data():
     init_db()

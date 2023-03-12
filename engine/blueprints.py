@@ -4,7 +4,11 @@ from flask import Blueprint, g, request, jsonify, json, make_response, session
 import pandas as pd
 from sqlalchemy import func, desc
 
-from db.models import Organisation, Account, Review, Interview, ReviewVote, InterviewVote
+from db.models import (
+        Organisation, Account, Review, Vote,
+        Interview, ReviewVote, InterviewVote,
+        VoteTypeModel
+)
 import db.schemas as schemas
 
 
@@ -273,28 +277,11 @@ def signup():
 
 account = Blueprint('account', __name__, url_prefix='/account')
 
-@account.route('/<int:account_id>', methods=['GET'])
-def get_account(account_id):
-    limit = request.args.get('limit', type=int, default=5)
-    account = g.session.query(Account).filter(Account.id == account_id).scalar()
-    review_sorted_q = (g.session
-            .query(Review)
-            .filter(Review.account_id == account_id)
-            .order_by(Review.created_at.desc())
-            .limit(limit))
-
-    account_schema = schemas.AccountSchema(exclude=('reviews', 'interviews'))
-    review_schema = schemas.ReviewSchema()
-    data = dict(
-            account = account_schema.dump(account),
-            reviews = review_schema.dump(review_sorted_q, many=True)
-        )
-    return jsonify(data=data)
-
-
-@account.route('/<int:account_id>/reviews', methods=['GET'])
-def get_account_reviews(account_id):
-    limit = request.args.get('limit', type=int, default=50)
+@account.route('/reviews', methods=['POST'])
+def get_account_reviews():
+    r = request.get_json()
+    limit = r.get('limit', 10)
+    account_id = r.get('account_id')
     review_sorted_q = (g.session
             .query(Review)
             .filter(Review.account_id == account_id)
@@ -306,9 +293,11 @@ def get_account_reviews(account_id):
     return jsonify(data=data)
 
 
-@account.route('/<int:account_id>/interviews', methods=['GET'])
-def get_account_interviews(account_id):
-    limit = request.args.get('limit', type=int, default=50)
+@account.route('/interviews', methods=['POST'])
+def get_account_interviews():
+    r = request.get_json()
+    limit = r.get('limit', 10)
+    account_id = r.get('account_id')
     interview_sorted_q = (g.session
             .query(Interview)
             .filter(Interview.account_id == account_id)
@@ -320,25 +309,51 @@ def get_account_interviews(account_id):
     return jsonify(data=data)
 
 
-@account.route('/<int:account_id>/review_votes', methods=['GET'])
-def get_account_review_votes(account_id):
-    review_votes_sorted_q = (g.session
-            .query(ReviewVote)
-            .filter(ReviewVote.account_id == account_id)
-            .order_by(ReviewVote.created_at.desc()))
+@account.route('/vote', methods=['PUT'])
+def review_vote():
+    """Handles creating new upvotes and downvotes for ReviewVote and
+    InterviewVote objects. Existing votes are updated if a user changes it from
+    a positive to a negative vote."""
+    r = request.get_json()
+    post_id = r.get('post_id', None)
+    raw_vote = r.get('vote', None)
+    already_upvoted = r.get('already_upvoted', False)
+    already_downvoted = r.get('already_downvoted', False)
+    vote_model_type = r.get('vote_model_type', VoteTypeModel.REVIEW)
 
-    schema = schemas.ReviewVoteSchema(exclude=['updated_at'])
-    data = dict(review_votes = schema.dump(review_votes_sorted_q, many=True))
-    return jsonify(data=data)
+    account_id = session.get('account_id')
 
+    error_message=None
+    if not account_id:
+        error_message = "Not authenticated"
+    if not raw_vote:
+        error_message = "Invalid vote"
 
-@account.route('/<int:account_id>/interview_votes', methods=['GET'])
-def get_account_interview_votes(account_id):
-    interview_votes_sorted_q = (g.session
-            .query(InterviewVote)
-            .filter(InterviewVote.account_id == account_id)
-            .order_by(InterviewVote.created_at.desc()))
+    # figure out which model we are dealing with and update filters from there
+    VoteModel = ReviewVote
+    filters = [(VoteModel.review_id == post_id)]
+    id_key = 'review_id'
+    vote = Vote.DOWNVOTE.value if raw_vote < 0 else Vote.UPVOTE.value
+    if vote_model_type == VoteTypeModel.INTERVIEW.value:
+        VoteModel = InterviewVote
+        filters = [(VoteModel.interview_id == post_id)]
+        id_key = 'interview_id'
 
-    schema = schemas.InterviewVoteSchema(exclude=['updated_at'])
-    data = dict(schema.dump(interview_votes_sorted_q, many=True))
-    return jsonify(data=data)
+    vote_created = False
+    filters.append(VoteModel.account_id == account_id)
+    if already_upvoted or already_downvoted:
+        # find existing vote and update it
+        vote_obj = g.session.query(VoteModel).filter(*filters).scalar()
+        vote_obj.vote = vote
+        vote_created = g.db_commit(g.session, [vote_obj])
+    else:
+        # no previous votes for this review, create a new vote object
+        params = {'account_id': account_id, 'vote': vote}
+        params[id_key] = post_id
+        vote_obj = VoteModel(**params)
+        vote_created = g.db_commit(g.session, [vote_obj])
+
+    if not vote_created:
+        error_message = "Failed to create vote"
+
+    return jsonify(vote_created=vote_created, error=error_message)

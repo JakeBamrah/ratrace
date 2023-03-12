@@ -1,9 +1,16 @@
 <script lang="ts">
-  import type { Interview } from '../utils/apiService'
+  import  { VoteModelEnum } from '../utils/apiService'
+  import type { Interview, VoteParams, onVote } from '../utils/apiService'
   import { salaryMapper, ratingsMapper, numCommaFormatter } from '../utils/mappers'
   import Vote from '../lib/Vote.svelte'
 
   export let interviews: Interview[]
+  export let onVote: onVote
+
+  const handleInterviewVote = async (params: VoteParams) => {
+    onVote({ ...params, vote_model_type: VoteModelEnum.INTERVIEW })
+    return
+  }
 </script>
 
 <div class="REVIEW_CONTAINER w-full divide-y space-y-4">
@@ -28,15 +35,14 @@
         </div>
         <p class="text-justify">
             <span class="font-bold">
-                Review:
+                Interview:
             </span>
             {interview.interview}
         </p>
         <div class="w-full flex justify-end">
           <Vote
-            upvotes={interview.upvotes}
-            downvotes={interview.downvotes}
-            onVote={(vote) => console.log(vote)} />
+            post={interview}
+            onVote={handleInterviewVote} />
         </div>
       </div>
     {/each}

@@ -44,6 +44,10 @@ class Vote(enum.Enum):
     UPVOTE = 1
     DOWNVOTE = -1
 
+class VoteTypeModel(enum.Enum):
+    REVIEW = 'review'
+    INTERVIEW = 'interview'
+
 class ReviewTag(enum.Enum):
     GOOD = 'good'
     AVERAGE = 'average'

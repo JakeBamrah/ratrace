@@ -95,6 +95,7 @@
               id={params.id}
               getOrg={getOrg}
               getReviewsAndInterviews={getOrgReviewsAndInterviews}
+              onVote={api.vote}
             />
           </Route>
         </Route>

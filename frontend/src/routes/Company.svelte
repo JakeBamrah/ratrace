@@ -4,10 +4,12 @@
   import Select from 'svelte-select'
   import { useNavigate } from 'svelte-navigator'
 
-  import { Industry, Rating, ReviewSort } from '../utils/apiService'
+  import { account, Industry, Rating, ReviewSort, Vote as VoteEnum } from '../utils/apiService'
   import type {
-    Review, Interview, ReviewSortKey,
-    RatingKey, Position, OrgQueryParamsType } from '../utils/apiService'
+    Review, Interview, ReviewSortKey, onVote, Vote as VoteType,
+    RatingKey, Position, OrgQueryParamsType, VoteParams,
+    VoteModelEnum
+  } from '../utils/apiService'
   import Interviews from './Interviews.svelte'
   import PageContainer from '../lib/PageContainer.svelte'
   import Reviews from './Reviews.svelte'
@@ -25,10 +27,11 @@
   export let id: string
   export let getOrg: (org_id: number) => Promise<any>
   export let getReviewsAndInterviews: (org_id: OrgQueryParamsType) => Promise<any>
+  export let onVote: onVote
 
   const navigate = useNavigate()
 
-  // review and interview filter options
+  // ------ REVIEW \ INTERVIW FILTER OPTIONS ------
   let selected_panel: SelectedPanel = 'Reviews'
   const panels: SelectedPanel[] = ['Reviews', 'Interviews']
 
@@ -310,9 +313,9 @@
         onTabSelect={(panel) => selected_panel = panel} />
     </div>
     {#if selected_panel === 'Reviews'}
-      <Reviews reviews={filtered_reviews} />
+      <Reviews onVote={onVote} reviews={filtered_reviews} />
     {:else}
-      <Interviews interviews={filtered_interviews} />
+      <Interviews onVote={onVote} interviews={filtered_interviews} />
     {/if}
 
       {#if selected_panel == 'Reviews' && !filter_review_max_reached}
