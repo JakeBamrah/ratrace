@@ -13,6 +13,9 @@
   $: already_downvoted = post.downvotes.includes($account?.id)
 
   const handleVote = (vote: VoteType) => {
+    if (!$account || !$account.id)
+      return
+
     // check if they have already given the same upvote prior
     if (
       vote === VoteEnum.UPVOTE && already_upvoted ||
