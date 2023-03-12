@@ -79,6 +79,11 @@ def get_org(org_id):
     review_limit = request.args.get('review_limit', type=int, default=50)
     interview_limit = request.args.get('interview_limit', type=int, default=50)
     org = g.session.query(Organisation).filter(Organisation.id == org_id).scalar()
+
+    # increment page_visits for org when selected
+    org.page_visits += 1
+    g.db_commit(g.session, [org])
+
     review_sorted_q = (g.session
             .query(Review)
             .filter(Review.org_id == org_id)
