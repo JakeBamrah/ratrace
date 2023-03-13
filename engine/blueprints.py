@@ -134,7 +134,7 @@ def get_org_reviews_and_interviews(org_id):
 
     if sort_order in {'DOWNVOTES', 'UPVOTES'}:
         # upvotes downvotes is a bit special
-        # we need to find the vote score for each review in an org and (cte)
+        # we need to find the vote score for each review in an org via (cte)
         # join this cte vote score table to actual review objects
         review_vote_score_q = (g.session
             .query(

@@ -7,11 +7,11 @@ import { alphabeticalSort } from './mappers'
 
 
 export enum Currency {
-    GBP = 'gbp',
-    USD = 'usd',
-    EUR = 'eur',
-    JPY = 'jpy',
-    CNY = 'cny'
+    GBP = 'GBP',
+    USD = 'USD',
+    EUR = 'EUR',
+    JPY = 'JPY',
+    CNY = 'CNY'
 }
 export type CurrencyKey = keyof typeof Currency
 

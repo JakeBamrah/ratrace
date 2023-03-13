@@ -12,6 +12,7 @@
   import Posts from './Posts.svelte'
   import PageContainer from '../lib/PageContainer.svelte'
   import Tabs from '../lib/Tabs.svelte'
+  import PostCreate from './PostCreate.svelte'
   import { getCompanySizeBracket } from '../utils/mappers'
 
 
@@ -19,7 +20,12 @@
   const ALL_POSITIONS = { id: -1, label: 'All'}
   const DEFAULT_SORT = { id: PostSort.DATE_CREATED.toUpperCase() as PostSortKey, label: PostSort.DATE_CREATED }
 
-  type SelectedPanel = 'Reviews' | 'Interviews'
+  enum SelectedPanelKey {
+    REVIEWS = 'Reviews',
+    INTERVIEWS = 'Interviews',
+    CREATE = 'Create',
+  }
+  type SelectedPanel = { id: SelectedPanelKey, value: string }
   type SelectSort = { id: PostSortKey, label: PostSort }
 
   export let id: string
@@ -30,8 +36,14 @@
   const navigate = useNavigate()
 
   // ------ REVIEW \ INTERVIW FILTER OPTIONS ------
-  let selected_panel: SelectedPanel = 'Reviews'
-  const panels: SelectedPanel[] = ['Reviews', 'Interviews']
+  let selected_panel: SelectedPanel = { id: SelectedPanelKey.REVIEWS, value: 'Reviews' }
+  const left_panels: SelectedPanel[] = [
+    { id: SelectedPanelKey.REVIEWS, value: 'Reviews' },
+    { id: SelectedPanelKey.INTERVIEWS, value: 'Interviews' }
+  ]
+  const right_panels: SelectedPanel[] = [
+    { id: SelectedPanelKey.CREATE, value: icons["edit-3"].toSvg({ class: 'h-4 w-4'}) }
+  ]
 
   const tags = Object.keys(Rating).map(k => ({ id: k, label: Rating[k]}))
   let selected_tag: { id: RatingKey, label: Rating } = {
@@ -45,7 +57,7 @@
     return {
       id: k,
       label: PostSort[k],
-      selectable: !(is_tenure && selected_panel === 'Interviews')
+      selectable: !(is_tenure && selected_panel.id === 'Interviews')
     }}) as SelectSort[]
   let selected_sort: SelectSort = DEFAULT_SORT
   let positions = [ALL_POSITIONS]
@@ -88,10 +100,10 @@
     } = args
 
     // if max not reached, we've had to pull in data (pre-sorted) from api
-    if (selected_panel === 'Reviews' && !maxed_out_reviews) {
+    if (selected_panel.id === SelectedPanelKey.REVIEWS && !maxed_out_reviews) {
       return reviews
     }
-    if (selected_panel === 'Interviews' && !maxed_out_interviews) {
+    if (selected_panel.id === SelectedPanelKey.INTERVIEWS && !maxed_out_interviews) {
       return interviews
     }
 
@@ -114,18 +126,20 @@
     }
 
     if (sort === PostSort.TENURE.toUpperCase()) {
-      if (selected_panel === 'Interviews')
+      if (selected_panel.id === SelectedPanelKey.INTERVIEWS) {
         selected_sort = null
+    }
 
-      if (selected_panel === 'Reviews')
+      if (selected_panel.id === SelectedPanelKey.REVIEWS)
         sorted_items.sort((a: Review, b: Review) => a.duration_years < b.duration_years ? 1 : 0)
     }
 
     if (sort === PostSort.COMPENSATION.toUpperCase()) {
-      if (selected_panel === 'Interviews')
+      if (selected_panel.id === SelectedPanelKey.INTERVIEWS)
         sorted_items.sort((a: Post, b: Post) => a.compensation < b.compensation ? 1 : 0)
     }
 
+    // sort by all positions
     if (position_id !== -1) {
       sorted_items = sorted_items.filter(i => i.position.id === position_id)
     }
@@ -268,7 +282,6 @@
     <div class="col-span-8 sm:col-span-4 w-full pt-0">
       Position:
       <Select
-        placeholder='Filter position'
         itemId='id'
         items={positions}
         bind:value={selected_position}
@@ -288,7 +301,6 @@
     <div class="col-span-4 sm:col-span-2 pt-2 sm:pt-0">
       Sort:
       <Select
-        placeholder='Select sort'
         itemId='id'
         items={sorts}
         bind:value={selected_sort}
@@ -303,30 +315,35 @@
     ">
     <div class="w-full flex space-x-4 sm:space-x-2">
       <Tabs
-        tabs={panels}
+        left_tabs={left_panels}
+        symbols={right_panels}
         selected_tab={selected_panel}
         onTabSelect={(panel) => selected_panel = panel} />
     </div>
-    {#if selected_panel === 'Reviews'}
+    {#if selected_panel.id === SelectedPanelKey.REVIEWS}
       <Posts
         onVote={onVote}
         posts={filtered_reviews}
         post_type={PostEnum.REVIEW}
       />
-    {:else}
+    {:else if selected_panel.id === SelectedPanelKey.INTERVIEWS}
       <Posts
         onVote={onVote}
         posts={filtered_interviews}
         post_type={PostEnum.INTERVIEW}
       />
+    {:else}
+      <PostCreate
+        positions={positions.filter(p => p.id !== -1)}
+      />
     {/if}
 
-      {#if selected_panel == 'Reviews' && !filter_review_max_reached}
+      {#if selected_panel.id == 'Reviews' && !filter_review_max_reached}
         <div class="w-full flex justify-center">
           <button on:click={() => onGetReviewsAndInterviews()}>LOAD MORE REVIEWS</button>
         </div>
       {/if}
-      {#if selected_panel == 'Interviews' && !filter_interview_max_reached}
+      {#if selected_panel.id == 'Interviews' && !filter_interview_max_reached}
         <div class="w-full flex justify-center">
           <button on:click={() => onGetReviewsAndInterviews()}>LOAD MORE INTERVIEWS</button>
         </div>
