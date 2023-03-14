@@ -103,9 +103,8 @@ def get_org(org_id):
     return jsonify(org=data)
 
 
-@orgs.route('/<int:org_id>/reviews_and_interviews', methods=['GET'])
-def get_org_reviews_and_interviews(org_id):
-    # TODO: setup similarity funcion to find positions like given position
+@orgs.route('/<int:org_id>/reviews', methods=['GET'])
+def get_org_reviews(org_id):
     position_id = request.args.get('position_id', type=int, default=None)
     tag = request.args.get('tag', type=str, default=None)
     sort_order = request.args.get('sort_order', type=str, default=None)
@@ -113,24 +112,17 @@ def get_org_reviews_and_interviews(org_id):
     offset = request.args.get('offset', type=int, default=0)
 
     review = g.session.query(Review)
-    interview = g.session.query(Interview)
-
-    review_filter_queries = [(Review.org_id == org_id)]
-    interview_filter_queries = [(Interview.org_id == org_id)]
+    filter_queries = [(Review.org_id == org_id)]
     if position_id:
-        review_filter_queries.append(Review.position_id == position_id)
-        interview_filter_queries.append(Interview.position_id == position_id)
+        filter_queries.append(Review.position_id == position_id)
     if tag:
-        review_filter_queries.append(Review.tag == tag)
-        interview_filter_queries.append(Interview.tag == tag)
+        filter_queries.append(Review.tag == tag)
 
-    review_order = Review.created_at.desc()
-    interview_order = Interview.created_at.desc()
+    order_by = Review.created_at.desc()
     if sort_order == 'TENURE':
-        review_order = Review.duration_years.desc()
+        order_by = Review.duration_years.desc()
     if sort_order == 'COMPENSATION':
-        review_order = Review.compensation.desc()
-        interview_order = Interview.compensation.desc()
+        order_by = Review.compensation.desc()
 
     if sort_order in {'DOWNVOTES', 'UPVOTES'}:
         # upvotes downvotes is a bit special
@@ -145,8 +137,54 @@ def get_org_reviews_and_interviews(org_id):
             .filter(Review.org_id == org_id)
             .group_by(ReviewVote.review_id)).cte('review_vote_count')
         review = g.session.query(Review).join(review_vote_score_q, review_vote_score_q.c.review_id == Review.id, isouter=True)
-        review_order = desc(func.coalesce(review_vote_score_q.c.vote_count, 0))
+        order_by = desc(func.coalesce(review_vote_score_q.c.vote_count, 0))
+        if sort_order == 'DOWNVOTES':
+            order_by = func.coalesce(review_vote_score_q.c.vote_count, 0)
+        else:
+            order_by = desc(func.coalesce(review_vote_score_q.c.vote_count, 0))
 
+
+    # for disabling load more reviews button
+    max_reviews_for_filter = review.filter(*filter_queries).count()
+    review_sorted_q = (review
+            .filter(*filter_queries)
+            .order_by(order_by)
+            .offset(offset)
+            .limit(limit))
+
+    data = dict(
+            posts = schemas.ReviewSchema().dump(review_sorted_q, many=True),
+            max_reached = max_reviews_for_filter <= offset + limit,
+        )
+    return jsonify(data)
+
+
+@orgs.route('/<int:org_id>/interviews', methods=['GET'])
+def get_org_interviews(org_id):
+    position_id = request.args.get('position_id', type=int, default=None)
+    tag = request.args.get('tag', type=str, default=None)
+    sort_order = request.args.get('sort_order', type=str, default=None)
+    limit = request.args.get('limit', type=int, default=50)
+    offset = request.args.get('offset', type=int, default=0)
+
+    interview = g.session.query(Interview)
+
+    filter_queries = [(Interview.org_id == org_id)]
+    if position_id:
+        filter_queries.append(Interview.position_id == position_id)
+    if tag:
+        filter_queries.append(Interview.tag == tag)
+
+    order_by = Interview.created_at.desc()
+    if sort_order == 'STAGES':
+        order_by = Interview.stages.desc()
+    if sort_order == 'COMPENSATION':
+        order_by = Interview.compensation.desc()
+
+    if sort_order in {'DOWNVOTES', 'UPVOTES'}:
+        # upvotes downvotes is a bit special
+        # we need to find the vote score for each review in an org via (cte)
+        # join this cte vote score table to actual review objects
         inter_vote_score_q = (g.session
             .query(
                 InterviewVote.interview_id.label('interview_id'),
@@ -158,34 +196,23 @@ def get_org_reviews_and_interviews(org_id):
         interview = g.session.query(Interview).join(inter_vote_score_q, inter_vote_score_q.c.interview_id == Interview.id, isouter=True)
 
         if sort_order == 'DOWNVOTES':
-            review_order = func.coalesce(review_vote_score_q.c.vote_count, 0)
-            interview_order = func.coalesce(inter_vote_score_q.c.vote_count, 0)
+            order_by = func.coalesce(inter_vote_score_q.c.vote_count, 0)
         else:
-            review_order = desc(func.coalesce(review_vote_score_q.c.vote_count, 0))
-            interview_order = desc(func.coalesce(inter_vote_score_q.c.vote_count, 0))
-
+            order_by = desc(func.coalesce(inter_vote_score_q.c.vote_count, 0))
 
     # for disabling load more reviews button
-    max_reviews_for_filter = review.filter(*review_filter_queries).count()
-    max_interviews_for_filter = interview.filter(*interview_filter_queries).count()
-    review_sorted_q = (review
-            .filter(*review_filter_queries)
-            .order_by(review_order)
-            .offset(offset)
-            .limit(limit))
+    max_interviews_for_filter = interview.filter(*filter_queries).count()
     interview_sorted_q = (interview
-            .filter(*interview_filter_queries)
-            .order_by(interview_order)
+            .filter(*filter_queries)
+            .order_by(order_by)
             .offset(offset)
             .limit(limit))
 
     data = dict(
-            reviews = schemas.ReviewSchema().dump(review_sorted_q, many=True),
-            no_more_reviews = max_reviews_for_filter <= offset + limit,
-            interviews = schemas.InterviewSchema().dump(interview_sorted_q, many=True),
-            no_more_interviews = max_interviews_for_filter <= offset + limit
+            posts = schemas.InterviewSchema().dump(interview_sorted_q, many=True),
+            max_reached = max_interviews_for_filter <= offset + limit
         )
-    return jsonify(reviews_and_interviews=data)
+    return jsonify(data)
 
 
 @orgs.route('/<int:org_id>/compensation_summary', methods=['GET'])

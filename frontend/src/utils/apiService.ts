@@ -27,6 +27,7 @@ export enum PostSort {
   DATE_CREATED = 'Date created',
   COMPENSATION = 'Compensation',
   TENURE = 'Tenure',
+  STAGES = 'Stages',
   DOWNVOTES = 'Downvotes',
   UPVOTES = 'Upvotes'
 }
@@ -88,6 +89,7 @@ export type OrgQueryParamsType = {
   position_id?: number
   limit?: number
   offset?: number
+  post_type?: PostEnum
 }
 
 type AccountID = number
@@ -230,14 +232,15 @@ export default class ApiService {
     return resp.data.orgs
   }
 
-  getOrgReviewsAndInterviews = async(args: OrgQueryParamsType) => {
+  getOrgPosts = async(args: OrgQueryParamsType) => {
     const {
       org_id,
       position_id,
       tag,
       sort_order,
       limit,
-      offset
+      offset,
+      post_type
     } = args
 
     const params = {
@@ -247,8 +250,14 @@ export default class ApiService {
       limit,
       offset
     }
-    const resp = await this.api.get(`/orgs/${org_id}/reviews_and_interviews`, { params })
-    return resp.data.reviews_and_interviews
+
+    let url = `/orgs/${org_id}/reviews`
+    if (post_type === PostEnum.INTERVIEW) {
+        url = `/orgs/${org_id}/interviews`
+    }
+
+    const resp = await this.api.get(url, { params })
+    return resp.data
   }
 
   login = async(args: AccountQueryParams): Promise<any> => {

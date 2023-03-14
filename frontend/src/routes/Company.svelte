@@ -19,6 +19,11 @@
   const LIMIT = 50
   const ALL_POSITIONS = { id: -1, label: 'All'}
   const DEFAULT_SORT = { id: PostSort.DATE_CREATED.toUpperCase() as PostSortKey, label: PostSort.DATE_CREATED }
+  const DEFAULT_SELECTED_TAG: { id: RatingKey, label: Rating } = {
+      id: Rating.ALL.toUpperCase() as RatingKey,
+      label: Rating.ALL
+    }
+
 
   enum SelectedPanelKey {
     REVIEWS = 'Reviews',
@@ -30,7 +35,7 @@
 
   export let id: string
   export let getOrg: (org_id: number) => Promise<any>
-  export let getReviewsAndInterviews: (org_id: OrgQueryParamsType) => Promise<any>
+  export let onGetOrgPosts: (org_id: OrgQueryParamsType) => Promise<any>
   export let onVote: onVote
   export let onPost: onPostType
 
@@ -47,22 +52,24 @@
   ]
 
   const tags = Object.keys(Rating).map(k => ({ id: k, label: Rating[k]}))
-  let selected_tag: { id: RatingKey, label: Rating } = {
-    id: Rating.ALL.toUpperCase() as RatingKey,
-    label: Rating.ALL
-  }
+  let review_selected_tag = DEFAULT_SELECTED_TAG
+  let interview_selected_tag = DEFAULT_SELECTED_TAG
 
   $: sorts = Object.keys(PostSort).map(k => {
     // tenure is only available as a choice for the reviews panel
     const is_tenure = PostSort[k] === PostSort.TENURE
+    const is_stages = PostSort[k] === PostSort.STAGES
     return {
       id: k,
       label: PostSort[k],
-      selectable: !(is_tenure && selected_panel.id === 'Interviews')
+      selectable: !(is_tenure && is_interview) && !(is_stages && is_review)
     }}) as SelectSort[]
-  let selected_sort: SelectSort = DEFAULT_SORT
+  let review_selected_sort: SelectSort = DEFAULT_SORT
+  let interview_selected_sort: SelectSort = DEFAULT_SORT
+
   let positions = []
-  let selected_position: { id: number, label: string } = ALL_POSITIONS
+  let review_selected_position: { id: number, label: string } = ALL_POSITIONS
+  let interview_selected_position: { id: number, label: string } = ALL_POSITIONS
 
   let org = null
   let reviews: Review[] = []
@@ -80,15 +87,17 @@
   $: maxed_out_reviews = reviews.length === org?.total_reviews
   $: maxed_out_interviews = interviews.length === org?.total_interviews
 
+  $: is_review = selected_panel?.id === SelectedPanelKey.REVIEWS
+  $: is_interview = selected_panel?.id === SelectedPanelKey.INTERVIEWS
+
   const sortItems = (args : {
     items: (Review | Interview)[]
     tag: RatingKey
     sort: PostSortKey
     position_id: number
-    selected_panel: SelectedPanel
   }) => {
     /*
-     * Items are pulled in from api (getOrg or onGetReviewsAndInterviews). If
+     * Items are pulled in from api (getOrg or handleGetOrgPosts). If
      * data has come directly from the api it has already been sorted. If all
      * data has been loaded we sort in-app.
      */
@@ -97,14 +106,13 @@
       tag,
       sort,
       position_id,
-      selected_panel
     } = args
 
     // if max not reached, we've had to pull in data (pre-sorted) from api
-    if (selected_panel.id === SelectedPanelKey.REVIEWS && !maxed_out_reviews) {
+    if (is_review && !maxed_out_reviews) {
       return reviews
     }
-    if (selected_panel.id === SelectedPanelKey.INTERVIEWS && !maxed_out_interviews) {
+    if (is_interview && !maxed_out_interviews) {
       return interviews
     }
 
@@ -127,16 +135,14 @@
     }
 
     if (sort === PostSort.TENURE.toUpperCase()) {
-      if (selected_panel.id === SelectedPanelKey.INTERVIEWS) {
-        selected_sort = null
-    }
-
-      if (selected_panel.id === SelectedPanelKey.REVIEWS)
         sorted_items.sort((a: Review, b: Review) => a.duration_years < b.duration_years ? 1 : 0)
     }
 
+    if (sort === PostSort.STAGES.toUpperCase()) {
+        sorted_items.sort((a: Interview, b: Interview) => a.stages < b.stages ? 1 : 0)
+    }
+
     if (sort === PostSort.COMPENSATION.toUpperCase()) {
-      if (selected_panel.id === SelectedPanelKey.INTERVIEWS)
         sorted_items.sort((a: Post, b: Post) => a.compensation < b.compensation ? 1 : 0)
     }
 
@@ -150,21 +156,23 @@
 
   $: filtered_reviews = sortItems({
     items: reviews,
-    tag: selected_tag?.id,
-    sort: selected_sort?.id,
-    position_id: selected_position?.id,
-    selected_panel: selected_panel
+    tag: review_selected_tag?.id,
+    sort: review_selected_sort?.id,
+    position_id: review_selected_position?.id
   }) as Review[]
 
   $: filtered_interviews = sortItems({
     items: interviews,
-    tag: selected_tag?.id,
-    sort: selected_sort?.id,
-    position_id: selected_position?.id,
-    selected_panel: selected_panel
+    tag: interview_selected_tag?.id,
+    sort: interview_selected_sort?.id,
+    position_id: interview_selected_position?.id
   }) as Interview[]
 
-  const onGetReviewsAndInterviews = (reset: boolean = false) => {
+  const handleGetOrgPosts = (
+    post_type: PostEnum,
+    max_reached: boolean,
+    reset: boolean = false,
+  ) => {
     /*
      * We load reviews and interviews in batches of 50.
      * We need to pull in more data from the api everytime the select menu is
@@ -175,42 +183,49 @@
      * Data from the api will be returned to us in the required sorting order.
      */
 
-    if (maxed_out_interviews && maxed_out_reviews && !reset) {
+    if (max_reached && !reset) {
       // we have no more data to pull in so just sort on client-side
       // not totally ideal because we may pull in some data unnecessarily but
       // it's a compromise for simplicity.
       return
     }
 
+    const is_post_type_review = post_type === PostEnum.REVIEW
     const params: OrgQueryParamsType = {
       org_id: org.id,
-      position_id: selected_position?.id,
-      tag: selected_tag.id,
-      sort_order: selected_sort?.id,
-      // we take the max offset because it helps us avoid pulling in duplicate
-      // rows for entity (interview or review) with less items
-      offset: Math.max(review_offset, interview_offset)
+      position_id: is_post_type_review ? review_selected_position?.id : interview_selected_position?.id,
+      tag: is_post_type_review ? review_selected_tag?.id : interview_selected_tag?.id,
+      sort_order: is_post_type_review ? review_selected_sort?.id : interview_selected_sort?.id,
+      offset: reset ? 0 : is_post_type_review ? review_offset : interview_offset,
+      post_type
     }
 
-    getReviewsAndInterviews(params).then(r => {
-      reviews = reset ? r.reviews : reviews.concat(r.reviews)
-      interviews = reset ? r.interviews : interviews.concat(r.interviews)
+    onGetOrgPosts(params).then(r => {
+      if (post_type === PostEnum.REVIEW) {
+        reviews = reset ? r.posts : reviews.concat(r.posts)
 
-      // reset the offsets back to initial 50
-      review_offset = reviews.length
-      interview_offset = interviews.length
+        // reset the offsets back to initial 50
+        review_offset = reviews.length
+        filter_review_max_reached = r.max_reached
+      }
 
-      filter_review_max_reached = r.no_more_reviews
-      filter_interview_max_reached = r.no_more_interviews
+      if (post_type === PostEnum.INTERVIEW) {
+        interviews = reset ? r.posts : interviews.concat(r.posts)
+
+        // reset the offsets back to initial 50
+        interview_offset = interviews.length
+        filter_interview_max_reached = r.max_reached
+      }
     })
   }
 
   const onSortChange = () => {
     // pull in fresh, sorted data from scratch everytime filters change
     // not the most efficient but keeps the code simple
-    review_offset = 0
-    interview_offset = 0
-    onGetReviewsAndInterviews(true)
+    const post_type =  is_review ? PostEnum.REVIEW : PostEnum.INTERVIEW
+    const max_reached = is_review ? maxed_out_reviews : maxed_out_interviews
+    const reset = true
+    handleGetOrgPosts(post_type, max_reached, reset)
   }
 
   // ORG SETUP AND POST CREATION
@@ -298,35 +313,66 @@
       flex w-full grid grid-cols-8 gap-y-1 gap-x-2
       border rounded-xl px-6 py-4
     ">
-    <div class="col-span-8 sm:col-span-4 w-full pt-0">
-      Position:
-      <Select
-        itemId='id'
-        items={positions}
-        bind:value={selected_position}
-        clearable={false}
-        on:change={onSortChange} />
-    </div>
-    <div class="col-span-4 sm:col-span-2 w-full pt-2 sm:pt-0">
-      Tag:
-      <Select
-        itemId='id'
-        items={tags}
-        bind:value={selected_tag}
-        clearable={false}
-        on:change={onSortChange} />
-    </div>
+      {#if is_review}
+        <div class="REVIEW_SORT_OPTIONS col-span-8 sm:col-span-4 w-full pt-0">
+          Position:
+          <Select
+            itemId='id'
+            items={positions}
+            bind:value={review_selected_position}
+            clearable={false}
+            on:change={onSortChange} />
+        </div>
+        <div class="col-span-4 sm:col-span-2 w-full pt-2 sm:pt-0">
+          Tag:
+          <Select
+            itemId='id'
+            items={tags}
+            bind:value={review_selected_tag}
+            clearable={false}
+            on:change={onSortChange} />
+        </div>
 
-    <div class="col-span-4 sm:col-span-2 pt-2 sm:pt-0">
-      Sort:
-      <Select
-        itemId='id'
-        items={sorts}
-        bind:value={selected_sort}
-        clearable={false}
-        on:change={onSortChange} />
+        <div class="col-span-4 sm:col-span-2 pt-2 sm:pt-0">
+          Sort:
+          <Select
+            itemId='id'
+            items={sorts}
+            bind:value={review_selected_sort}
+            clearable={false}
+            on:change={onSortChange} />
+        </div>
+      {:else}
+        <div class="INTERVIEW_SORT_OPTIONS col-span-8 sm:col-span-4 w-full pt-0">
+          Position:
+          <Select
+            itemId='id'
+            items={positions}
+            bind:value={interview_selected_position}
+            clearable={false}
+            on:change={onSortChange} />
+        </div>
+        <div class="col-span-4 sm:col-span-2 w-full pt-2 sm:pt-0">
+          Tag:
+          <Select
+            itemId='id'
+            items={tags}
+            bind:value={interview_selected_tag}
+            clearable={false}
+            on:change={onSortChange} />
+        </div>
+
+        <div class="col-span-4 sm:col-span-2 pt-2 sm:pt-0">
+          Sort:
+          <Select
+            itemId='id'
+            items={sorts}
+            bind:value={interview_selected_sort}
+            clearable={false}
+            on:change={onSortChange} />
+        </div>
+      {/if}
     </div>
-  </div>
 
   <div
     class="REVIEWS_AND_INTERVIEWS
@@ -339,13 +385,13 @@
         selected_tab={selected_panel}
         onTabSelect={(panel) => selected_panel = panel} />
     </div>
-    {#if selected_panel.id === SelectedPanelKey.REVIEWS}
+    {#if is_review}
       <Posts
         onVote={onVote}
         posts={filtered_reviews}
         post_type={PostEnum.REVIEW}
       />
-    {:else if selected_panel.id === SelectedPanelKey.INTERVIEWS}
+    {:else if is_interview}
       <Posts
         onVote={onVote}
         posts={filtered_interviews}
@@ -357,20 +403,26 @@
         onPost={handlePost}
       />
     {/if}
-
-      {#if selected_panel.id == 'Reviews' && !filter_review_max_reached}
-        <div class="w-full flex justify-center">
-          <button on:click={() => onGetReviewsAndInterviews()}>LOAD MORE REVIEWS</button>
-        </div>
-      {/if}
-      {#if selected_panel.id == 'Interviews' && !filter_interview_max_reached}
-        <div class="w-full flex justify-center">
-          <button on:click={() => onGetReviewsAndInterviews()}>LOAD MORE INTERVIEWS</button>
-        </div>
-      {/if}
-
+    {#if is_review && !filter_review_max_reached}
+      <div class="w-full flex justify-center">
+        <button
+          on:click={() => (
+          handleGetOrgPosts(PostEnum.REVIEW, maxed_out_reviews, false))
+        }>LOAD MORE REVIEWS</button>
+      </div>
+    {/if}
+    {#if is_interview && !filter_interview_max_reached}
+      <div class="w-full flex justify-center">
+        <button
+          on:click={() => (
+          handleGetOrgPosts(PostEnum.INTERVIEW, maxed_out_interviews, false))
+        }>LOAD MORE INTERVIEWS</button>
+      </div>
+    {/if}
   </div>
+
   {:else}
     <p>No company data <a href="/">search again</a></p>
+
   {/if}
 </PageContainer>

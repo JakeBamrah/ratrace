@@ -12,6 +12,8 @@
   export let post_type: PostEnum
 
   const sanitize_config = { USE_PROFILES: { html: true } }
+  $: is_review = post_type === PostEnum.REVIEW
+
 
   const handlePostVote = async (params: VoteParams) => {
     onVote({ ...params, vote_model_type: post_type })
@@ -34,14 +36,14 @@
         <div class="flex flex-col grid grid-cols-4 gap-x-2 w-full">
           <p class="col-span-4 sm:col-span-2 truncate"><b>Position:</b> {post.position.name}</p>
           <p class="col-span-4 sm:col-span-2 truncate">
-              <b>{post_type === PostEnum.REVIEW ? 'Salary' : 'Offer'}</b>
+              <b>{is_review ? 'Salary' : 'Offer'}</b>
               {`${salaryMapper(post.currency)}${post.compensation > 0 ? numCommaFormatter(post.compensation, 0) : 'NA'}`}
           </p>
           <p class="col-span-4 sm:col-span-2 truncate">
             <b>Location:</b>
             {post.location.length > 0 ? post.location : 'NA'}
           </p>
-          {#if post_type === PostEnum.REVIEW}
+          {#if is_review}
             <p class="col-span-4 sm:col-span-2 truncate">
               <b>Tenure:</b>
               {post.duration_years > 0 ? `${yearFormatter(post.duration_years)}` : 'NA'}
@@ -55,7 +57,7 @@
         </div>
         <p class="text-justify">
             <span class="font-bold">
-                Interview:
+              {is_review ? 'Review' : 'Interview'}
             </span>
             {@html DOMPurify.sanitize(marked.parse(post.post), sanitize_config)}
         </p>

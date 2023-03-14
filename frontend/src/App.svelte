@@ -61,10 +61,6 @@
     return await api.getOrg(params)
   }
 
-  const getOrgReviewsAndInterviews = async (params: OrgQueryParamsType) => {
-    return await api.getOrgReviewsAndInterviews(params)
-  }
-
   let loading_app = true
   onMount(async () => {
     // authenticate each page load
@@ -94,7 +90,7 @@
             <Company
               id={params.id}
               getOrg={getOrg}
-              getReviewsAndInterviews={getOrgReviewsAndInterviews}
+              onGetOrgPosts={api.getOrgPosts}
               onVote={api.vote}
               onPost={api.post}
             />
