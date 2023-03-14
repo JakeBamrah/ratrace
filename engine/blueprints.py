@@ -7,7 +7,7 @@ from sqlalchemy import func, desc
 from db.models import (
         Organisation, Account, Review, Vote,
         Interview, ReviewVote, InterviewVote,
-        VoteTypeModel
+        PostTypeModel, Position
 )
 import db.schemas as schemas
 
@@ -314,8 +314,80 @@ def get_account_interviews():
     return jsonify(data=data)
 
 
+@account.route('/post-review', methods=['POST'])
+def post_review():
+    r = request.get_json()
+    post = r.get('post')
+    position = r.get('position')
+    position_id = r.get('position_id')
+    org_id = r.get('org_id')
+
+    r['account_id'] = session.get('account_id')
+
+    error_message = None
+    if not r['account_id']:
+        error_message = "Not logged in"
+    if not position and not position_id:
+        error_message = "Position not given"
+    if not post:
+        error_message = "Post not given"
+
+    objs = []
+    schema = schemas.ReviewSchema()
+    if not position_id:
+        new_position = Position(name=position, org_id=org_id)
+        g.session.add(new_position)
+        g.session.flush()
+
+        r['position_id'] = new_position.id
+
+    # we've used position by this point, remove so schema can load successfully
+    r.pop('position', None)
+    review = schema.load(r)
+    objs.append(Review(**review))
+    review_created = g.db_commit(g.session, objs)
+
+    return jsonify(post_created=review_created, error=error_message)
+
+
+@account.route('/post-interview', methods=['POST'])
+def post_interview():
+    r = request.get_json()
+    post = r.get('post')
+    position = r.get('position')
+    position_id = r.get('position_id')
+    org_id = r.get('org_id')
+
+    r['account_id'] = session.get('account_id')
+
+    error_message = None
+    if not r['account_id']:
+        error_message = "Not logged in"
+    if not position and not position_id:
+        error_message = "Position not given"
+    if not post:
+        error_message = "Post not given"
+
+    objs = []
+    schema = schemas.InterviewSchema()
+    if not position_id:
+        new_position = Position(name=position, org_id=org_id)
+        g.session.add(new_position)
+        g.session.flush()
+
+        r['position_id'] = new_position.id
+
+    # we've used position by this point, remove so schema can load successfully
+    r.pop('position', None)
+    interview = schema.load(r)
+    objs.append(Interview(**interview))
+    interview_created = g.db_commit(g.session, objs)
+
+    return jsonify(post_created=interview_created, error=error_message)
+
+
 @account.route('/vote', methods=['PUT'])
-def review_vote():
+def post_vote():
     """Handles creating new upvotes and downvotes for ReviewVote and
     InterviewVote objects. Existing votes are updated if a user changes it from
     a positive to a negative vote."""
@@ -324,7 +396,7 @@ def review_vote():
     raw_vote = r.get('vote', None)
     already_upvoted = r.get('already_upvoted', False)
     already_downvoted = r.get('already_downvoted', False)
-    vote_model_type = r.get('vote_model_type', VoteTypeModel.REVIEW)
+    vote_model_type = r.get('vote_model_type', PostTypeModel.REVIEW)
 
     account_id = session.get('account_id')
 
@@ -339,7 +411,7 @@ def review_vote():
     filters = [(VoteModel.review_id == post_id)]
     id_key = 'review_id'
     vote = Vote.DOWNVOTE.value if raw_vote < 0 else Vote.UPVOTE.value
-    if vote_model_type == VoteTypeModel.INTERVIEW.value:
+    if vote_model_type == PostTypeModel.INTERVIEW.value:
         VoteModel = InterviewVote
         filters = [(VoteModel.interview_id == post_id)]
         id_key = 'interview_id'

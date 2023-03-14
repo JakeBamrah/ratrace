@@ -150,9 +150,23 @@ export type Interview = {
   reported: boolean
 }
 
+export type PostQueryParams = {
+    tag: RatingKey
+    post: string
+    location: string
+    position?: string
+    position_id?: number
+    compensation: number
+    tenure_stages?: number
+    currency: CurrencyKey
+    org_id?: number
+    post_type: PostEnum
+}
+export type onPostType = (args: PostQueryParams) => Promise<any>
+
 export enum PostEnum {
-  REVIEW = 'review',
-  INTERVIEW = 'interview'
+  REVIEW = 'Review',
+  INTERVIEW = 'Interview'
 }
 
 // HACK: Extend types hack to silence errors
@@ -274,5 +288,32 @@ export default class ApiService {
     const params = {...args}
     const resp = await this.api.put('/account/vote', params)
     return resp
+  }
+
+  post = async (args: PostQueryParams): Promise<any> => {
+    const params = {
+      tag: args.tag,
+      post: args.post,
+      location: args.location,
+      position: args.position,
+      position_id: args.position_id,
+      compensation: args.compensation,
+      currency: args.currency,
+      org_id: args.org_id,
+    }
+
+    let url = '/account/post-review'
+    if (args.post_type === PostEnum.REVIEW.toUpperCase()) {
+      params['duration_years'] = args.tenure_stages
+    }
+
+    if (args.post_type === PostEnum.INTERVIEW.toUpperCase()) {
+      url = '/account/post-interview'
+      // interview stages should always be a whole number
+      params['stages'] = Math.round(args.tenure_stages)
+    }
+
+    const resp = await this.api.post(url, params)
+    return resp.data
   }
 }

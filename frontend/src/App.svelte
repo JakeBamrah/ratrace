@@ -96,6 +96,7 @@
               getOrg={getOrg}
               getReviewsAndInterviews={getOrgReviewsAndInterviews}
               onVote={api.vote}
+              onPost={api.post}
             />
           </Route>
         </Route>

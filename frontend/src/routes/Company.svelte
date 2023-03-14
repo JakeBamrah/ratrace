@@ -6,8 +6,8 @@
 
   import { Industry, Rating, PostSort, PostEnum } from '../utils/apiService'
   import type {
-    Review, Interview, PostSortKey, onVote,
-    RatingKey, Position, OrgQueryParamsType, Post
+    Review, Interview, PostSortKey, onVote, onPostType,
+    RatingKey, Position, OrgQueryParamsType, Post, PostQueryParams
   } from '../utils/apiService'
   import Posts from './Posts.svelte'
   import PageContainer from '../lib/PageContainer.svelte'
@@ -32,6 +32,7 @@
   export let getOrg: (org_id: number) => Promise<any>
   export let getReviewsAndInterviews: (org_id: OrgQueryParamsType) => Promise<any>
   export let onVote: onVote
+  export let onPost: onPostType
 
   const navigate = useNavigate()
 
@@ -60,7 +61,7 @@
       selectable: !(is_tenure && selected_panel.id === 'Interviews')
     }}) as SelectSort[]
   let selected_sort: SelectSort = DEFAULT_SORT
-  let positions = [ALL_POSITIONS]
+  let positions = []
   let selected_position: { id: number, label: string } = ALL_POSITIONS
 
   let org = null
@@ -174,7 +175,7 @@
      * Data from the api will be returned to us in the required sorting order.
      */
 
-    if (maxed_out_interviews && maxed_out_reviews) {
+    if (maxed_out_interviews && maxed_out_reviews && !reset) {
       // we have no more data to pull in so just sort on client-side
       // not totally ideal because we may pull in some data unnecessarily but
       // it's a compromise for simplicity.
@@ -190,6 +191,7 @@
       // rows for entity (interview or review) with less items
       offset: Math.max(review_offset, interview_offset)
     }
+
     getReviewsAndInterviews(params).then(r => {
       reviews = reset ? r.reviews : reviews.concat(r.reviews)
       interviews = reset ? r.interviews : interviews.concat(r.interviews)
@@ -211,6 +213,41 @@
     onGetReviewsAndInterviews(true)
   }
 
+  // ORG SETUP AND POST CREATION
+  const initializeOrgData = (org_id: number) => {
+    getOrg(org_id).then(r => {
+      if (r.org && Object.keys(r.org).length === 0) {
+        navigate('/')
+        return
+      }
+
+      org = r.org
+      reviews = r.reviews
+      interviews = r.interviews
+      positions = [ALL_POSITIONS].concat(
+        org.positions.map((p: Position) => ({ id: p.id, label: p.name }))
+      )
+
+      review_offset = r.reviews.length
+      interview_offset = r.interviews.length
+
+      filter_review_max_reached = r.reviews.length < LIMIT
+      filter_interview_max_reached = r.interviews.length < LIMIT
+    })
+  }
+
+  const handlePost = async (params: PostQueryParams) => {
+    params.org_id = org?.id
+    const resp = await onPost(params)
+
+    // completely reset org data (except filters)
+    initializeOrgData(org.id)
+
+    // set selected panel to review
+    selected_panel = left_panels[0]
+    return resp
+  }
+
   // pull in org data on mount
   const int_id = Number(id)
   onMount(async () => {
@@ -220,25 +257,7 @@
     }
 
     if (int_id)
-      getOrg(int_id).then(r => {
-        if (r.org && Object.keys(r.org).length === 0) {
-          navigate('/')
-          return
-        }
-
-        org = r.org
-        reviews = r.reviews
-        interviews = r.interviews
-        positions = positions.concat(
-          org.positions.map((p: Position) => ({ id: p.id, label: p.name }))
-        )
-
-        review_offset = r.reviews.length
-        interview_offset = r.interviews.length
-
-        filter_review_max_reached = r.reviews.length < LIMIT
-        filter_interview_max_reached = r.interviews.length < LIMIT
-      })
+      initializeOrgData(int_id)
   })
 </script>
 
@@ -335,6 +354,7 @@
     {:else}
       <PostCreate
         positions={positions.filter(p => p.id !== -1)}
+        onPost={handlePost}
       />
     {/if}
 

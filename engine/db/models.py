@@ -44,7 +44,7 @@ class Vote(enum.Enum):
     UPVOTE = 1
     DOWNVOTE = -1
 
-class VoteTypeModel(enum.Enum):
+class PostTypeModel(enum.Enum):
     REVIEW = 'review'
     INTERVIEW = 'interview'
 
