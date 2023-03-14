@@ -41,6 +41,7 @@
   export let use_window_shortcut: boolean = false
   export let ref: HTMLInputElement = null
   export let type: string = 'text'
+  export let text_area: boolean = false
   export let error: boolean = false
   export let errorMessage: string = null
 
@@ -94,24 +95,40 @@
     bg-grey-100 dark:bg-dark-400 rounded-3xl border
     { error ? 'border-red-500' : 'bg-grey-100' }
   ">
-  <input
-    id={id}
-    placeholder={placeholder}
-    on:input={onHandleInput}
-    on:blur={onHandleBlur}
-    on:keydown={onHandleKeyDown}
-    on:focus={onFocus}
-    bind:this={ref}
-    type={type}
+  {#if text_area}
+    <textarea
+      id={id}
+      placeholder={placeholder}
+      on:input={onHandleInput}
+      on:blur={onHandleBlur}
+      on:keydown={onHandleKeyDown}
+      on:focus={onFocus}
+      bind:value={value}
+      class="
+        w-full bg-grey-100 h-24 resize-none pt-1
+        border-none focus:outline-none ring-0
+      "
+      ></textarea>
+  {:else}
+    <input
+      id={id}
+      placeholder={placeholder}
+      on:input={onHandleInput}
+      on:blur={onHandleBlur}
+      on:keydown={onHandleKeyDown}
+      on:focus={onFocus}
+      bind:this={ref}
+      type={type}
 
-    use:events
-    {value}
-    class="
-      {canClear && !empty ? 'mr-6' : ''}
-      border-none focus:outline-none ring-0 w-full
-      font-light placeholder-grey-350 dark:placeholder-dark-300 truncate
-      bg-transparent dark:bg-dark-400
-    "/>
+      use:events
+      {value}
+      class="
+        {canClear && !empty ? 'mr-6' : ''}
+        border-none focus:outline-none ring-0 w-full
+        font-light placeholder-grey-350 dark:placeholder-dark-300 truncate
+        bg-transparent dark:bg-dark-400
+      "/>
+  {/if}
   {#if empty && shortcut}
     <div class="hidden sm:block absolute right-0 text-xs mr-4">
       <span class="flex text-grey-350 dark:text-dark-300 ">
