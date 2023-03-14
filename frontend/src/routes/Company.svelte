@@ -12,7 +12,7 @@
   import Posts from './Posts.svelte'
   import PageContainer from '../lib/PageContainer.svelte'
   import Tabs from '../lib/Tabs.svelte'
-  import PostCreate from './PostCreate.svelte'
+  import CreatePost from './CreatePost.svelte'
   import { getCompanySizeBracket } from '../utils/mappers'
 
 
@@ -352,7 +352,7 @@
         post_type={PostEnum.INTERVIEW}
       />
     {:else}
-      <PostCreate
+      <CreatePost
         positions={positions.filter(p => p.id !== -1)}
         onPost={handlePost}
       />
