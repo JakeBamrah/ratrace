@@ -31,6 +31,7 @@
     .max(64, "Password allows 64 characters max")
   const validation_schema = { username: username_schema, password: password_schema }
 
+  let submit_disabled = false
   const onSubmit = () => {
     const values = { username, password }
     const { has_errors, errors } = validateYupValues<AccountQueryParams>(values, validation_schema)
@@ -40,10 +41,12 @@
       return
     }
 
+    submit_disabled = true
     onLogin(values).then(authenticated => {
       if (authenticated)
         navigate('/')
     })
+    submit_disabled = false
     return
   }
 </script>
