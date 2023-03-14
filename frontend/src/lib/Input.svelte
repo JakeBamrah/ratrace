@@ -91,9 +91,9 @@
 
 <div
   class="
-    w-full px-4 pt-1.5 pb-1.5 relative flex items-center
-    bg-grey-100 dark:bg-dark-400 rounded-3xl border
-    { error ? 'border-red-500' : 'bg-grey-100' }
+    w-full px-4 py-2 relative flex items-center
+    bg-grey-100 dark:bg-dark-400 rounded-lg border
+    { error ? 'border-red-300' : 'border-grey-100' }
   ">
   {#if text_area}
     <textarea

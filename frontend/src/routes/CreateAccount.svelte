@@ -4,6 +4,7 @@
   import { string } from 'yup';
 
   import Input from '../lib/Input.svelte'
+  import Button from '../lib/Button.svelte'
   import SecondaryButton from '../lib/SecondaryButton.svelte'
   import type { AccountQueryParams } from '../utils/apiService'
   import { validateYupValues } from '../utils/validators'
@@ -89,11 +90,11 @@
       />
       <div class="flex w-full justify-end space-x-4">
         <SecondaryButton on:click={() => navigate('/login')}>Back</SecondaryButton>
-        <button
+        <Button
           disabled={submit_disabled}
           on:click={onSubmit}>
           Create account
-        </button>
+        </Button>
       </div>
     </div>
 </div>

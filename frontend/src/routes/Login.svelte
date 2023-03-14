@@ -4,6 +4,8 @@
   import { string } from 'yup';
 
   import Input from '../lib/Input.svelte'
+  import Button from '../lib/Button.svelte'
+  import Link from '../lib/Link.svelte'
   import SecondaryButton from '../lib/SecondaryButton.svelte'
   import type { AccountQueryParams } from '../utils/apiService'
   import { validateYupValues } from '../utils/validators'
@@ -76,14 +78,12 @@
       />
       <div class="flex w-full justify-end space-x-4">
         <SecondaryButton on:click={() => navigate('/')}>Back</SecondaryButton>
-        <button on:click={onSubmit}>Login</button>
+        <Button on:click={onSubmit}>Login</Button>
       </div>
       <div class="w-full border-t border-grey-300 py-3 text-center">
         <p>
           No account?
-          <button
-            class="hover:underline text-grey-400"
-            on:click={() => navigate('/signup')}>Sign-up!</button>
+          <Link on:click={() => navigate('/signup')}>Sign-up!</Link>
         </p>
       </div>
     </div>

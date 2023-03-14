@@ -56,11 +56,11 @@
     <button
       disabled={already_upvoted}
       on:click={() => handleVote(Vote.UPVOTE)}
-      class="disabled:text-red-500 text-xl">+</button>
+      class="disabled:underline text-xl">+</button>
     <p class="mt-1 text-grey-400">({votes})</p>
     <button
       disabled={already_downvoted}
       on:click={() => handleVote(Vote.DOWNVOTE)}
-      class="disabled:text-red-500 text-xl">-</button>
+      class="disabled:underline text-xl">-</button>
   </div>
 </div>

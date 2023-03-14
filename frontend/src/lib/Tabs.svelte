@@ -11,8 +11,8 @@
     {#each left_tabs as tab}
       <button
         class="
-          px-3 py-1 rounded-full
-          {selected_tab.id === tab.id ? 'bg-grey-300 text-white' : 'bg-transparent'}
+          hover:bg-grey-100 px-3 py-2 rounded-full
+          {selected_tab.id === tab.id ? 'bg-grey-100' : 'bg-transparent'}
         "
         on:click={() => onTabSelect(tab)}>
         {tab.value}
@@ -24,8 +24,8 @@
     {#each symbols as tab}
       <button
         class="
-          p-1.5 rounded-full
-          {selected_tab.id === tab.id ? 'bg-grey-300 text-white' : 'bg-transparent'}
+          hover:bg-grey-100 p-3 rounded-full
+          {selected_tab.id === tab.id ? 'bg-grey-100' : 'bg-transparent'}
         "
         on:click={() => onTabSelect(tab)}>
         {@html tab.value}

@@ -1,9 +1,11 @@
 <script lang="ts">
   import Select from 'svelte-select'
   import { useNavigate } from 'svelte-navigator'
+  import { icons } from 'feather-icons'
 
   import type { SelectRow } from '../App.svelte'
   import type { IndustryKey } from '../utils/apiService'
+  import Button from '../lib/Button.svelte'
 
 
   export let selected_industry: SelectRow<IndustryKey>
@@ -30,7 +32,7 @@
         focused={true}
         items={industry_rows}
         on:change={onIndustrySelect}
-      ></Select>
+      />
 
       <Select
         id="company-filter-input-el"
@@ -45,12 +47,10 @@
       />
     </div>
 
-    <div class="DESKTOP_BUTTON flex justify-end w-full p-2">
-      <button
-        on:click={() => navigate(`/org/${selected_org?.id}`)}
-      >
+    <div class="DESKTOP_BUTTON flex justify-end w-full pt-3">
+      <Button on:click={() => navigate(`/org/${selected_org?.id}`)}>
         Search
-      </button>
+      </Button>
     </div>
 
   </div>

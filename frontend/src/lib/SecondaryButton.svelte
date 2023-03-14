@@ -6,6 +6,12 @@
   const events = getEventsAction(current_component);
 </script>
 
-<button use:events class="hover:underline">
+<button
+  use:events
+  class="
+    hover:underline
+    border-b border-transparent
+    focus:outline-none focus:underline
+  ">
   <slot></slot>
 </button>

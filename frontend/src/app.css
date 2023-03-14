@@ -4,6 +4,9 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    @apply text-grey-500;
+  }
   div {
     /* @apply text-base sm:text-sm; */
     @apply text-sm;

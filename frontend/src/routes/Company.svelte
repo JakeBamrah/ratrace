@@ -10,6 +10,7 @@
     RatingKey, Position, OrgQueryParamsType, Post, PostQueryParams
   } from '../utils/apiService'
   import Posts from './Posts.svelte'
+  import Button from '../lib/Button.svelte'
   import PageContainer from '../lib/PageContainer.svelte'
   import Tabs from '../lib/Tabs.svelte'
   import CreatePost from './CreatePost.svelte'
@@ -404,19 +405,19 @@
       />
     {/if}
     {#if is_review && !filter_review_max_reached}
-      <div class="w-full flex justify-center">
-        <button
+      <div class="w-full flex pt-4 justify-center">
+        <Button
           on:click={() => (
           handleGetOrgPosts(PostEnum.REVIEW, maxed_out_reviews, false))
-        }>LOAD MORE REVIEWS</button>
+        }>Load more</Button>
       </div>
     {/if}
     {#if is_interview && !filter_interview_max_reached}
-      <div class="w-full flex justify-center">
-        <button
+      <div class="w-full flex pt-4 justify-center">
+        <Button
           on:click={() => (
           handleGetOrgPosts(PostEnum.INTERVIEW, maxed_out_interviews, false))
-        }>LOAD MORE INTERVIEWS</button>
+        }>Load more</Button>
       </div>
     {/if}
   </div>

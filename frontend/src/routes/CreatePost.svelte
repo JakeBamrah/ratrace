@@ -5,7 +5,8 @@
   import { useNavigate } from 'svelte-navigator'
 
   import Input from '../lib/Input.svelte'
-  import SecondaryButton from '../lib/SecondaryButton.svelte'
+  import Link from '../lib/Link.svelte'
+  import Button from '../lib/Button.svelte'
   import { account, Currency, Rating, PostEnum } from '../utils/apiService'
   import type { PostQueryParams, onPostType } from '../utils/apiService'
   import { validateYupValues, castYupValues } from '../utils/validators'
@@ -140,10 +141,10 @@
             <button
               on:click={() => creating_new_position = !creating_new_position}
               class="
-                rounded-lg p-1 hover:bg-grey-100 text-grey-500
+                rounded-lg p-1 hover:bg-grey-100
                 { creating_new_position ? 'bg-grey-100' : '' }
               ">
-              {@html icons.plus.toSvg({ class: 'h-6 w-6'})}
+              {@html icons.plus.toSvg({ class: 'h-6 w-6', style: 'margin: 3px'})}
             </button>
           </div>
       </div>
@@ -193,17 +194,13 @@
       </div>
     </div>
     <div class="flex w-full justify-end">
-      <button disabled={submit_disabled} on:click={onSubmit}>Submit</button>
+      <Button disabled={submit_disabled} on:click={onSubmit}>Submit</Button>
     </div>
   {:else}
     <div class="flex items-center justify-center pt-4">
       <p>
         You must
-        <button
-          class="hover:underline text-grey-400"
-          on:click={() => navigate('/login')}>
-          login
-        </button>
+        <Link on:click={() => navigate('/login')}> login </Link>
         to post
       </p>
     </div>
