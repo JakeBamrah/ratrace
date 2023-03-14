@@ -32,23 +32,27 @@
     .max(64, "Password allows 64 characters max")
   const validation_schema = { username: username_schema, password: password_schema }
 
+  let submit_disabled = false
   const onSubmit = () => {
     const values = { username, password }
-    const { has_errors, errors } = validateYupValues<AccountQueryParams>(values, validation_schema)
+    let { has_errors, errors } = validateYupValues<AccountQueryParams>(values, validation_schema)
 
     form_errors = errors
     if (password != reenter_password) {
       form_errors['reenter_password'] = "Passwords do not match"
+      has_errors = true
     }
 
     if (has_errors) {
       return
     }
 
+    submit_disabled = true
     onSignUp(values).then(err => {
       if (!err)
         navigate('/')
     })
+    submit_disabled = false
     return
   }
 </script>
@@ -66,7 +70,7 @@
         placeholder="username"
         type="text"
         bind:ref={username_input}
-        error={form_errors.username}
+        error={Boolean(form_errors.username)}
       />
 
       <Input
@@ -74,18 +78,22 @@
         bind:value={password}
         placeholder="password"
         type="password"
-        error={form_errors.password}
+        error={Boolean(form_errors.password)}
       />
       <Input
         id="reenter-password-input"
         bind:value={reenter_password}
         placeholder="re-enter password"
         type="password"
-        error={form_errors.reenter_password}
+        error={Boolean(form_errors.reenter_password)}
       />
       <div class="flex w-full justify-end space-x-4">
         <SecondaryButton on:click={() => navigate('/login')}>Back</SecondaryButton>
-        <button on:click={onSubmit}>Create account</button>
+        <button
+          disabled={submit_disabled}
+          on:click={onSubmit}>
+          Create account
+        </button>
       </div>
     </div>
 </div>
