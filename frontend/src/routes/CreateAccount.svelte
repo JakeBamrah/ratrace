@@ -6,6 +6,7 @@
   import Input from '../lib/Input.svelte'
   import Button from '../lib/Button.svelte'
   import SecondaryButton from '../lib/SecondaryButton.svelte'
+  import { authenticated } from '../utils/apiService'
   import type { AccountQueryParams } from '../utils/apiService'
   import { validateYupValues } from '../utils/validators'
   import type { validationError } from '../utils/validators'
@@ -23,6 +24,10 @@
 
   onMount(() => {
     username_input.focus()
+
+    if ($authenticated) {
+      navigate('/')
+    }
   })
 
   const username_schema = string()

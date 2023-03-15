@@ -5,8 +5,8 @@
 
   import Input from '../lib/Input.svelte'
   import Button from '../lib/Button.svelte'
-  import Link from '../lib/Link.svelte'
   import SecondaryButton from '../lib/SecondaryButton.svelte'
+  import { authenticated } from '../utils/apiService'
   import type { AccountQueryParams } from '../utils/apiService'
   import { validateYupValues } from '../utils/validators'
   import type { validationError } from '../utils/validators'
@@ -21,7 +21,13 @@
   $: form_errors = {} as validationError
   let login_input: HTMLInputElement
 
-  onMount(() => login_input.focus())
+  onMount(() => {
+    login_input.focus()
+
+    if ($authenticated) {
+      navigate('/')
+    }
+  })
 
   const username_schema = string()
     .required("Username is a required field")
