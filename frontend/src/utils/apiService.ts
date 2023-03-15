@@ -325,4 +325,11 @@ export default class ApiService {
     const resp = await this.api.post(url, params)
     return resp.data
   }
+
+  deletePost = async (post_id: number, post_type: PostEnum): Promise<boolean> => {
+    const url = '/account/delete-post'
+    const params = { post_id, post_type }
+    const resp = await this.api.post(url, params)
+    return resp.data
+  }
 }

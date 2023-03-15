@@ -93,6 +93,7 @@
               onGetOrgPosts={api.getOrgPosts}
               onVote={api.vote}
               onPost={api.post}
+              onDeletePost={api.deletePost}
             />
           </Route>
         </Route>

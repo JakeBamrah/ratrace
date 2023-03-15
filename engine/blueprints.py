@@ -136,7 +136,12 @@ def get_org_reviews(org_id):
             .join( Review, isouter=True)
             .filter(Review.org_id == org_id)
             .group_by(ReviewVote.review_id)).cte('review_vote_count')
-        review = g.session.query(Review).join(review_vote_score_q, review_vote_score_q.c.review_id == Review.id, isouter=True)
+        review = (g.session
+            .query(Review)
+            .join(
+                review_vote_score_q,
+                review_vote_score_q.c.review_id == Review.id, isouter=True
+            ))
         order_by = desc(func.coalesce(review_vote_score_q.c.vote_count, 0))
         if sort_order == 'DOWNVOTES':
             order_by = func.coalesce(review_vote_score_q.c.vote_count, 0)
@@ -280,8 +285,7 @@ def signup():
 
     error_message = None
     if not username or not password or len(password) < 8:
-        error_message = "Username or password not given"
-        return jsonify(error=error_message)
+        return jsonify(error="Username or password not given")
 
     # check if user actually exists
     account = (g.session
@@ -353,11 +357,11 @@ def post_review():
 
     error_message = None
     if not r['account_id']:
-        error_message = "Not logged in"
+        return jsonify(post_created=False, error="Not logged in")
     if not position and not position_id:
-        error_message = "Position not given"
+        return jsonify(post_created=False, error="Position not given")
     if not post:
-        error_message = "Post not given"
+        return jsonify(post_created=False, error="Post not given")
 
     objs = []
     schema = schemas.ReviewSchema()
@@ -389,11 +393,11 @@ def post_interview():
 
     error_message = None
     if not r['account_id']:
-        error_message = "Not logged in"
+        return jsonify(post_created=False, error="Not logged in")
     if not position and not position_id:
-        error_message = "Position not given"
+        return jsonify(post_created=False, error="Position not given")
     if not post:
-        error_message = "Post not given"
+        return jsonify(post_created=False, error="Post not given")
 
     objs = []
     schema = schemas.InterviewSchema()
@@ -413,6 +417,32 @@ def post_interview():
     return jsonify(post_created=interview_created, error=error_message)
 
 
+@account.route('/delete-post', methods=['POST'])
+def delete_post():
+    r = request.get_json()
+    post_id = r.get('post_id')
+    post_model_type = r.get('post_type')
+
+    account_id = session.get('account_id')
+
+    error_message = None
+    if not account_id:
+        return jsonify(post_created=False, error="Not logged in")
+    if not post_id or not post_model_type:
+        return jsonify(post_created=False, error="Post not given")
+
+    PModel = Review
+    if post_model_type.lower() == PostTypeModel.INTERVIEW.value:
+        PModel = Interview
+
+    filters =[PModel.id == post_id, PModel.account_id == account_id]
+    post = g.session.query(PModel).filter(*filters).scalar()
+    g.session.delete(post)
+    g.session.commit()
+
+    return jsonify(post_deleted=True, error=error_message)
+
+
 @account.route('/vote', methods=['PUT'])
 def post_vote():
     """Handles creating new upvotes and downvotes for ReviewVote and
@@ -429,16 +459,17 @@ def post_vote():
 
     error_message=None
     if not account_id:
-        error_message = "Not authenticated"
+        return jsonify(vote_created=False, error="Not authenticated")
     if not raw_vote:
         error_message = "Invalid vote"
+        return jsonify(vote_created=False, error="Invalid vote")
 
     # figure out which model we are dealing with and update filters from there
     VoteModel = ReviewVote
     filters = [(VoteModel.review_id == post_id)]
     id_key = 'review_id'
     vote = Vote.DOWNVOTE.value if raw_vote < 0 else Vote.UPVOTE.value
-    if vote_model_type == PostTypeModel.INTERVIEW.value:
+    if vote_model_type.lower() == PostTypeModel.INTERVIEW.value:
         VoteModel = InterviewVote
         filters = [(VoteModel.interview_id == post_id)]
         id_key = 'interview_id'

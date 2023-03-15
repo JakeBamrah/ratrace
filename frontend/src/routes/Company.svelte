@@ -39,6 +39,7 @@
   export let onGetOrgPosts: (org_id: OrgQueryParamsType) => Promise<any>
   export let onVote: onVote
   export let onPost: onPostType
+  export let onDeletePost: (post_id: number, post_type:PostEnum) => Promise<boolean>
 
   const navigate = useNavigate()
 
@@ -264,6 +265,14 @@
     return resp
   }
 
+  const handlePostDelete = async (post_id: number, post_type: PostEnum) => {
+    if (!post_id)
+      return
+
+    await onDeletePost(post_id, post_type)
+    initializeOrgData(org.id)
+  }
+
   // pull in org data on mount
   const int_id = Number(id)
   onMount(async () => {
@@ -389,11 +398,13 @@
     {#if is_review}
       <Posts
         onVote={onVote}
+        onDeletePost={(post_id) => handlePostDelete(post_id, PostEnum.REVIEW)}
         posts={filtered_reviews}
         post_type={PostEnum.REVIEW}
       />
     {:else if is_interview}
       <Posts
+        onDeletePost={(post_id) => handlePostDelete(post_id, PostEnum.INTERVIEW)}
         onVote={onVote}
         posts={filtered_interviews}
         post_type={PostEnum.INTERVIEW}
