@@ -27,10 +27,12 @@
     .required("Username is a required field")
     .min(3, "Username must be 3 characters")
     .max(20, "Username allows 20 characters max")
+    .typeError("Must be a string")
   const password_schema = string()
     .required("Password is a required field")
     .min(8, "Password must be 8 characters")
     .max(64, "Password allows 64 characters max")
+    .typeError("Must be a string")
   const validation_schema = { username: username_schema, password: password_schema }
 
   let submit_disabled = false
@@ -58,8 +60,8 @@
     flex flex-col items-center justify-center w-full
     p-0 px-2 h-4/5 relative
   ">
-    <p class="text-3xl pb-2 pl-1">Login</p>
-    <div class="grid grid-cols-1 gap-3 w-80">
+    <p class="text-2xl text-grey-700 pb-4 pl-1">Login</p>
+    <div class="grid grid-cols-1 gap-6 w-80">
       <Input
         id="username-input"
         bind:value={username}
@@ -67,6 +69,7 @@
         type="text"
         bind:ref={login_input}
         error={Boolean(form_errors.username)}
+        errorMessage={form_errors.username}
       />
 
       <Input
@@ -75,16 +78,11 @@
         placeholder="password"
         type="password"
         error={Boolean(form_errors.password)}
+        errorMessage={form_errors.password}
       />
-      <div class="flex w-full justify-end space-x-4">
+      <div class="flex w-full justify-end space-x-4 border-t border-grey-300 py-5">
         <SecondaryButton on:click={() => navigate('/')}>Back</SecondaryButton>
         <Button on:click={onSubmit}>Login</Button>
-      </div>
-      <div class="w-full border-t border-grey-300 py-3 text-center">
-        <p>
-          No account?
-          <Link on:click={() => navigate('/signup')}>Sign-up!</Link>
-        </p>
       </div>
     </div>
 </div>

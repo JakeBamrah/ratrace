@@ -1,11 +1,11 @@
 <script lang="ts">
-  import Select from 'svelte-select'
+  import Select from '../lib/Select.svelte'
   import { useNavigate } from 'svelte-navigator'
-  import { icons } from 'feather-icons'
 
   import type { SelectRow } from '../App.svelte'
   import type { IndustryKey } from '../utils/apiService'
   import Button from '../lib/Button.svelte'
+  import Link from '../lib/Link.svelte'
 
 
   export let selected_industry: SelectRow<IndustryKey>
@@ -20,9 +20,9 @@
 </script>
 
 <div class="flex flex-col items-center justify-center p-0 px-2 h-4/5 relative">
-  <div class="w-80 sm:w-4/5 md:max-w-xl lg:max-w-2xl">
-    <p class="text-3xl pb-2 pl-1">ratrace.run</p>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-1">
+  <div class="w-80 sm:w-4/5 md:max-w-xl lg:max-w-2xl space-y-6">
+    <p class="text-3xl text-grey-700 pl-1">ratrace.run</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
       <Select
         id="industry-filter-input-el"
         itemId="id"
@@ -47,11 +47,15 @@
       />
     </div>
 
-    <div class="DESKTOP_BUTTON flex justify-end w-full pt-3">
-      <Button on:click={() => navigate(`/org/${selected_org?.id}`)}>
-        Search
-      </Button>
-    </div>
+      <div class="flex w-full justify-between items-center space-x-4 border-t border-grey-300 py-5">
+        <p class="pl-1">
+          Can't find a company?
+          <Link on:click={() => navigate('/login')}>Create one</Link>
+        </p>
+        <Button disabled={!selected_org} on:click={() => navigate(`/org/${selected_org?.id}`)}>
+          Search
+        </Button>
+      </div>
 
   </div>
 </div>

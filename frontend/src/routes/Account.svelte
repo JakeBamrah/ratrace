@@ -58,7 +58,7 @@
 
 <PageContainer>
   <div class="px-6 py-4 border w-full rounded-xl space-y-4">
-    <p class="text-3xl">Account</p>
+    <p class="text-2xl text-grey-700">Account</p>
     <div class="space-y-2">
     <p><b>Username:</b> {$account?.username} <span class="text-grey-400 text-xs">(#{$account?.id})</span></p>
     <div>

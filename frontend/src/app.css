@@ -11,6 +11,10 @@
     /* @apply text-base sm:text-sm; */
     @apply text-sm;
   }
+
+  b, svg {
+    @apply text-grey-700;
+  }
 }
 
 @layer components {

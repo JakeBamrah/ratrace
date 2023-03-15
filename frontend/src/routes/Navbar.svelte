@@ -16,7 +16,7 @@
             class="rounded-full bg-grey-200 h-12 w-12"
             on:click={() => navigate('/')} />
       </div>
-      <div class="flex items-center h-10 space-x-2 z-1">
+      <div class="flex items-center h-10 space-x-0 sm:space-x-2 z-1">
         <button
           class="hover:bg-grey-100 px-3 py-2 rounded-full"
           on:click={() => navigate('/')}>
@@ -26,13 +26,18 @@
         <button
           class="hover:bg-grey-100 px-3 py-2 rounded-full"
           on:click={() => navigate('/account')}>
-            Account
+            Profile
           </button>
         {:else}
-        <button
-          class="hover:bg-grey-100 px-3 py-2 rounded-full"
-          on:click={() => navigate('/login')}>
-            Login
+          <button
+            class="hover:bg-grey-100 px-3 py-2 rounded-full"
+            on:click={() => navigate('/login')}>
+              Log in
+          </button>
+          <button
+            class="bg-black pl-4 pr-3 py-2 text-white rounded-full"
+            on:click={() => navigate('/signup')}>
+              Sign up
           </button>
         {/if}
       </div>

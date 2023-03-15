@@ -21,16 +21,20 @@
   $: form_errors = {} as validationError
   let username_input: HTMLInputElement
 
-  onMount(() => username_input.focus())
+  onMount(() => {
+    username_input.focus()
+  })
 
   const username_schema = string()
     .required("Username is a required field")
     .min(3, "Username must be 3 characters")
     .max(20, "Username allows 20 characters max")
+    .typeError("Must be a string")
   const password_schema = string()
     .required("Password is a required field")
     .min(8, "Password must be 8 characters")
     .max(64, "Password allows 64 characters max")
+    .typeError("Must be a string")
   const validation_schema = { username: username_schema, password: password_schema }
 
   let submit_disabled = false
@@ -63,33 +67,38 @@
     flex flex-col items-center justify-center w-full
     p-0 px-2 h-4/5 relative
   ">
-    <p class="text-3xl pb-2 pl-1">Sign-up</p>
-    <div class="grid grid-cols-1 gap-3 w-80">
+    <p class="text-2xl text-grey-700 pb-2 pl-1">Sign-up</p>
+    <div class="grid grid-cols-1 space-y-6 w-80">
       <Input
         id="username-input"
+        label="Username*"
         bind:value={username}
         placeholder="username"
         type="text"
         bind:ref={username_input}
         error={Boolean(form_errors.username)}
+        errorMessage={form_errors.username}
       />
-
       <Input
         id="password-input"
+        label="Password*"
         bind:value={password}
         placeholder="password"
         type="password"
         error={Boolean(form_errors.password)}
+        errorMessage={form_errors.password}
       />
       <Input
         id="reenter-password-input"
+        label="Re-enter password*"
         bind:value={reenter_password}
         placeholder="re-enter password"
         type="password"
         error={Boolean(form_errors.reenter_password)}
+        errorMessage={form_errors.reenter_password}
       />
-      <div class="flex w-full justify-end space-x-4">
-        <SecondaryButton on:click={() => navigate('/login')}>Back</SecondaryButton>
+      <div class="flex w-full justify-end space-x-4 border-t border-grey-300 py-5">
+        <SecondaryButton on:click={() => navigate('/')}>Back</SecondaryButton>
         <Button
           disabled={submit_disabled}
           on:click={onSubmit}>

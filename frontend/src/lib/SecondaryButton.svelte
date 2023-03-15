@@ -12,6 +12,7 @@
     hover:underline
     border-b border-transparent
     focus:outline-none focus:underline
+    text-grey-700
   ">
   <slot></slot>
 </button>

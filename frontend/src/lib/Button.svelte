@@ -15,7 +15,8 @@
   class="
     px-3 py-1.5
     border border-grey-200 active:bg-grey-100 font-medium rounded-lg
-    focus:outline-none focus:border-grey-300
+    focus:outline-none focus:border-grey-300 text-grey-700
+    disabled:text-grey-300
   ">
   <slot></slot>
 </button>

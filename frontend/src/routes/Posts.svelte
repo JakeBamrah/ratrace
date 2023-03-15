@@ -67,9 +67,9 @@
           {/if}
         </div>
         <p class="text-justify">
-            <span class="font-bold">
-              {is_review ? 'Review' : 'Interview'}
-            </span>
+            <b class="font-bold">
+              {is_review ? 'Review:' : 'Interview:'}
+            </b>
             {@html DOMPurify.sanitize(marked.parse(post.post), sanitize_config)}
         </p>
         <div class="w-full flex justify-end">

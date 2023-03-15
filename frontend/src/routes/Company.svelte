@@ -1,7 +1,7 @@
 <script lang="ts">
   import { icons } from 'feather-icons'
   import { onMount } from 'svelte'
-  import Select from 'svelte-select'
+  import Select from '../lib/Select.svelte'
   import { useNavigate } from 'svelte-navigator'
 
   import { Industry, Rating, PostSort, PostEnum } from '../utils/apiService'
@@ -231,7 +231,7 @@
   }
 
   // ORG SETUP AND POST CREATION
-  const initializeOrgData = (org_id: number) => {
+  const initializeOrgData = async (org_id: number) => {
     onGetOrg(org_id).then(r => {
       if (r.org && Object.keys(r.org).length === 0) {
         navigate('/')
@@ -258,7 +258,7 @@
     const resp = await onPost(params)
 
     // completely reset org data (except filters)
-    initializeOrgData(org.id)
+    await initializeOrgData(org.id)
 
     // set selected panel to review
     selected_panel = left_panels[0]
@@ -270,7 +270,7 @@
       return
 
     await onDeletePost(post_id, post_type)
-    initializeOrgData(org.id)
+    await initializeOrgData(org.id)
   }
 
   // pull in org data on mount
@@ -281,8 +281,9 @@
       return
     }
 
-    if (int_id)
+    if (int_id) {
       initializeOrgData(int_id)
+    }
   })
 </script>
 
@@ -291,7 +292,7 @@
   <div class="COMPANY_BIO w-full rounded-xl border px-6 py-4 space-y-2">
     <div class="w-full flex items-center space-x-2 pb-4">
       <div class="h-14 w-14 rounded-full bg-grey-300" />
-      <p class="font-bold truncate w-48 sm:w-80">{org.name}</p>
+      <p class="font-bold truncate w-48 sm:w-80 text-grey-700">{org.name}</p>
     </div>
     <div class="flex items-center space-x-2">
       {@html icons.home.toSvg({ class: 'h-4 w-4'})}
@@ -386,7 +387,7 @@
 
   <div
     class="REVIEWS_AND_INTERVIEWS
-      w-full border rounded-xl px-6 py-4 space-y-2 divide-y
+      w-full border rounded-xl px-6 py-4 space-y-4 divide-y
     ">
     <div class="w-full flex space-x-4 sm:space-x-2">
       <Tabs
@@ -432,9 +433,5 @@
       </div>
     {/if}
   </div>
-
-  {:else}
-    <p>No company data <a href="/">search again</a></p>
-
   {/if}
 </PageContainer>

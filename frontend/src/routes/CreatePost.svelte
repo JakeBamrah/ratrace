@@ -1,6 +1,6 @@
 <script lang="ts">
   import { icons } from 'feather-icons'
-  import Select from 'svelte-select'
+  import Select from '../lib/Select.svelte'
   import { string, number } from 'yup';
   import { useNavigate } from 'svelte-navigator'
 
@@ -42,19 +42,23 @@
   $: form_errors = {} as validationError
 
   const tenure_stages_schema = number()
-    .positive("Tenure must be a positive number")
-    .lessThan(50, "Compensation should be less than 50")
+    .positive("Must be a positive number")
+    .lessThan(50, "Must be less than 50")
+    .typeError("Must be a number")
   const compensation_schema = number()
-    .moreThan(-1, "Compensation must zero or more")
-    .lessThan(10 * 1000000, "Compensation should be less than 8 digits")
+    .moreThan(-1, "Must be zero or greater")
+    .lessThan(10 * 1000000, "Must be less than 8 digits")
+    .typeError("Must be a number")
   const position_schema = string()
-    .required("Position is a required field")
-    .min(2, "Position must be 2 characters")
-    .max(32, "Position allows 32 characters max")
+    .required("Position is a required")
+    .min(2, "Must be 2 characters or greater")
+    .max(32, "Must be 32 characters or less")
+    .typeError("Must be a string")
   const work_location_schema = string()
   const post_schema = string()
     .required("Post is required")
     .max(2000, "Post allows 2000 characters max")
+    .typeError("Must be a string")
   const validation_schema = {
     tenure_stages: tenure_stages_schema,
     compensation: compensation_schema,
@@ -100,9 +104,9 @@
   }
 </script>
 
-<div>
+<div class="space-y-2">
   {#if $account?.id}
-    <div class="flex w-full grid grid-cols-3 sm:grid-cols-6 gap-3 pt-4 pb-2">
+    <div class="flex w-full grid grid-cols-3 sm:grid-cols-6 gap-6 pt-4 pb-4">
       <div class="col-span-6 sm:col-span-3 ">
         <Select
           items={posts}
@@ -116,9 +120,10 @@
           id="location-input"
           bind:value={work_location}
           placeholder="location"
+          label="Location"
           type="text"
           error={Boolean(form_errors.work_location)}
-        />
+          errorMessage={form_errors.work_location} />
       </div>
 
       <div class="col-span-6 sm:col-span-3 ">
@@ -128,9 +133,10 @@
               id="new-position-input"
               bind:value={new_position}
               placeholder="new position name"
+              label="New position"
               type="text"
               error={Boolean(form_errors.position)}
-            />
+              errorMessage={form_errors.position} />
           {:else}
             <Select
               items={positions}
@@ -153,13 +159,14 @@
           id="tenure-stages-input"
           bind:value={tenure_stages}
           placeholder={ is_review ? "Tenure" : "Stages" }
+          label={ is_review ? "Tenure" : "Stages" }
           type="text"
           error={Boolean(form_errors.tenure_stages)}
-        />
+          errorMessage={form_errors.tenure_stages} />
       </div>
 
       <div class="col-span-6 flex space-x-3">
-        <div class="w-1/3 sm:w-1/2">
+        <div class="w-1/3">
           <Select
             items={currencies}
             bind:value={selected_currency}
@@ -169,11 +176,12 @@
         <div class="w-1/3">
           <Input
             id="compensation-input"
+            label={ is_review ? "Salary" : "Offer" }
             bind:value={compensation}
             placeholder={ is_review ? "Salary" : "Offer" }
             type="text"
             error={Boolean(form_errors.compensation)}
-          />
+            errorMessage={form_errors.compensation} />
         </div>
         <div class="w-1/3">
           <Select
@@ -189,15 +197,17 @@
           id="post-input"
           bind:value={post}
           placeholder={ is_review ? "Review" : "Interview" }
+          label={ is_review ? "Review" : "Interview" }
           text_area={true}
-          error={Boolean(form_errors.post)} />
+          error={Boolean(form_errors.post)}
+          errorMessage={form_errors.post} />
       </div>
     </div>
-    <div class="flex w-full justify-end">
+    <div class="flex justify-end space-x-4 border-t pt-5">
       <Button disabled={submit_disabled} on:click={onSubmit}>Submit</Button>
     </div>
   {:else}
-    <div class="flex items-center justify-center pt-4">
+    <div class="flex items-center justify-center pt-5">
       <p>
         You must
         <Link on:click={() => navigate('/login')}> login </Link>
