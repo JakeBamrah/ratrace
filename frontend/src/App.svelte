@@ -83,13 +83,15 @@
           <CreateAccount onSignUp={api.signup} />
         </Route>
         <Route path="/account">
-          <Account onLogout={api.logout} />
+          <Account
+            onAccountUpdate={api.accountUpdate}
+            onLogout={api.logout} />
         </Route>
         <Route path="org/*">
           <Route path=":id" let:params>
             <Company
               id={params.id}
-              getOrg={getOrg}
+              onGetOrg={getOrg}
               onGetOrgPosts={api.getOrgPosts}
               onVote={api.vote}
               onPost={api.post}

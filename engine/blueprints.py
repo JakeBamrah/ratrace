@@ -26,7 +26,7 @@ def gzippify(data):
     response.headers['Content-Encoding'] = 'gzip'
     return response
 
-@orgs.route('/get_names', methods=['GET'])
+@orgs.route('/get-names', methods=['GET'])
 def get_names():
     limit = request.args.get('limit', type=int, default=50)
     offset = request.args.get('offset', type=int, default=0)
@@ -253,7 +253,7 @@ def login():
     return jsonify(authenticated=True, account=schema.dump(account))
 
 
-@auth.route('/check_session', methods=['GET'])
+@auth.route('/check-session', methods=['GET'])
 def check_session():
     account_id = session.get('account_id')
     schema = schemas.AccountSchema(only=(['id', 'username', 'anonymous', 'dark_mode']))
@@ -312,6 +312,27 @@ def signup():
 
 
 account = Blueprint('account', __name__, url_prefix='/account')
+
+@account.route('/update', methods=['POST'])
+def account_update():
+    r = request.get_json()
+    anonymous = r.get('anonymous')
+    dark_mode = r.get('dark_mode')
+
+    account_id = session.get('account_id')
+    error_message=None
+    if not account_id:
+        return jsonify(error="Not logged in")
+
+    account = g.session.query(Account).filter(Account.id == account_id).scalar()
+    if anonymous is not None:
+        account.anonymous = anonymous
+    if dark_mode is not None:
+        account.dark_mode = dark_mode
+
+    g.db_commit(g.session, [account])
+
+    return jsonify(error=error_message)
 
 @account.route('/reviews', methods=['POST'])
 def get_account_reviews():

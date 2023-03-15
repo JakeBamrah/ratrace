@@ -16,7 +16,7 @@
             class="rounded-full bg-grey-200 h-12 w-12"
             on:click={() => navigate('/')} />
       </div>
-      <div class="flex items-center h-10 space-x-4 sm:space-x-2 z-1">
+      <div class="flex items-center h-10 space-x-2 z-1">
         <button
           class="hover:bg-grey-100 px-3 py-2 rounded-full"
           on:click={() => navigate('/')}>

@@ -103,11 +103,11 @@ export type Account = {
 }
 
 export type AccountQueryParams = {
-  username: string
+  username?: string
   account_id?: number
   password?: string
-  dark_mode?: Boolean
-  anonymous?: string
+  dark_mode?: boolean
+  anonymous?: boolean
 }
 
 export type Position = {
@@ -222,7 +222,7 @@ export default class ApiService {
       limit,
       offset
     }
-    const resp = await this.api.get('/orgs/get_names', { params })
+    const resp = await this.api.get('/orgs/get-names', { params })
     return resp.data
   }
 
@@ -269,7 +269,7 @@ export default class ApiService {
   }
 
   authenticate = async(): Promise<any> => {
-    const resp = await this.api.get('/auth/check_session')
+    const resp = await this.api.get('/auth/check-session')
     if (resp.data && resp.data.authenticated) {
       account.set(resp.data.account)
     }
@@ -290,6 +290,11 @@ export default class ApiService {
     if (resp.data && !resp.data.error) {
       account.set(resp.data.account)
     }
+    return Boolean(resp.data.error)
+  }
+
+  accountUpdate = async (args: AccountQueryParams): Promise<any> => {
+    const resp = await this.api.post('/account/update', args)
     return Boolean(resp.data.error)
   }
 

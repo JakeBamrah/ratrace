@@ -35,7 +35,7 @@
   type SelectSort = { id: PostSortKey, label: PostSort }
 
   export let id: string
-  export let getOrg: (org_id: number) => Promise<any>
+  export let onGetOrg: (org_id: number) => Promise<any>
   export let onGetOrgPosts: (org_id: OrgQueryParamsType) => Promise<any>
   export let onVote: onVote
   export let onPost: onPostType
@@ -99,7 +99,7 @@
     position_id: number
   }) => {
     /*
-     * Items are pulled in from api (getOrg or handleGetOrgPosts). If
+     * Items are pulled in from api (onGetOrg or handleGetOrgPosts). If
      * data has come directly from the api it has already been sorted. If all
      * data has been loaded we sort in-app.
      */
@@ -232,7 +232,7 @@
 
   // ORG SETUP AND POST CREATION
   const initializeOrgData = (org_id: number) => {
-    getOrg(org_id).then(r => {
+    onGetOrg(org_id).then(r => {
       if (r.org && Object.keys(r.org).length === 0) {
         navigate('/')
         return
