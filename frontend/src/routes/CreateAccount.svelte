@@ -73,7 +73,7 @@
         id="username-input"
         label="Username*"
         bind:value={username}
-        placeholder="username"
+        placeholder="Username"
         type="text"
         bind:ref={username_input}
         error={Boolean(form_errors.username)}
@@ -83,7 +83,7 @@
         id="password-input"
         label="Password*"
         bind:value={password}
-        placeholder="password"
+        placeholder="Password"
         type="password"
         error={Boolean(form_errors.password)}
         errorMessage={form_errors.password}
@@ -92,7 +92,7 @@
         id="reenter-password-input"
         label="Re-enter password*"
         bind:value={reenter_password}
-        placeholder="re-enter password"
+        placeholder="Re-enter password"
         type="password"
         error={Boolean(form_errors.reenter_password)}
         errorMessage={form_errors.reenter_password}

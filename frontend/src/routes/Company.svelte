@@ -326,60 +326,60 @@
     ">
       {#if is_review}
         <div class="REVIEW_SORT_OPTIONS col-span-8 sm:col-span-4 w-full pt-0">
-          Position:
           <Select
             itemId='id'
             items={positions}
             bind:value={review_selected_position}
             clearable={false}
+            label="Position"
             on:change={onSortChange} />
         </div>
         <div class="col-span-4 sm:col-span-2 w-full pt-2 sm:pt-0">
-          Tag:
           <Select
             itemId='id'
             items={tags}
             bind:value={review_selected_tag}
             clearable={false}
+            label="Review tag"
             on:change={onSortChange} />
         </div>
 
         <div class="col-span-4 sm:col-span-2 pt-2 sm:pt-0">
-          Sort:
           <Select
             itemId='id'
             items={sorts}
             bind:value={review_selected_sort}
             clearable={false}
+            label="Sort"
             on:change={onSortChange} />
         </div>
       {:else}
         <div class="INTERVIEW_SORT_OPTIONS col-span-8 sm:col-span-4 w-full pt-0">
-          Position:
           <Select
             itemId='id'
             items={positions}
             bind:value={interview_selected_position}
             clearable={false}
+            label="Position"
             on:change={onSortChange} />
         </div>
         <div class="col-span-4 sm:col-span-2 w-full pt-2 sm:pt-0">
-          Tag:
           <Select
             itemId='id'
             items={tags}
             bind:value={interview_selected_tag}
             clearable={false}
+            label="Review tag"
             on:change={onSortChange} />
         </div>
 
         <div class="col-span-4 sm:col-span-2 pt-2 sm:pt-0">
-          Sort:
           <Select
             itemId='id'
             items={sorts}
             bind:value={interview_selected_sort}
             clearable={false}
+            label="Sort"
             on:change={onSortChange} />
         </div>
       {/if}

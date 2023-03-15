@@ -46,7 +46,7 @@
     .lessThan(50, "Must be less than 50")
     .typeError("Must be a number")
   const compensation_schema = number()
-    .moreThan(-1, "Must be zero or greater")
+    .moreThan(-1, "Must be > 0")
     .lessThan(10 * 1000000, "Must be less than 8 digits")
     .typeError("Must be a number")
   const position_schema = string()
@@ -113,13 +113,14 @@
           bind:value={selected_post}
           clearable={false}
           searchable={false}
-          itemId='id' />
+          itemId='id'
+          label="Post type"/>
       </div>
       <div class="col-span-6 sm:col-span-3 ">
         <Input
           id="location-input"
           bind:value={work_location}
-          placeholder="location"
+          placeholder="Location"
           label="Location"
           type="text"
           error={Boolean(form_errors.work_location)}
@@ -127,7 +128,7 @@
       </div>
 
       <div class="col-span-6 sm:col-span-3 ">
-        <div class="flex items-center space-x-1">
+        <div class="flex items-end space-x-1">
           {#if creating_new_position}
             <Input
               id="new-position-input"
@@ -142,7 +143,8 @@
               items={positions}
               bind:value={selected_position}
               clearable={false}
-              itemId='id' />
+              itemId='id'
+              label="Position" />
             {/if}
             <button
               on:click={() => creating_new_position = !creating_new_position}
@@ -171,7 +173,9 @@
             items={currencies}
             bind:value={selected_currency}
             clearable={false}
-            itemId='id' />
+            searchable={false}
+            itemId='id'
+            label="Currency"/>
         </div>
         <div class="w-1/3">
           <Input
@@ -188,7 +192,9 @@
             items={tags}
             bind:value={selected_tag}
             clearable={false}
-            itemId='id' />
+            searchable={false}
+            itemId='id'
+            label="Review tag" />
         </div>
       </div>
 
