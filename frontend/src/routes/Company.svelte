@@ -285,161 +285,163 @@
   })
 </script>
 
-<PageContainer>
-  {#if org}
-  <div class="COMPANY_BIO w-full rounded-xl border px-6 py-4 space-y-2">
-    <div class="w-full flex items-center space-x-2 pb-4">
-      <div class="h-14 w-14 rounded-full bg-grey-300" />
-      <p class="font-bold truncate w-48 sm:w-80 text-grey-700">{org.name}</p>
-    </div>
-    <div class="flex items-center space-x-2">
-      <Home class="h-4 w-4" />
-      <p class="truncate">{org.headquarters}</p>
+<div class="pb-10">
+  <PageContainer>
+    {#if org}
+    <div class="COMPANY_BIO w-full rounded-xl border px-6 py-4 space-y-2">
+      <div class="w-full flex items-center space-x-2 pb-4">
+        <div class="h-14 w-14 rounded-full bg-grey-300" />
+        <p class="font-bold truncate w-48 sm:w-80 text-grey-700">{org.name}</p>
+      </div>
+      <div class="flex items-center space-x-2">
+        <Home class="h-4 w-4" />
+        <p class="truncate">{org.headquarters}</p>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <User class="h-4 w-4" />
+        <p>{getCompanySizeBracket(org.size)}</p>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <Link class="h-4 w-4" />
+        {#if org.url}
+          <a href={org.url} target="_blank" rel="noreferrer" class="truncate">{org.url}</a>
+        {:else}
+          <p class="truncate">{'No url available'}</p>
+        {/if}
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <Globe class="h-4 w-4" />
+        <p class="truncate">{Industry[org.industry]}</p>
+      </div>
     </div>
 
-    <div class="flex items-center space-x-2">
-      <User class="h-4 w-4" />
-      <p>{getCompanySizeBracket(org.size)}</p>
-    </div>
+    <div
+      class="POSITION_FILTER
+        flex w-full grid grid-cols-8 gap-y-1 gap-x-2
+        border rounded-xl px-6 py-4
+      ">
+        {#if is_review}
+          <div class="REVIEW_SORT_OPTIONS col-span-8 sm:col-span-4 w-full pt-0">
+            <Select
+              itemId='id'
+              items={positions}
+              bind:value={review_selected_position}
+              clearable={false}
+              label="Position"
+              on:change={onSortChange} />
+          </div>
+          <div class="col-span-4 sm:col-span-2 w-full pt-2 sm:pt-0">
+            <Select
+              itemId='id'
+              items={tags}
+              bind:value={review_selected_tag}
+              clearable={false}
+              label="Review tag"
+              on:change={onSortChange} />
+          </div>
 
-    <div class="flex items-center space-x-2">
-      <Link class="h-4 w-4" />
-      {#if org.url}
-        <a href={org.url} target="_blank" rel="noreferrer" class="truncate">{org.url}</a>
-      {:else}
-        <p class="truncate">{'No url available'}</p>
-      {/if}
-    </div>
+          <div class="col-span-4 sm:col-span-2 pt-2 sm:pt-0">
+            <Select
+              itemId='id'
+              items={sorts}
+              bind:value={review_selected_sort}
+              clearable={false}
+              label="Sort"
+              on:change={onSortChange} />
+          </div>
+        {:else}
+          <div class="INTERVIEW_SORT_OPTIONS col-span-8 sm:col-span-4 w-full pt-0">
+            <Select
+              itemId='id'
+              items={positions}
+              bind:value={interview_selected_position}
+              clearable={false}
+              label="Position"
+              on:change={onSortChange} />
+          </div>
+          <div class="col-span-4 sm:col-span-2 w-full pt-2 sm:pt-0">
+            <Select
+              itemId='id'
+              items={tags}
+              bind:value={interview_selected_tag}
+              clearable={false}
+              label="Review tag"
+              on:change={onSortChange} />
+          </div>
 
-    <div class="flex items-center space-x-2">
-      <Globe class="h-4 w-4" />
-      <p class="truncate">{Industry[org.industry]}</p>
-    </div>
-  </div>
+          <div class="col-span-4 sm:col-span-2 pt-2 sm:pt-0">
+            <Select
+              itemId='id'
+              items={sorts}
+              bind:value={interview_selected_sort}
+              clearable={false}
+              label="Sort"
+              on:change={onSortChange} />
+          </div>
+        {/if}
+      </div>
 
-  <div
-    class="POSITION_FILTER
-      flex w-full grid grid-cols-8 gap-y-1 gap-x-2
-      border rounded-xl px-6 py-4
-    ">
+    <div
+      class="REVIEWS_AND_INTERVIEWS
+        w-full border rounded-xl px-6 py-4 space-y-4 divide-y
+      ">
+      <div class="w-full flex space-x-4 sm:space-x-2">
+        <Tabs
+          left_tabs={left_panels}
+          selected_tab={selected_panel}
+          onTabSelect={(panel) => selected_panel = panel}
+        >
+          <button
+            slot="symbols"
+            class="
+              hover:bg-grey-100 p-3 rounded-full
+              {selected_panel.id === 'Create' ? 'bg-grey-100' : 'bg-transparent'}
+            "
+            on:click={() => selected_panel = selected_panel_symbol}>
+            <Edit3 class="h-4 w-4 text-grey-500" />
+          </button>
+        </Tabs>
+      </div>
       {#if is_review}
-        <div class="REVIEW_SORT_OPTIONS col-span-8 sm:col-span-4 w-full pt-0">
-          <Select
-            itemId='id'
-            items={positions}
-            bind:value={review_selected_position}
-            clearable={false}
-            label="Position"
-            on:change={onSortChange} />
-        </div>
-        <div class="col-span-4 sm:col-span-2 w-full pt-2 sm:pt-0">
-          <Select
-            itemId='id'
-            items={tags}
-            bind:value={review_selected_tag}
-            clearable={false}
-            label="Review tag"
-            on:change={onSortChange} />
-        </div>
-
-        <div class="col-span-4 sm:col-span-2 pt-2 sm:pt-0">
-          <Select
-            itemId='id'
-            items={sorts}
-            bind:value={review_selected_sort}
-            clearable={false}
-            label="Sort"
-            on:change={onSortChange} />
-        </div>
+        <Posts
+          onVote={onVote}
+          onDeletePost={(post_id) => handlePostDelete(post_id, PostEnum.REVIEW)}
+          posts={filtered_reviews}
+          post_type={PostEnum.REVIEW}
+        />
+      {:else if is_interview}
+        <Posts
+          onDeletePost={(post_id) => handlePostDelete(post_id, PostEnum.INTERVIEW)}
+          onVote={onVote}
+          posts={filtered_interviews}
+          post_type={PostEnum.INTERVIEW}
+        />
       {:else}
-        <div class="INTERVIEW_SORT_OPTIONS col-span-8 sm:col-span-4 w-full pt-0">
-          <Select
-            itemId='id'
-            items={positions}
-            bind:value={interview_selected_position}
-            clearable={false}
-            label="Position"
-            on:change={onSortChange} />
+        <CreatePost
+          positions={positions.filter(p => p.id !== -1)}
+          onPost={handlePost}
+        />
+      {/if}
+      {#if is_review && !filter_review_max_reached}
+        <div class="w-full flex pt-4 justify-center">
+          <Button
+            on:click={() => (
+            handleGetOrgPosts(PostEnum.REVIEW, maxed_out_reviews, false))
+          }>Load more</Button>
         </div>
-        <div class="col-span-4 sm:col-span-2 w-full pt-2 sm:pt-0">
-          <Select
-            itemId='id'
-            items={tags}
-            bind:value={interview_selected_tag}
-            clearable={false}
-            label="Review tag"
-            on:change={onSortChange} />
-        </div>
-
-        <div class="col-span-4 sm:col-span-2 pt-2 sm:pt-0">
-          <Select
-            itemId='id'
-            items={sorts}
-            bind:value={interview_selected_sort}
-            clearable={false}
-            label="Sort"
-            on:change={onSortChange} />
+      {/if}
+      {#if is_interview && !filter_interview_max_reached}
+        <div class="w-full flex pt-4 justify-center">
+          <Button
+            on:click={() => (
+            handleGetOrgPosts(PostEnum.INTERVIEW, maxed_out_interviews, false))
+          }>Load more</Button>
         </div>
       {/if}
     </div>
-
-  <div
-    class="REVIEWS_AND_INTERVIEWS
-      w-full border rounded-xl px-6 py-4 space-y-4 divide-y
-    ">
-    <div class="w-full flex space-x-4 sm:space-x-2">
-      <Tabs
-        left_tabs={left_panels}
-        selected_tab={selected_panel}
-        onTabSelect={(panel) => selected_panel = panel}
-      >
-        <button
-          slot="symbols"
-          class="
-            hover:bg-grey-100 p-3 rounded-full
-            {selected_panel.id === 'Create' ? 'bg-grey-100' : 'bg-transparent'}
-          "
-          on:click={() => selected_panel = selected_panel_symbol}>
-          <Edit3 class="h-4 w-4 text-grey-500" />
-        </button>
-      </Tabs>
-    </div>
-    {#if is_review}
-      <Posts
-        onVote={onVote}
-        onDeletePost={(post_id) => handlePostDelete(post_id, PostEnum.REVIEW)}
-        posts={filtered_reviews}
-        post_type={PostEnum.REVIEW}
-      />
-    {:else if is_interview}
-      <Posts
-        onDeletePost={(post_id) => handlePostDelete(post_id, PostEnum.INTERVIEW)}
-        onVote={onVote}
-        posts={filtered_interviews}
-        post_type={PostEnum.INTERVIEW}
-      />
-    {:else}
-      <CreatePost
-        positions={positions.filter(p => p.id !== -1)}
-        onPost={handlePost}
-      />
     {/if}
-    {#if is_review && !filter_review_max_reached}
-      <div class="w-full flex pt-4 justify-center">
-        <Button
-          on:click={() => (
-          handleGetOrgPosts(PostEnum.REVIEW, maxed_out_reviews, false))
-        }>Load more</Button>
-      </div>
-    {/if}
-    {#if is_interview && !filter_interview_max_reached}
-      <div class="w-full flex pt-4 justify-center">
-        <Button
-          on:click={() => (
-          handleGetOrgPosts(PostEnum.INTERVIEW, maxed_out_interviews, false))
-        }>Load more</Button>
-      </div>
-    {/if}
-  </div>
-  {/if}
-</PageContainer>
+  </PageContainer>
+</div>

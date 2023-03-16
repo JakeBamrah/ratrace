@@ -50,13 +50,12 @@
       <div class="flex w-full justify-between items-center space-x-4 border-t border-grey-300 py-5">
         <p class="pl-1">
           Can't find a company?
-          <Link on:click={() => navigate('/login')}>Create one</Link>
+          <Link on:click={() => navigate('/create-company')}>Create one</Link>
         </p>
         <Button disabled={!selected_org} on:click={() => navigate(`/org/${selected_org?.id}`)}>
           Search
         </Button>
       </div>
-
   </div>
 </div>
 

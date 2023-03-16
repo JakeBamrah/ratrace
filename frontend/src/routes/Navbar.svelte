@@ -35,7 +35,7 @@
               Log in
           </button>
           <button
-            class="bg-black pl-4 pr-3 py-2 text-white rounded-full"
+            class="bg-black px-3 py-2 text-white rounded-full"
             on:click={() => navigate('/signup')}>
               Sign up
           </button>

@@ -1,5 +1,4 @@
 import axios from 'redaxios';
-import type { AxiosInstance } from 'axios'
 import { writable, derived } from 'svelte/store';
 import type { Writable, Readable } from 'svelte/store'
 
@@ -90,6 +89,9 @@ export type OrgQueryParamsType = {
   limit?: number
   offset?: number
   post_type?: PostEnum
+  headquarters?: string
+  size?: number
+  url?: string
 }
 
 type AccountID = number
@@ -189,7 +191,7 @@ export const authenticated: Readable<Boolean> = derived(account, $account => Boo
 
 export default class ApiService {
   base_url: string
-  api: AxiosInstance
+  api: any
 
   constructor(base_url: string) {
     let config = {
@@ -357,6 +359,20 @@ export default class ApiService {
   deletePost = async (post_id: number, post_type: PostEnum): Promise<{ post_deleted: boolean, error: string }> => {
     const url = '/account/delete-post'
     const params = this.sanitizeParams({ post_id, post_type })
+    const resp = await this.api.post(url, params)
+    return resp.data
+  }
+
+  createCompany = async (args: OrgQueryParamsType): Promise<{ org_created?: boolean, error?: string }> => {
+    const params = this.sanitizeParams({
+      name: args.org_name,
+      size: args.size,
+      headquarters: args.headquarters,
+      url: args.url,
+      industry: args.industry
+    })
+
+    const url = '/orgs/create-company'
     const resp = await this.api.post(url, params)
     return resp.data
   }

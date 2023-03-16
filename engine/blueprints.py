@@ -228,6 +228,36 @@ def get_org_comp_info(org_id):
     return str(org.interviews)
 
 
+@orgs.route('/create-company', methods=['POST'])
+def create_company():
+    r = request.get_json()
+    name = r.get('name')
+    size = r.get('size')
+    headquarters = r.get('headquarters', '')
+    url = r.get('url', '')
+    industry = r.get('industry')
+
+    error_message=None
+    if not name:
+        return jsonify(error="Name not given")
+    if not size or not headquarters or not industry:
+        return jsonify(error="Missing required values")
+
+    existing_company = (g.session
+                .query(Organisation)
+                .filter(func.lower(Organisation.name) == func.lower(name))
+                .scalar())
+    if existing_company:
+        return jsonify(error="Company name exists")
+
+    schema = schemas.OrganisationSchema()
+    org_obj = schema.load(r)
+    org = Organisation(**org_obj)
+    org_created = g.db_commit(g.session, [org])
+
+    return jsonify(org_created=org_created, error=error_message)
+
+
 auth = Blueprint('auth', __name__, url_prefix='/auth')
 
 @auth.route('/login', methods=['POST'])

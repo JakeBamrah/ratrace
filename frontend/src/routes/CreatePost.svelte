@@ -122,7 +122,7 @@
           clearable={false}
           searchable={false}
           itemId='id'
-          label="Post type"/>
+          label="Post type*"/>
       </div>
       <div class="col-span-6 sm:col-span-3 ">
         <Input
@@ -142,7 +142,7 @@
               id="new-position-input"
               bind:value={new_position}
               placeholder="new position name"
-              label="New position"
+              label="New position*"
               type="text"
               error={Boolean(form_errors.position)}
               errorMessage={form_errors.position} />
@@ -152,7 +152,7 @@
               bind:value={selected_position}
               clearable={false}
               itemId='id'
-              label="Position" />
+              label="Position*" />
             {/if}
             <button
               on:click={() => creating_new_position = !creating_new_position}
@@ -183,7 +183,7 @@
             clearable={false}
             searchable={false}
             itemId='id'
-            label="Currency"/>
+            label="Currency*"/>
         </div>
         <div class="w-1/3">
           <Input
@@ -202,7 +202,7 @@
             clearable={false}
             searchable={false}
             itemId='id'
-            label="Review tag" />
+            label="Review tag*" />
         </div>
       </div>
 
@@ -236,7 +236,7 @@
             id="post-input"
             bind:value={post}
             placeholder={ is_review ? "Review" : "Interview" }
-            label={ is_review ? "Review" : "Interview" }
+            label={ is_review ? "Review*" : "Interview*" }
             text_area={true}
             error={Boolean(form_errors.post)}
             errorMessage={form_errors.post} />

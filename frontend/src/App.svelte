@@ -12,6 +12,7 @@
 
   import Home from './routes/Home.svelte'
   import Company from './routes/Company.svelte'
+  import CreateCompany from './routes/CreateCompany.svelte'
   import ApiService, { Industry, authenticated } from './utils/apiService'
   import Login from './routes/Login.svelte'
   import CreateAccount from './routes/CreateAccount.svelte'
@@ -69,7 +70,7 @@
 </script>
 
 <main>
-  <div class="pb-10 h-screen">
+  <div class="h-screen">
     {#if loading_app}
       <div class="EMPTY_PLACEHOLDER_TO_STOP_FLICKERING"></div>
     {:else}
@@ -80,6 +81,12 @@
         </Route>
         <Route path="/signup">
           <CreateAccount onSignUp={api.signup} />
+        </Route>
+        <Route path="/create-company">
+          <CreateCompany
+            onCompanyCreate={api.createCompany}
+            industry_rows={industries.filter(i => i.label !== 'All')}
+          />
         </Route>
         <Route path="/account">
           <Account

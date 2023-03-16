@@ -106,7 +106,7 @@ class Organisation(db.Base):
 
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String(32), nullable=False)
-    url = Column(String, unique=True)
+    url = Column(String)
     size = Column(Integer, default=1, nullable=False)
     headquarters = Column(String(32), nullable=False)
     industry = Column(Enum(Industry), nullable=False)

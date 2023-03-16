@@ -77,7 +77,7 @@
         id="username-input"
         bind:value={username}
         placeholder="Username"
-        label="Username"
+        label="Username*"
         type="text"
         bind:ref={login_input}
         error={Boolean(form_errors.username)}
@@ -88,7 +88,7 @@
         id="password-input"
         bind:value={password}
         placeholder="Password"
-        label="Password"
+        label="Password*"
         type="password"
         error={Boolean(form_errors.password)}
         errorMessage={form_errors.password}
