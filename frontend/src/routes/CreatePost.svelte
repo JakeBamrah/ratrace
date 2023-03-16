@@ -219,7 +219,7 @@
                 class="
                   w-full bg-transparent h-24 resize-none pt-1
                   border-none focus:outline-none ring-0
-                  space-y-4
+                  space-y-4 overflow-hidden overflow-y-scroll
                 ">
                 {@html marked.parse(post ?? '')}
               </div>
