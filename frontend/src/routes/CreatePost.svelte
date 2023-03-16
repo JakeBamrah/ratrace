@@ -1,5 +1,7 @@
 <script lang="ts">
+  import DOMPurify from 'dompurify'
   import { icons } from 'feather-icons'
+  import { marked } from 'marked'
   import Select from '../lib/Select.svelte'
   import { string, number } from 'yup';
   import { useNavigate } from 'svelte-navigator'
@@ -7,6 +9,7 @@
   import Input from '../lib/Input.svelte'
   import Link from '../lib/Link.svelte'
   import Button from '../lib/Button.svelte'
+  import SecondaryButton from '../lib/SecondaryButton.svelte'
   import { account, Currency, Rating, PostEnum } from '../utils/apiService'
   import type { PostQueryParams, onPostType } from '../utils/apiService'
   import { validateYupValues, castYupValues } from '../utils/validators'
@@ -33,6 +36,11 @@
   const tags = tag_objs.filter(t => t.id !== 'ALL')
   let selected_tag = tags[0]
 
+  // preview post as markdown config
+  let preview_post = false
+  const sanitize_config = { USE_PROFILES: { html: true } }
+
+  // form validation and parsing
   let tenure_stages = "1"
   let work_location = ""
   let compensation = "0"
@@ -98,7 +106,7 @@
 
     // prevent double spending, make sure button is disabled on submit
     submit_disabled = true
-    await onPost(params as PostQueryParams).then(r => console.log(r))
+    await onPost(params as PostQueryParams)
     submit_disabled = false
     return
   }
@@ -149,7 +157,7 @@
             <button
               on:click={() => creating_new_position = !creating_new_position}
               class="
-                rounded-lg p-1 hover:bg-grey-100
+                rounded-lg p-1 hover:bg-grey-100 text-grey-500
                 { creating_new_position ? 'bg-grey-100' : '' }
               ">
               {@html icons.plus.toSvg({ class: 'h-6 w-6', style: 'margin: 3px'})}
@@ -198,18 +206,48 @@
         </div>
       </div>
 
-      <div class="col-span-6">
-        <Input
-          id="post-input"
-          bind:value={post}
-          placeholder={ is_review ? "Review" : "Interview" }
-          label={ is_review ? "Review" : "Interview" }
-          text_area={true}
-          error={Boolean(form_errors.post)}
-          errorMessage={form_errors.post} />
+      <div class="col-span-6 relative">
+        {#if preview_post}
+          <div class="POST_PREVIEW">
+            <p class="text-xs font-extralight pb-1 text-grey-400">Preview</p>
+            <div
+              class="
+                w-full px-4 py-2 relative flex items-center text-black
+                bg-transparent dark:bg-dark-400 rounded-lg border border-grey-100
+              ">
+              <div
+                class="
+                  w-full bg-transparent h-24 resize-none pt-1
+                  border-none focus:outline-none ring-0
+                  space-y-4
+                ">
+                {@html marked.parse(post ?? '')}
+              </div>
+            </div>
+          </div>
+        {:else}
+          <p
+            class="
+              absolute w-full text-right text-xs font-extralight text-grey-400
+            ">
+            [supports <Link on:click={() => navigate('/')}>markdown</Link>]
+          </p>
+          <Input
+            id="post-input"
+            bind:value={post}
+            placeholder={ is_review ? "Review" : "Interview" }
+            label={ is_review ? "Review" : "Interview" }
+            text_area={true}
+            error={Boolean(form_errors.post)}
+            errorMessage={form_errors.post} />
+        {/if}
       </div>
     </div>
     <div class="flex justify-end space-x-4 border-t pt-5">
+      <SecondaryButton
+        on:click={() => preview_post = !preview_post }>
+          {preview_post ? 'Write' : 'Preview'}
+      </SecondaryButton>
       <Button disabled={submit_disabled} on:click={onSubmit}>Submit</Button>
     </div>
   {:else}

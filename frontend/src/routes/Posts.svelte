@@ -17,7 +17,6 @@
   const sanitize_config = { USE_PROFILES: { html: true } }
   $: is_review = post_type === PostEnum.REVIEW
 
-
   const handlePostVote = async (params: VoteParams) => {
     onVote({ ...params, vote_model_type: post_type })
     return
@@ -48,30 +47,32 @@
           <p class="col-span-4 sm:col-span-2 truncate"><b>Position:</b> {post.position.name}</p>
           <p class="col-span-4 sm:col-span-2 truncate">
               <b>{is_review ? 'Salary' : 'Offer'}</b>
-              {`${salaryMapper(post.currency)}${post.compensation > 0 ? numCommaFormatter(post.compensation, 0) : 'NA'}`}
+              {`${salaryMapper(post.currency)}${post.compensation > 0 ? numCommaFormatter(post.compensation, 0) : 'n.a'}`}
           </p>
           <p class="col-span-4 sm:col-span-2 truncate">
             <b>Location:</b>
-            {post.location.length > 0 ? post.location : 'NA'}
+            {post.location.length > 0 ? post.location : 'n.a'}
           </p>
           {#if is_review}
             <p class="col-span-4 sm:col-span-2 truncate">
               <b>Tenure:</b>
-              {post.duration_years > 0 ? `${yearFormatter(post.duration_years)}` : 'NA'}
+              {post.duration_years > 0 ? `${yearFormatter(post.duration_years)}` : 'n.a'}
             </p>
           {:else}
             <p class="col-span-4 sm:col-span-2 truncate">
               <b>Stages completed:</b>
-              {post.stages > 0 ? post.stages : 'NA'}
+              {post.stages > 0 ? post.stages : 'n.a'}
             </p>
           {/if}
         </div>
-        <p class="text-justify">
+        <div class="text-justify">
             <b class="font-bold">
               {is_review ? 'Review:' : 'Interview:'}
             </b>
-            {@html DOMPurify.sanitize(marked.parse(post.post), sanitize_config)}
-        </p>
+            <div class="space-y-4">
+              {@html DOMPurify.sanitize(marked.parse(post.post), sanitize_config)}
+            </div>
+        </div>
         <div class="w-full flex justify-end">
           <Vote
             post={post}
