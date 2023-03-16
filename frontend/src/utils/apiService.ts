@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios from 'redaxios';
 import type { AxiosInstance } from 'axios'
 import { writable, derived } from 'svelte/store';
 import type { Writable, Readable } from 'svelte/store'
@@ -205,6 +205,23 @@ export default class ApiService {
     this.api = axios.create(config)
   }
 
+  sanitizeParams = (args: { [key: string]: any }) => {
+    /*
+     * Remove undefined or null args from request params. Redaxios doesn't
+     * remove null or undefined arguments from request params.
+     */
+    let sanitized_params = {}
+    Object.keys(args).forEach(k => {
+      if (args[k] === null || typeof args[k] === 'undefined') {
+        console.log(k, args[k])
+        return
+      }
+      sanitized_params[k] = args[k]
+    })
+
+    return sanitized_params
+  }
+
   getOrg = async ({ org_id, limit = 50}: OrgQueryParamsType): Promise<{ org: Organisation, reviews: Review[], interviews: Interview[] }> => {
     const params = { org_id, limit }
     const resp = await this.api.get(`/orgs/${org_id}`, { params })
@@ -217,17 +234,18 @@ export default class ApiService {
   }
 
   getOrgNames = async ({ industry, offset, limit }: Omit<OrgQueryParamsType, 'org_name'>): Promise<{ id: string, label: string }[]> => {
-    const params = {
+    const params = this.sanitizeParams({
       industry: industry && industry !== 'ALL' ? industry : null,
       limit,
       offset
-    }
+    })
+
     const resp = await this.api.get('/orgs/get-names', { params })
     return resp.data
   }
 
   searchOrgs = async ({ org_name, industry, limit, offset }: OrgQueryParamsType): Promise<Organisation[]> => {
-    const params = { org_name, industry, limit, offset }
+    const params = this.sanitizeParams({ org_name, industry, limit, offset })
     const resp = await this.api.get('/orgs/search', { params })
     return resp.data
   }
@@ -243,13 +261,13 @@ export default class ApiService {
       post_type
     } = args
 
-    const params = {
+    const params = this.sanitizeParams({
       position_id: position_id === -1 ? null : position_id,
       tag: tag === Rating.ALL.toUpperCase() ? null : tag,
       sort_order,
       limit,
       offset
-    }
+    })
 
     let url = `/orgs/${org_id}/reviews`
     if (post_type === PostEnum.INTERVIEW) {
@@ -261,7 +279,8 @@ export default class ApiService {
   }
 
   login = async(args: AccountQueryParams): Promise<{ account?: Account, authenticated: boolean, error?: string }> => {
-    const resp = await this.api.post('/auth/login', args)
+    const params = this.sanitizeParams(args)
+    const resp = await this.api.post('/auth/login', params)
     if (resp.data && resp.data.authenticated) {
       account.set(resp.data.account)
     }
@@ -287,7 +306,8 @@ export default class ApiService {
   }
 
   signup = async (args: AccountQueryParams): Promise<{ account?: Account, error?: string }> => {
-    const resp = await this.api.post('/auth/signup', args)
+    const params = this.sanitizeParams(args)
+    const resp = await this.api.post('/auth/signup', params)
     if (resp.data && !resp.data.error) {
       account.set(resp.data.account)
     }
@@ -296,18 +316,19 @@ export default class ApiService {
   }
 
   accountUpdate = async (args: AccountQueryParams): Promise<any> => {
-    const resp = await this.api.post('/account/update', args)
+    const params = this.sanitizeParams(args)
+    const resp = await this.api.post('/account/update', params)
     return Boolean(resp.data.error)
   }
 
   vote = async (args: VoteParams): Promise<any> => {
-    const params = {...args}
+    const params = this.sanitizeParams(args)
     const resp = await this.api.put('/account/vote', params)
     return resp
   }
 
   post = async (args: PostQueryParams): Promise<{ post_created: boolean, error?: string}> => {
-    const params = {
+    const params = this.sanitizeParams({
       tag: args.tag,
       post: args.post,
       location: args.location,
@@ -316,7 +337,7 @@ export default class ApiService {
       compensation: args.compensation,
       currency: args.currency,
       org_id: args.org_id,
-    }
+    })
 
     let url = '/account/post-review'
     if (args.post_type === PostEnum.REVIEW.toUpperCase()) {
@@ -335,7 +356,7 @@ export default class ApiService {
 
   deletePost = async (post_id: number, post_type: PostEnum): Promise<{ post_deleted: boolean, error: string }> => {
     const url = '/account/delete-post'
-    const params = { post_id, post_type }
+    const params = this.sanitizeParams({ post_id, post_type })
     const resp = await this.api.post(url, params)
     return resp.data
   }
