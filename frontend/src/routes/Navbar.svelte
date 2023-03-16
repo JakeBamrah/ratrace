@@ -12,14 +12,14 @@
   <div class="w-full py-10 sm:py-8 px-2 relative">
     <div class="flex justify-between items-center">
       <div>
-          <button
-            class="rounded-full bg-grey-200 h-12 w-12"
-            on:click={() => navigate('/')} />
+        <button
+          class="rounded-full bg-grey-200 h-12 w-12"
+          on:click={() => navigate('/')} />
       </div>
       <div class="flex items-center h-10 space-x-0 sm:space-x-2 z-1">
         <button
           class="hover:bg-grey-100 px-3 py-2 rounded-full"
-          on:click={() => navigate('/')}>
+          on:click={() => navigate('/about')}>
           About
         </button>
         {#if authenticated}

@@ -10,6 +10,7 @@
   import { Router, Route } from 'svelte-navigator'
   import { onMount } from 'svelte'
 
+  import About from './routes/About.svelte'
   import Home from './routes/Home.svelte'
   import Company from './routes/Company.svelte'
   import CreateCompany from './routes/CreateCompany.svelte'
@@ -76,6 +77,9 @@
     {:else}
       <Router primary={false} url="/">
         <Navbar authenticated={$authenticated}/>
+        <Route path="/about">
+          <About />
+        </Route>
         <Route path="/login">
           <Login onLogin={api.login} />
         </Route>

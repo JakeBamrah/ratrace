@@ -230,7 +230,7 @@
             class="
               absolute w-full text-right text-xs font-extralight text-grey-400
             ">
-            [supports <Link on:click={() => navigate('/')}>markdown</Link>]
+            [supports <Link on:click={() => navigate('/about#markdown')}>markdown</Link>]
           </p>
           <Input
             id="post-input"
