@@ -363,6 +363,13 @@ export default class ApiService {
     return resp.data
   }
 
+  reportPost = async (post_id: number, post_type: PostEnum): Promise<{ post_deleted: boolean, error: string }> => {
+    const url = '/account/report-post'
+    const params = this.sanitizeParams({ post_id, post_type })
+    const resp = await this.api.post(url, params)
+    return resp.data
+  }
+
   createCompany = async (args: OrgQueryParamsType): Promise<{ org_created?: boolean, error?: string }> => {
     const params = this.sanitizeParams({
       name: args.org_name,

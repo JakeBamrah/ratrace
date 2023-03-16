@@ -498,6 +498,35 @@ def delete_post():
     return jsonify(post_deleted=True, error=error_message)
 
 
+@account.route('/report-post', methods=['POST'])
+def report_post():
+    r = request.get_json()
+    post_id = r.get('post_id')
+    post_model_type = r.get('post_type')
+
+    account_id = session.get('account_id')
+
+    error_message = None
+    if not account_id:
+        return jsonify(post_deleted=False, error="Not logged in")
+    if not post_id or not post_model_type:
+        return jsonify(post_deleted=False, error="Post not given")
+
+    PModel = Review
+    if post_model_type.lower() == PostTypeModel.INTERVIEW.value:
+        PModel = Interview
+
+    filters =[PModel.id == post_id]
+    post = g.session.query(PModel).filter(*filters).scalar()
+    if post and post.reported:
+        return jsonify(post_reported=True, error=error_message)
+
+    post.reported = True
+    post_reported = g.db_commit(g.session, [post])
+
+    return jsonify(post_reported=post_reported, error=error_message)
+
+
 @account.route('/vote', methods=['PUT'])
 def post_vote():
     """Handles creating new upvotes and downvotes for ReviewVote and

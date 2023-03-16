@@ -7,6 +7,7 @@
   export let onVote: onVote
   export let post_type: PostEnum
   export let onDeletePost: (post_id: number) => void
+  export let onReportPost: (post_id: number) => void
 
   $: is_review = post_type === PostEnum.REVIEW
 
@@ -24,6 +25,7 @@
         post={post}
         onVote={handlePostVote}
         onDeletePost={onDeletePost}
+        onReportPost={onReportPost}
       />
     {/each}
   {:else}

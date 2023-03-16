@@ -1,7 +1,7 @@
 <script lang="ts">
   import { marked } from 'marked'
   import DOMPurify from 'dompurify'
-  import { Trash } from 'lucide-svelte';
+  import { Trash, Flag } from 'lucide-svelte';
 
   import { account, PostEnum } from '../utils/apiService'
   import type { Post, onVote } from '../utils/apiService'
@@ -13,29 +13,38 @@
   export let onVote: onVote
   export let post_type: PostEnum
   export let onDeletePost: (post_id: number) => void
+  export let onReportPost: (post_id: number) => void
 
   let read_more = false
   const long_post = post.post.length > 700
 
   const sanitize_config = { USE_PROFILES: { html: true } }
   $: is_review = post_type === PostEnum.REVIEW
+
+  let reported = false
 </script>
 
 <div class="REVIEW_CONTENT pt-4 space-y-4">
   <div class="flex justify-between items-center">
     <p class="text-xs font-light italic text-grey-400">{post.account.username}</p>
     <div class="flex space-x-2">
+        {#if $account?.id === post.account.id}
+          <SecondaryButton
+            on:click={() => onDeletePost(post.id)}>
+            <Trash class="h-4 w-4 text-grey-500" />
+          </SecondaryButton>
+        {/if}
+        {#if $account?.id}
+          <SecondaryButton
+            on:click={() => { onReportPost(post.id); reported = true }}>
+            <Flag class="h-4 w-4 { reported? 'text-red-400' : 'text-grey-500 ' }" />
+          </SecondaryButton>
+        {/if}
       <p class="
         text-xs font-light italic px-2 py-1
         rounded-md bg-grey-100
       ">
         {ratingsMapper(post.tag)}</p>
-        {#if $account?.id === post.account.id}
-          <SecondaryButton
-            on:click={() => onDeletePost(post.id)}>
-            <Trash class="h-4 w-4" />
-          </SecondaryButton>
-        {/if}
       </div>
   </div>
   <div class="flex flex-col grid grid-cols-4 gap-x-2 w-full">

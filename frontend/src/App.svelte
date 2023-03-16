@@ -102,6 +102,7 @@
               onVote={api.vote}
               onPost={api.post}
               onDeletePost={api.deletePost}
+              onReportPost={api.reportPost}
             />
           </Route>
         </Route>

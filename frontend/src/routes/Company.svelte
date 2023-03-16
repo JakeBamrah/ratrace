@@ -40,6 +40,7 @@
   export let onVote: onVote
   export let onPost: onPostType
   export let onDeletePost: (post_id: number, post_type:PostEnum) => Promise<{ post_deleted: boolean, error: string }>
+  export let onReportPost: (post_id: number, post_type:PostEnum) => Promise<{ post_reported: boolean, error: string }>
 
   const navigate = useNavigate()
 
@@ -409,12 +410,14 @@
         <Posts
           onVote={onVote}
           onDeletePost={(post_id) => handlePostDelete(post_id, PostEnum.REVIEW)}
+          onReportPost={(post_id) => onReportPost(post_id, PostEnum.REVIEW)}
           posts={filtered_reviews}
           post_type={PostEnum.REVIEW}
         />
       {:else if is_interview}
         <Posts
           onDeletePost={(post_id) => handlePostDelete(post_id, PostEnum.INTERVIEW)}
+          onReportPost={(post_id) => onReportPost(post_id, PostEnum.INTERVIEW)}
           onVote={onVote}
           posts={filtered_interviews}
           post_type={PostEnum.INTERVIEW}
