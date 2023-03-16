@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
   import { current_component } from "svelte/internal"
-  import { icons } from 'feather-icons'
+  import { X } from 'lucide-svelte';
 
   import { getEventsAction } from "../utils/events"
 
@@ -151,7 +151,7 @@
           hover:bg-white dark:hover:bg-dark-500 rounded-xl p-0.5
         " >
         <span class="text-grey-350 dark:text-dark-300 ">
-          {@html icons.x.toSvg({ height: 24, width: 24 })}
+          <X style="height:24px; width:24px;" />
         </span>
       </button>
     {/if}

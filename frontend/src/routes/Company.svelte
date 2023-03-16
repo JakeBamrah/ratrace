@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { icons } from 'feather-icons'
+  import { Edit3, User, Link, Globe, Home } from 'lucide-svelte';
   import { onMount } from 'svelte'
   import Select from '../lib/Select.svelte'
   import { useNavigate } from 'svelte-navigator'
@@ -49,9 +49,7 @@
     { id: SelectedPanelKey.REVIEWS, value: 'Reviews' },
     { id: SelectedPanelKey.INTERVIEWS, value: 'Interviews' }
   ]
-  const right_panels: SelectedPanel[] = [
-    { id: SelectedPanelKey.CREATE, value: icons["edit-3"].toSvg({ class: 'h-4 w-4'}) }
-  ]
+  const selected_panel_symbol: SelectedPanel = { id: SelectedPanelKey.CREATE, value: 'Create' }
 
   const tags = Object.keys(Rating).map(k => ({ id: k, label: Rating[k]}))
   let review_selected_tag = DEFAULT_SELECTED_TAG
@@ -295,17 +293,17 @@
       <p class="font-bold truncate w-48 sm:w-80 text-grey-700">{org.name}</p>
     </div>
     <div class="flex items-center space-x-2">
-      {@html icons.home.toSvg({ class: 'h-4 w-4'})}
+      <Home class="h-4 w-4" />
       <p class="truncate">{org.headquarters}</p>
     </div>
 
     <div class="flex items-center space-x-2">
-      {@html icons.user.toSvg({ class: 'h-4 w-4'})}
+      <User class="h-4 w-4" />
       <p>{getCompanySizeBracket(org.size)}</p>
     </div>
 
     <div class="flex items-center space-x-2">
-      {@html icons.link.toSvg({ class: 'h-4 w-4'})}
+      <Link class="h-4 w-4" />
       {#if org.url}
         <a href={org.url} target="_blank" rel="noreferrer" class="truncate">{org.url}</a>
       {:else}
@@ -314,7 +312,7 @@
     </div>
 
     <div class="flex items-center space-x-2">
-      {@html icons.globe.toSvg({ class: 'h-4 w-4'})}
+      <Globe class="h-4 w-4" />
       <p class="truncate">{Industry[org.industry]}</p>
     </div>
   </div>
@@ -392,9 +390,19 @@
     <div class="w-full flex space-x-4 sm:space-x-2">
       <Tabs
         left_tabs={left_panels}
-        symbols={right_panels}
         selected_tab={selected_panel}
-        onTabSelect={(panel) => selected_panel = panel} />
+        onTabSelect={(panel) => selected_panel = panel}
+      >
+        <button
+          slot="symbols"
+          class="
+            hover:bg-grey-100 p-3 rounded-full
+            {selected_panel.id === 'Create' ? 'bg-grey-100' : 'bg-transparent'}
+          "
+          on:click={() => selected_panel = selected_panel_symbol}>
+          <Edit3 class="h-4 w-4 text-grey-500" />
+        </button>
+      </Tabs>
     </div>
     {#if is_review}
       <Posts

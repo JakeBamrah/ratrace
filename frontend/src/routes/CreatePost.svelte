@@ -1,6 +1,6 @@
 <script lang="ts">
   import DOMPurify from 'dompurify'
-  import { icons } from 'feather-icons'
+  import { Plus } from 'lucide-svelte';
   import { marked } from 'marked'
   import Select from '../lib/Select.svelte'
   import { string, number } from 'yup';
@@ -160,7 +160,7 @@
                 rounded-lg p-1 hover:bg-grey-100 text-grey-500
                 { creating_new_position ? 'bg-grey-100' : '' }
               ">
-              {@html icons.plus.toSvg({ class: 'h-6 w-6', style: 'margin: 3px'})}
+              <Plus class="h-6 w-6" style="margin:3px;" />
             </button>
           </div>
       </div>
@@ -221,7 +221,7 @@
                   border-none focus:outline-none ring-0
                   space-y-4 overflow-hidden overflow-y-scroll
                 ">
-                {@html marked.parse(post ?? '')}
+                {@html DOMPurify.sanitize(marked.parse(post ?? ''), sanitize_config)}
               </div>
             </div>
           </div>

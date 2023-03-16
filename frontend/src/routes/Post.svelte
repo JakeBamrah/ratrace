@@ -1,7 +1,7 @@
 <script lang="ts">
   import { marked } from 'marked'
   import DOMPurify from 'dompurify'
-  import { icons } from 'feather-icons'
+  import { Trash } from 'lucide-svelte';
 
   import { account, PostEnum } from '../utils/apiService'
   import type { Post, onVote } from '../utils/apiService'
@@ -33,7 +33,7 @@
         {#if $account?.id === post.account.id}
           <SecondaryButton
             on:click={() => onDeletePost(post.id)}>
-            {@html icons.trash.toSvg({ class: 'h-4 w-4'})}
+            <Trash class="h-4 w-4" />
           </SecondaryButton>
         {/if}
       </div>
