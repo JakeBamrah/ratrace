@@ -50,6 +50,8 @@ export const yearFormatter = (year: number) => {
 }
 
 export const getCompanySizeBracket = (size: number) => {
+  if (size > 10000)
+      return "+10000"
   if (size > 5000)
       return "5000-1000"
   if (size > 1000)
