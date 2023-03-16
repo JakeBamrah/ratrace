@@ -39,7 +39,7 @@
   export let onGetOrgPosts: (org_id: OrgQueryParamsType) => Promise<any>
   export let onVote: onVote
   export let onPost: onPostType
-  export let onDeletePost: (post_id: number, post_type:PostEnum) => Promise<boolean>
+  export let onDeletePost: (post_id: number, post_type:PostEnum) => Promise<{ post_deleted: boolean, error: string }>
 
   const navigate = useNavigate()
 

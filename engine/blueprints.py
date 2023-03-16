@@ -70,7 +70,7 @@ def search_orgs():
 
     schema = schemas.OrganisationSchema(exclude=('interviews', 'reviews'), many=True)
     orgs = schema.dump(find_orgs_q)
-    return jsonify(orgs=orgs)
+    return jsonify(orgs)
 
 
 @orgs.route('/<int:org_id>', methods=['GET'])
@@ -100,7 +100,7 @@ def get_org(org_id):
             reviews = schemas.ReviewSchema().dump(review_sorted_q, many=True),
             interviews = schemas.InterviewSchema().dump(interview_sorted_q, many=True),
         )
-    return jsonify(org=data)
+    return jsonify(data)
 
 
 @orgs.route('/<int:org_id>/reviews', methods=['GET'])
@@ -237,7 +237,7 @@ def login():
     password = r.get('password', '')
 
     if not username or not password:
-        return jsonify(authenticated=False)
+        return jsonify(authenticated=False, error="Details not given")
 
     # check if user actually exists
     account = (g.session
@@ -245,7 +245,7 @@ def login():
             .filter(Account.username == username)
             .scalar())
     if not account or not account.check_password(password):
-        return jsonify(authenticated=False)
+        return jsonify(authenticated=False, error="Incorrect log in details")
 
     session['account_id'] = account.id
 
@@ -285,7 +285,7 @@ def signup():
 
     error_message = None
     if not username or not password or len(password) < 8:
-        return jsonify(error="Username or password not given")
+        return jsonify(error="Signup details missing")
 
     # check if user actually exists
     account = (g.session
@@ -293,7 +293,7 @@ def signup():
             .filter(Account.username == username)
             .scalar())
     if account:
-        error_message = "Account already exists"
+        error_message = "Username taken"
         return jsonify(error=error_message)
 
     # create user and attempt to commit user
@@ -302,7 +302,7 @@ def signup():
 
     account_created = g.db_commit(g.session, [new_account])
     if not account_created:
-        error_message = "Failed to create account"
+        return jsonify(error="Failed to create account")
 
     # add account id to the session so session can be checked on re-direct
     session['account_id'] = new_account.id
@@ -398,6 +398,8 @@ def post_review():
     review = schema.load(r)
     objs.append(Review(**review))
     review_created = g.db_commit(g.session, objs)
+    if not review_created:
+        return jsonify(post_created=False, error="Failed to create post")
 
     return jsonify(post_created=review_created, error=error_message)
 
@@ -434,6 +436,8 @@ def post_interview():
     interview = schema.load(r)
     objs.append(Interview(**interview))
     interview_created = g.db_commit(g.session, objs)
+    if not interview_created:
+        return jsonify(post_created=False, error="Failed to create post")
 
     return jsonify(post_created=interview_created, error=error_message)
 
@@ -448,9 +452,9 @@ def delete_post():
 
     error_message = None
     if not account_id:
-        return jsonify(post_created=False, error="Not logged in")
+        return jsonify(post_deleted=False, error="Not logged in")
     if not post_id or not post_model_type:
-        return jsonify(post_created=False, error="Post not given")
+        return jsonify(post_deleted=False, error="Post not given")
 
     PModel = Review
     if post_model_type.lower() == PostTypeModel.INTERVIEW.value:

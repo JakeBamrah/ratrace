@@ -216,7 +216,7 @@
     <div class="flex items-center justify-center pt-5">
       <p>
         You must
-        <Link on:click={() => navigate('/login')}> login </Link>
+        <Link on:click={() => navigate('/login')}> log in </Link>
         to post
       </p>
     </div>

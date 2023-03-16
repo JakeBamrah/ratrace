@@ -7,12 +7,12 @@
   import Button from '../lib/Button.svelte'
   import SecondaryButton from '../lib/SecondaryButton.svelte'
   import { authenticated } from '../utils/apiService'
-  import type { AccountQueryParams } from '../utils/apiService'
+  import type { Account, AccountQueryParams } from '../utils/apiService'
   import { validateYupValues } from '../utils/validators'
   import type { validationError } from '../utils/validators'
 
 
-  export let onLogin: (params: AccountQueryParams) => Promise<boolean>
+  export let onLogin: (params: AccountQueryParams) => Promise<{ account?: Account, error?: string, authenticated: boolean }>
 
   const navigate = useNavigate()
 
@@ -41,6 +41,7 @@
     .typeError("Must be a string")
   const validation_schema = { username: username_schema, password: password_schema }
 
+  let error_message: string = null
   let submit_disabled = false
   const onSubmit = () => {
     const values = { username, password }
@@ -52,9 +53,13 @@
     }
 
     submit_disabled = true
-    onLogin(values).then(authenticated => {
-      if (authenticated)
-        navigate('/')
+    onLogin(values).then(resp => {
+      if (!resp.authenticated) {
+        error_message = resp.error
+        return
+      }
+
+      navigate('/')
     })
     submit_disabled = false
     return
@@ -88,9 +93,12 @@
         error={Boolean(form_errors.password)}
         errorMessage={form_errors.password}
       />
-      <div class="flex w-full justify-end space-x-4 border-t border-grey-300 py-5">
-        <SecondaryButton on:click={() => navigate('/')}>Back</SecondaryButton>
-        <Button on:click={onSubmit}>Login</Button>
+      <div class="flex justify-between items-center w-full border-t border-grey-300 py-5">
+        <p class="text-red-400">{ error_message ? `(${error_message})` : ''}</p>
+        <div class="flex space-x-4">
+          <SecondaryButton on:click={() => navigate('/')}>Back</SecondaryButton>
+          <Button on:click={onSubmit}>Login</Button>
+        </div>
       </div>
     </div>
 </div>

@@ -12,7 +12,7 @@
   import type { validationError } from '../utils/validators'
 
 
-  export let onSignUp: (params: AccountQueryParams) => Promise<Boolean>
+  export let onSignUp: (params: AccountQueryParams) => Promise<{ error?: string }>
 
   const navigate = useNavigate()
 
@@ -42,6 +42,7 @@
     .typeError("Must be a string")
   const validation_schema = { username: username_schema, password: password_schema }
 
+  let error_message: string = null
   let submit_disabled = false
   const onSubmit = () => {
     const values = { username, password }
@@ -58,10 +59,23 @@
     }
 
     submit_disabled = true
-    onSignUp(values).then(err => {
-      if (!err)
-        navigate('/')
+    onSignUp(values).then(resp => {
+      // if username is already taken, assign error to username form-errors
+      const is_username_error = resp.error?.toLowerCase().includes('username')
+      if (is_username_error) {
+        form_errors.username = resp.error
+        return
+      }
+
+      // otherwise just create an error message for underneath form
+      if (resp.error) {
+        error_message = resp.error
+        return
+      }
+
+      navigate('/')
     })
+
     submit_disabled = false
     return
   }
@@ -102,13 +116,20 @@
         error={Boolean(form_errors.reenter_password)}
         errorMessage={form_errors.reenter_password}
       />
-      <div class="flex w-full justify-end space-x-4 border-t border-grey-300 py-5">
-        <SecondaryButton on:click={() => navigate('/')}>Back</SecondaryButton>
-        <Button
-          disabled={submit_disabled}
-          on:click={onSubmit}>
-          Create account
-        </Button>
+      <div
+        class="
+          flex justify-between items-center w-full
+          border-t border-grey-300 py-5
+        ">
+        <p class="text-red-400">{ error_message ? `(${error_message})` : ''}</p>
+        <div class="flex space-x-4">
+          <SecondaryButton on:click={() => navigate('/')}>Back</SecondaryButton>
+          <Button
+            disabled={submit_disabled}
+            on:click={onSubmit}>
+            Create account
+          </Button>
+        </div>
       </div>
     </div>
 </div>

@@ -13,7 +13,6 @@
   import Home from './routes/Home.svelte'
   import Company from './routes/Company.svelte'
   import ApiService, { Industry, authenticated } from './utils/apiService'
-  import type { OrgQueryParamsType } from './utils/apiService'
   import Login from './routes/Login.svelte'
   import CreateAccount from './routes/CreateAccount.svelte'
   import Account from './routes/Account.svelte'

@@ -205,15 +205,15 @@ export default class ApiService {
     this.api = axios.create(config)
   }
 
-  getOrg = async ({ org_id, limit = 50}: OrgQueryParamsType): Promise<Organisation> => {
+  getOrg = async ({ org_id, limit = 50}: OrgQueryParamsType): Promise<{ org: Organisation, reviews: Review[], interviews: Interview[] }> => {
     const params = { org_id, limit }
     const resp = await this.api.get(`/orgs/${org_id}`, { params })
 
     // sort positions for selected org
-    const org = resp.data.org.org
-    org.positions.sort((a: Organisation, b: Organisation) => alphabeticalSort(a.name, b.name))
+    const org = resp.data.org
+    org?.positions.sort((a: Organisation, b: Organisation) => alphabeticalSort(a.name, b.name))
 
-    return resp.data.org
+    return resp.data
   }
 
   getOrgNames = async ({ industry, offset, limit }: Omit<OrgQueryParamsType, 'org_name'>): Promise<{ id: string, label: string }[]> => {
@@ -229,10 +229,10 @@ export default class ApiService {
   searchOrgs = async ({ org_name, industry, limit, offset }: OrgQueryParamsType): Promise<Organisation[]> => {
     const params = { org_name, industry, limit, offset }
     const resp = await this.api.get('/orgs/search', { params })
-    return resp.data.orgs
+    return resp.data
   }
 
-  getOrgPosts = async(args: OrgQueryParamsType) => {
+  getOrgPosts = async(args: OrgQueryParamsType): Promise<{ posts: Post[], max_reached: boolean }> => {
     const {
       org_id,
       position_id,
@@ -260,15 +260,16 @@ export default class ApiService {
     return resp.data
   }
 
-  login = async(args: AccountQueryParams): Promise<any> => {
+  login = async(args: AccountQueryParams): Promise<{ account?: Account, authenticated: boolean, error?: string }> => {
     const resp = await this.api.post('/auth/login', args)
     if (resp.data && resp.data.authenticated) {
       account.set(resp.data.account)
     }
-    return resp.data.authenticated
+
+    return resp.data
   }
 
-  authenticate = async(): Promise<any> => {
+  authenticate = async(): Promise<{ account?: Account, authenticated: boolean }> => {
     const resp = await this.api.get('/auth/check-session')
     if (resp.data && resp.data.authenticated) {
       account.set(resp.data.account)
@@ -285,12 +286,13 @@ export default class ApiService {
     return resp.data.authenticated
   }
 
-  signup = async (args: AccountQueryParams): Promise<any> => {
+  signup = async (args: AccountQueryParams): Promise<{ account?: Account, error?: string }> => {
     const resp = await this.api.post('/auth/signup', args)
     if (resp.data && !resp.data.error) {
       account.set(resp.data.account)
     }
-    return Boolean(resp.data.error)
+
+    return resp.data
   }
 
   accountUpdate = async (args: AccountQueryParams): Promise<any> => {
@@ -304,7 +306,7 @@ export default class ApiService {
     return resp
   }
 
-  post = async (args: PostQueryParams): Promise<any> => {
+  post = async (args: PostQueryParams): Promise<{ post_created: boolean, error?: string}> => {
     const params = {
       tag: args.tag,
       post: args.post,
@@ -331,7 +333,7 @@ export default class ApiService {
     return resp.data
   }
 
-  deletePost = async (post_id: number, post_type: PostEnum): Promise<boolean> => {
+  deletePost = async (post_id: number, post_type: PostEnum): Promise<{ post_deleted: boolean, error: string }> => {
     const url = '/account/delete-post'
     const params = { post_id, post_type }
     const resp = await this.api.post(url, params)
