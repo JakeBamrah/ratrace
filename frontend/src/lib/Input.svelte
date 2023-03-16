@@ -80,7 +80,8 @@
       target.blur()
       return
     }
-    if (e.key === 'Enter') {
+    // allow new lines in multiline text area
+    if (e.key === 'Enter' && !text_area) {
       value = value.trim()
       target.blur()
       return
