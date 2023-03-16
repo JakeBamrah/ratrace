@@ -11,6 +11,7 @@ class Config(object):
     PERMANENT_SESSION_LIFETIME = one_day
     APPLICATION_ROOT = '/'
     SESSION_PERMANENT = True
+    CORS_SUPPORTS_CREDENTIALS = True
 
 class DevConfig(Config):
     DEBUG = True
